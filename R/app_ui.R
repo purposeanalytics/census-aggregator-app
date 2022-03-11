@@ -9,7 +9,37 @@ app_ui <- function(request) {
     golem_add_external_resources(),
     # Your application UI logic
     shiny::fluidPage(
-      shiny::h1("censusaggregationapp")
+      shiny::h1("censusaggregationapp"),
+      shinyWidgets::prettyRadioButtons(
+        "aggregate_geography",
+        "Aggregate area",
+        choices = list(
+          "Census Subdivisions" = "csd",
+          "Census Tracts" = "ct"
+        )
+      ),
+      shinyWidgets::prettyRadioButtons(
+        "selection_tool",
+        "Choose selection tool",
+        choices = list(
+          "Click to select geographies" = "click",
+          "Draw a polygon" = "polygon"
+        )
+      ),
+      shiny::div(
+        shinyWidgets::actionBttn(
+          "export_data",
+          "Export data"
+        )
+      ),
+      shiny::div(
+        shinyWidgets::actionBttn(
+          "export_geography",
+          "Export boundary",
+          style = "minimal",
+          color = "danger"
+        )
+      )
     )
   )
 }
