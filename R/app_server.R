@@ -4,5 +4,8 @@
 #' (do not remove)
 #' @noRd
 app_server <- function(input, output, session) {
-  # Your application server logic
+
+  mod_map_server("map")
+  mod_sidebar_server("sidebar")
+
 }

@@ -6,37 +6,9 @@
 app_ui <- function(request) {
   shiny::tagList(
     golem_add_external_resources(),
-    shiny::fluidPage(
-      shinyWidgets::prettyRadioButtons(
-        "aggregate_geography",
-        "Aggregate area",
-        choices = list(
-          "Census Subdivisions" = "csd",
-          "Census Tracts" = "ct"
-        )
-      ),
-      shinyWidgets::prettyRadioButtons(
-        "selection_tool",
-        "Choose selection tool",
-        choices = list(
-          "Click to select geographies" = "click",
-          "Draw a polygon" = "polygon"
-        )
-      ),
-      shiny::div(
-        shinyWidgets::actionBttn(
-          "export_data",
-          "Export data"
-        )
-      ),
-      shiny::div(
-        shinyWidgets::actionBttn(
-          "export_geography",
-          "Export boundary",
-          style = "minimal",
-          color = "danger"
-        )
-      )
+    shiny::sidebarLayout(
+      mainPanel = mod_map_ui("map"),
+      sidebarPanel = mod_sidebar_ui("sidebar")
     )
   )
 }
