@@ -13,6 +13,7 @@ Imports:
     golem (>= 0.3.2),
     magrittr,
     mapboxer,
+    sf,
     shiny (>= 1.6.0),
     shinyWidgets
 Encoding: UTF-8

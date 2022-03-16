@@ -6,9 +6,10 @@
 app_ui <- function(request) {
   shiny::tagList(
     golem_add_external_resources(),
-    shiny::sidebarLayout(
-      mainPanel = mod_map_ui("map"),
-      sidebarPanel = mod_sidebar_ui("sidebar")
+    shiny::div(
+      style = "display: flex;",
+      mod_map_ui("map"),
+      mod_sidebar_ui("sidebar")
     )
   )
 }

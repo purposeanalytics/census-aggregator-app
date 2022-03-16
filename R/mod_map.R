@@ -7,8 +7,9 @@
 #' @noRd
 mod_map_ui <- function(id) {
   ns <- shiny::NS(id)
-  shiny::mainPanel(
-    mapboxer::mapboxerOutput(ns("map"))
+  shiny::div(
+    style = "width: 70%; padding-right: 30px;",
+    mapboxer::mapboxerOutput(ns("map"), height = "800px")
   )
 }
 

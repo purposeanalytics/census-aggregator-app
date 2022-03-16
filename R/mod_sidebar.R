@@ -9,7 +9,8 @@
 #' @importFrom shiny NS tagList
 mod_sidebar_ui <- function(id) {
   ns <- NS(id)
-  shiny::sidebarPanel(
+  shiny::div(
+    style = "width: 30%",
     shinyWidgets::prettyRadioButtons(
       ns("aggregate_geography"),
       "Aggregate area",
@@ -47,7 +48,7 @@ mod_sidebar_ui <- function(id) {
 #'
 #' @noRd
 mod_sidebar_server <- function(id) {
-  moduleServer(id, function(input, output, session) {
+  shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
   })
 }
