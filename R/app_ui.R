@@ -1,15 +1,12 @@
-#' The application User-Interface
+#' App user interface
 #'
 #' @param request Internal parameter for `{shiny}`.
-#'     DO NOT REMOVE.
+#' (do not remove)
 #' @noRd
 app_ui <- function(request) {
   shiny::tagList(
-    # Leave this function for adding external resources
     golem_add_external_resources(),
-    # Your application UI logic
     shiny::fluidPage(
-      shiny::h1("censusaggregationapp"),
       shinyWidgets::prettyRadioButtons(
         "aggregate_geography",
         "Aggregate area",
