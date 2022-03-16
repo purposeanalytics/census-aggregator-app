@@ -21,7 +21,7 @@ mod_map_server <- function(id) {
     ns <- session$ns
 
     output$map <- mapboxer::renderMapboxer(
-      map_ct()
+      map()
     )
   })
 }
