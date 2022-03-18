@@ -16,12 +16,15 @@ mod_map_ui <- function(id) {
 #' map Server Functions
 #'
 #' @noRd
-mod_map_server <- function(id) {
+mod_map_server <- function(id, inputs) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
-    output$map <- mapboxer::renderMapboxer(
-      map()
-    )
+    output$map <- mapboxer::renderMapboxer({
+      switch(inputs()[["aggregate_area"]],
+        csd = map_csd(),
+        ct = map_ct()
+      )
+    })
   })
 }

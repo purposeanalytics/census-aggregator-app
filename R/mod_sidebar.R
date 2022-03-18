@@ -12,7 +12,7 @@ mod_sidebar_ui <- function(id) {
   shiny::div(
     style = "width: 30%",
     shinyWidgets::prettyRadioButtons(
-      ns("aggregate_geography"),
+      ns("aggregate_area"),
       "Aggregate area",
       choices = list(
         "Census Subdivisions" = "csd",
@@ -50,6 +50,16 @@ mod_sidebar_ui <- function(id) {
 mod_sidebar_server <- function(id) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
+
+    # Update `aggregate_area` reactive value with input
+
+    inputs <- shiny::reactive({
+      list(
+        aggregate_area = input$aggregate_area
+      )
+    })
+
+    return(inputs)
   })
 }
 
