@@ -20,11 +20,21 @@ mod_map_server <- function(id, inputs) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
-    output$map <- mapboxer::renderMapboxer({
+    output$map <- mapboxer::renderMapboxer(
+      map()
+    )
+
+    # Update map based on inputs ----
+    shiny::reactive({
       switch(inputs()[["aggregate_area"]],
-        csd = map_csd(),
-        ct = map_ct()
-      )
+        csd = mapboxer::mapboxer_proxy(ns("map")) %>%
+          toggle_layer_visible("csd") %>%
+          toggle_layer_invsibile("ct"),
+        ct = mapboxer::mapboxer_proxy(ns("map")) %>%
+          toggle_layer_visible("ct") %>%
+          toggle_layer_invsibile("csd")
+      ) %>%
+        mapboxer::update_mapboxer()
     })
   })
 }
