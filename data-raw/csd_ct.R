@@ -4,6 +4,7 @@ library(cancensus)
 library(dplyr)
 library(janitor)
 library(sf)
+library(mapboxapi)
 
 dataset <- "CA16"
 
@@ -15,7 +16,7 @@ canada_region <- c(C = 01)
 
 csd <- get_census(dataset = dataset, regions = canada_region, level = "CSD") %>%
   clean_names() %>%
-  select(geo_uid, type, region_name, area_sq_km, population, households)
+  select(geo_uid, area_sq_km, population, households)
 
 csd_sf <- get_census(dataset = dataset, regions = canada_region, level = "CSD", geo_format = "sf") %>%
   clean_names() %>%
@@ -25,7 +26,30 @@ csd <- csd %>%
   left_join(csd_sf, by = "geo_uid") %>%
   st_as_sf(crs = st_crs(csd_sf))
 
-# usethis::use_data(csd, overwrite = TRUE)
+# Optimizing as per recommendations in https://docs.mapbox.com/help/troubleshooting/uploads/#troubleshooting
+# Since the processing takes >1 hour, it times out
+
+# Reproject to Web Mercator (EPSG:3857)
+# If not in this format, then Mapbox will reproject on upload, which takes time and can contribute to timing out
+
+csd <- csd %>%
+  st_transform(3857)
+
+# Break multipolygon into single polygon, also speeds up uploading
+# Now there is one row per polygon, instead of one row per CSD - will need to remember to handle that on the data processing side
+
+csd <- csd %>%
+  st_cast("POLYGON")
+
+# Upload
+
+upload_tiles(
+  input = csd,
+  username = "purposeanalytics",
+  tileset_id = "2016_csd",
+  tileset_name = "2016_census_csd",
+  multipart = TRUE
+)
 
 # CT
 
@@ -41,4 +65,10 @@ ct <- ct %>%
   left_join(ct_sf, by = "geo_uid") %>%
   st_as_sf(crs = st_crs(ct_sf))
 
-usethis::use_data(ct, overwrite = TRUE)
+upload_tiles(
+  input = ct,
+  username = "purposeanalytics",
+  tileset_id = "2016_ct",
+  tileset_name = "2016_census_ct",
+  multipart = TRUE
+)
