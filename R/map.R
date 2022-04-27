@@ -35,7 +35,11 @@ map <- function() {
         "source-layer" = "2016_census_ct",
         "paint" = list(
           "fill-color" = "white",
-          "fill-opacity" = 0.0001
+          "fill-opacity" = list(
+            "case",
+            list("boolean", c("feature-state", "click"), FALSE), 1,
+            0.0001
+          )
         )
       )
     ) %>%

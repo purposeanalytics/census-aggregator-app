@@ -66,9 +66,9 @@ mod_sidebar_server <- function(id, selected_geographies) {
     })
 
     shiny::observeEvent(selected_geographies(), ignoreInit = TRUE, {
+
+      shiny::req(nrow(selected_geographies()) > 0)
       summary_statistics <- selected_geographies() %>%
-        # Dedupe - for now, eventually clicking again will become selecting
-        dplyr::distinct() %>%
         dplyr::select(population, households, area_sq_km) %>%
         dplyr::summarise_all(sum) %>%
         dplyr::mutate(population_density = round(population / area_sq_km))
