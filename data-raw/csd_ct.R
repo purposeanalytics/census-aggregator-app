@@ -5,6 +5,7 @@ library(dplyr)
 library(janitor)
 library(sf)
 library(mapboxapi)
+library(rmapshaper)
 
 dataset <- "CA16"
 
@@ -35,19 +36,32 @@ csd <- csd %>%
 csd <- csd %>%
   st_transform(3857)
 
-# Break multipolygon into single polygon, also speeds up uploading
-# Now there is one row per polygon, instead of one row per CSD - will need to remember to handle that on the data processing side
+# One option is to break multipolygon into a single polygon, which will also speed up uploading
+# But we don't want to do this - selection (click) should be on multipolygons, so we really don't want to let people select single polygons
+
+# Size before:
+csd_size <- object.size(csd)
+
+# Simplify features
 
 csd <- csd %>%
-  st_cast("POLYGON")
+  ms_simplify(keep = 0.2, keep_shapes = TRUE)
+
+# Size after:
+csd_simplified_size <- object.size(csd)
+
+as.numeric(csd_simplified_size) / as.numeric(csd_size)
 
 # Upload
+
+csd <- csd %>%
+  head(1)
 
 upload_tiles(
   input = csd,
   username = "purposeanalytics",
-  tileset_id = "2016_csd",
-  tileset_name = "2016_census_csd",
+  tileset_id = "2016_csd_test",
+  tileset_name = "2016_census_csd_test",
   multipart = TRUE
 )
 

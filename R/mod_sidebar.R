@@ -40,6 +40,12 @@ mod_sidebar_ui <- function(id) {
         style = "minimal",
         color = "danger"
       )
+    ),
+    shiny::div(
+      shiny::textOutput(ns("population")),
+      shiny::textOutput(ns("households")),
+      shiny::textOutput(ns("area_sq_km")),
+      shiny::textOutput(ns("population_density"))
     )
   )
 }
@@ -47,15 +53,48 @@ mod_sidebar_ui <- function(id) {
 #' sidebar Server Functions
 #'
 #' @noRd
-mod_sidebar_server <- function(id) {
+mod_sidebar_server <- function(id, selected_geographies) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
-    # Update `aggregate_area` reactive value with input
+    # Update inputs with aggregate_area
 
     inputs <- shiny::reactive({
       list(
         aggregate_area = input$aggregate_area
+      )
+    })
+
+    shiny::observeEvent(selected_geographies(), ignoreInit = TRUE, {
+      summary_statistics <- selected_geographies() %>%
+        # Dedupe - for now, eventually clicking again will become selecting
+        dplyr::distinct() %>%
+        dplyr::select(population, households, area_sq_km) %>%
+        dplyr::summarise_all(sum) %>%
+        dplyr::mutate(population_density = round(population / area_sq_km))
+
+      output$population <- shiny::renderText(
+        glue::glue("Total population: {population}",
+          population = scales::comma(summary_statistics[["population"]])
+        )
+      )
+
+      output$households <- shiny::renderText(
+        glue::glue("Total households: {households}",
+          households = scales::comma(summary_statistics[["households"]])
+        )
+      )
+
+      output$area_sq_km <- shiny::renderText(
+        glue::glue("Total area: {area_sq_km} square kilometres",
+          area_sq_km = scales::comma(summary_statistics[["area_sq_km"]], accuracy = 0.01)
+        )
+      )
+
+      output$population_density <- shiny::renderText(
+        glue::glue("Average population density: {population_density} people per square kilometre",
+          population_density = scales::comma(summary_statistics[["population_density"]])
+        )
       )
     })
 

@@ -16,7 +16,7 @@ mod_map_ui <- function(id) {
 #' map Server Functions
 #'
 #' @noRd
-mod_map_server <- function(id, inputs) {
+mod_map_server <- function(id, inputs, selected_geographies) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
@@ -36,5 +36,17 @@ mod_map_server <- function(id, inputs) {
       ) %>%
         mapboxer::update_mapboxer()
     })
+
+    # Keep track of geographies that are clicked ----
+    shiny::observeEvent(
+      input$map_onclick,
+      {
+        # Set current value of selected_geographies to be existing tibble, plus new geographies
+        selected_geographies(
+          selected_geographies() %>%
+            dplyr::bind_rows(input$map_onclick$props %>% dplyr::as_tibble())
+        )
+      }
+    )
   })
 }
