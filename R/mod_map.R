@@ -23,26 +23,47 @@ mod_map_server <- function(id, inputs, selected_geographies) {
     output$map <- mapboxer::renderMapboxer(
       map() %>%
         # Observe zoom-out level, once rendered, to know whether to zoom back out to "city view"
-        htmlwidgets::onRender("function() {
+        htmlwidgets::onRender("
+function() {
 
-      var map = mapboxer._widget['map-map'].map;
-      // disable map rotation using right click + drag
-      map.dragRotate.disable();
+    var map = mapboxer._widget['map-map'].map;
+    // disable map rotation using right click + drag
+    map.dragRotate.disable();
 
-      // disable map rotation using touch rotation gesture
-      map.touchZoomRotate.disableRotation();
+    // disable map rotation using touch rotation gesture
+    map.touchZoomRotate.disableRotation();
 
-      // Listen for what geographies have been clicked
-      Shiny.addCustomMessageHandler('clicked_id', function(clicked_id) {
-        console.log(clicked_id);
+    // Set click feature to true when geography is clicked
+    // Can't use from input$map_onclick unfortunately, since it doesn't contain the ID
+    map.on('click', 'ct_fill', (e) => {
 
-      // Set the Click feature of those geographies to true
-          map.setFeatureState(
-            { source: '2016_ct', sourceLayer: '2016_census_ct', id: clicked_id },
-            { click: true }
-          );
-      });
-        }")
+        console.log(e.features[0]);
+
+        // Check if it's already clicked - if so, we want to deselect, so set click to false
+        var click_id = e.features[0].id;
+        var already_clicked = map.getFeatureState({ source: '2016_ct', sourceLayer: '2016_census_ct', id: click_id }).click === true;
+
+        console.log(already_clicked);
+
+        if (already_clicked) {
+            console.log('already clicked');
+
+            map.setFeatureState(
+                { source: '2016_ct', sourceLayer: '2016_census_ct', id: click_id },
+                { click: false }
+            );
+        } else {
+            // Otherwise, set click to feature to true
+            console.log('not already clicked');
+
+            map.setFeatureState(
+                { source: '2016_ct', sourceLayer: '2016_census_ct', id: click_id },
+                { click: true }
+            );
+        }
+    })
+}
+")
     )
 
 
