@@ -34,34 +34,22 @@ function() {
     map.touchZoomRotate.disableRotation();
 
     // Set click feature to true when geography is clicked
-    // Can't use from input$map_onclick unfortunately, since it doesn't contain the ID
-    map.on('click', 'ct_fill', (e) => {
+    Shiny.addCustomMessageHandler('clicked_ids', function (clicked_ids) {
 
-        console.log(e.features[0]);
+        var map = mapboxer._widget['map-map'].map;
+        var features = map.queryRenderedFeatures({ layers: ['ct_fill'] });
+        for (var i = 0; i < features.length; i++) {
+            var current_geo_uid = features[i].properties['geo_uid'];
+            var current_geo_uid_clicked = clicked_ids.includes(current_geo_uid);
+            var current_id = features[i].id
 
-        // Check if it's already clicked - if so, we want to deselect, so set click to false
-        var click_id = e.features[0].id;
-        var already_clicked = map.getFeatureState({ source: '2016_ct', sourceLayer: '2016_census_ct', id: click_id }).click === true;
-
-        console.log(already_clicked);
-
-        if (already_clicked) {
-            console.log('already clicked');
-
+            // Set 'click' property to whatever the value of current_geo_uid_clicked is
             map.setFeatureState(
-                { source: '2016_ct', sourceLayer: '2016_census_ct', id: click_id },
-                { click: false }
-            );
-        } else {
-            // Otherwise, set click to feature to true
-            console.log('not already clicked');
-
-            map.setFeatureState(
-                { source: '2016_ct', sourceLayer: '2016_census_ct', id: click_id },
-                { click: true }
+                { source: '2016_ct', sourceLayer: '2016_census_ct', id: current_id },
+                { click: current_geo_uid_clicked }
             );
         }
-    })
+    });
 }
 ")
     )
@@ -103,7 +91,7 @@ function() {
         }
 
         # Sent the IDs to javascript
-        session$sendCustomMessage("clicked_id", selected_geographies()[["geo_uid"]])
+        session$sendCustomMessage("clicked_ids", selected_geographies()[["geo_uid"]])
       }
     )
   })
