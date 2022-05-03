@@ -86,3 +86,15 @@ upload_tiles(
   tileset_name = "2016_census_ct",
   multipart = TRUE
 )
+
+# Convert from multipolygon to polygon for testing click issues
+ct_polygon <- ct %>%
+  st_cast("POLYGON")
+
+upload_tiles(
+  input = ct_polygon,
+  username = "purposeanalytics",
+  tileset_id = "2016_ct_polygon",
+  tileset_name = "2016_census_ct_polygon",
+  multipart = TRUE
+)

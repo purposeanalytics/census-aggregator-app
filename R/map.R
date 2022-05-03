@@ -5,18 +5,42 @@ map <- function() {
     # CT
     mapboxer::add_source(mapboxer::mapbox_source(
       type = "vector",
-      url = "mapbox://purposeanalytics.2016_ct"
+      url = "mapbox://purposeanalytics.2016_ct_polygon"
     ),
-    id = "2016_ct"
+    id = "2016_ct_polygon"
+    ) %>%
+    ## Add a "blank" layer for clicking on, that contains all CTs
+    mapboxer::add_layer(
+      list(
+        "id" = "ct_fill",
+        "type" = "fill",
+        "source" = "2016_ct_polygon",
+        "source-layer" = "2016_census_ct_polygon",
+        "paint" = list(
+          "fill-color" = "white",
+          "fill-opacity" = 0
+          # "fill-color" = "white",
+          # "fill-color" = list(
+          #   "case",
+          #   list("boolean", c("feature-state", "click"), FALSE), "white",
+          #   "blue"
+          # )
+        )
+      )
     ) %>%
     mapboxer::add_layer(
       list(
         id = "ct_line",
-        source = "2016_ct",
-        "source-layer" = "2016_census_ct",
+        source = "2016_ct_polygon",
+        "source-layer" = "2016_census_ct_polygon",
         type = "line",
         paint = list(
-          "line-color" = "red",
+          # "line-color" = "red",
+          "line-color" = list(
+              "case",
+              list("boolean", c("feature-state", "click"), FALSE), "blue",
+              "red"
+            ),
           "line-width" = 1.5,
           "line-opacity" = 0.5
         )
@@ -24,23 +48,6 @@ map <- function() {
         # layout = list(
         #   "visibility" = "none"
         # )
-      )
-    ) %>%
-    ## Add a "blank" layer for clicking on, that contains all CTs
-    mapboxer::add_layer(
-      list(
-        "id" = "ct_fill",
-        "type" = "fill",
-        "source" = "2016_ct",
-        "source-layer" = "2016_census_ct",
-        "paint" = list(
-          "fill-color" = "white",
-          "fill-opacity" = list(
-            "case",
-            list("boolean", c("feature-state", "click"), FALSE), 1,
-            0.0001
-          )
-        )
       )
     ) %>%
     # CSD
