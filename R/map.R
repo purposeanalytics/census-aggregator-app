@@ -5,7 +5,8 @@ map <- function() {
     # CT
     mapboxer::add_source(mapboxer::mapbox_source(
       type = "vector",
-      url = "mapbox://purposeanalytics.2016_ct_polygon"
+      url = "mapbox://purposeanalytics.2016_ct_polygon",
+      promoteId = "geo_uid"
     ),
     id = "2016_ct_polygon"
     ) %>%
@@ -17,14 +18,13 @@ map <- function() {
         "source" = "2016_ct_polygon",
         "source-layer" = "2016_census_ct_polygon",
         "paint" = list(
-          "fill-color" = "white",
-          "fill-opacity" = 0
           # "fill-color" = "white",
-          # "fill-color" = list(
-          #   "case",
-          #   list("boolean", c("feature-state", "click"), FALSE), "white",
-          #   "blue"
-          # )
+          "fill-opacity" = 0.25,
+          "fill-color" = list(
+            "case",
+            list("boolean", c("feature-state", "click"), FALSE), "white",
+            "blue"
+          )
         )
       )
     ) %>%
@@ -35,12 +35,12 @@ map <- function() {
         "source-layer" = "2016_census_ct_polygon",
         type = "line",
         paint = list(
-          # "line-color" = "red",
-          "line-color" = list(
-              "case",
-              list("boolean", c("feature-state", "click"), FALSE), "blue",
-              "red"
-            ),
+          "line-color" = "red",
+          # "line-color" = list(
+          #     "case",
+          #     list("boolean", c("feature-state", "click"), FALSE), "blue",
+          #     "red"
+          #   ),
           "line-width" = 1.5,
           "line-opacity" = 0.5
         )
