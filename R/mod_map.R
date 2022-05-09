@@ -33,26 +33,46 @@ function() {
     // disable map rotation using touch rotation gesture
     map.touchZoomRotate.disableRotation();
 
-    // Set click feature to true when geography is clicked
-    // TODO: Sometimes this listening is not responsive enough - if clicked too many times too close to each other? Really needs to listen properly
-    // Might have to end up using click event instead within mapbox anyways
-    Shiny.addCustomMessageHandler('clicked_ids', function (clicked_ids) {
+      // When the user clicks the ct_fill layer, update the 'click' feature state for that geo_uid
+      map.on('click', 'ct_fill', (e) => {
+        map.getCanvas().style.cursor = 'pointer';
 
-        var map = mapboxer._widget['map-map'].map;
+        // Cycle through rendered features to find the clicked one, and see what its 'click' value is
+        // If true, it has already been clicked and needs to be 'unclicked' - set to false
+        // If false, has already been clicked + unclicked, needed to be 'clicked' - set to true
+        // If null, has not been clicked, needs to be 'clicked' - set to true
+
+        var clicked_geo_uid = e.features[0].id;
+
         var features = map.queryRenderedFeatures({ layers: ['ct_fill'] });
+
         for (var i = 0; i < features.length; i++) {
-            var current_geo_uid = features[i].properties['geo_uid'];
-            var current_geo_uid_clicked = clicked_ids.includes(current_geo_uid);
 
-            console.log('geo_uid' + current_geo_uid + 'clicked' + current_geo_uid_clicked);
+        var current_geo_uid = features[i].id;
 
-            // Set 'click' property to whatever the value of current_geo_uid_clicked is
-            map.setFeatureState(
-                { source: '2016_ct', sourceLayer: '2016_census_ct', id: current_geo_uid },
-                { click: current_geo_uid_clicked }
-            );
+        if (clicked_geo_uid === current_geo_uid) {
+          var geo_uid_already_clicked = features[i].state.click;
+
+          if (geo_uid_already_clicked) {
+          console.log('already clicked');
+
+        map.setFeatureState(
+          { source: '2016_ct', sourceLayer: '2016_census_ct', id: clicked_geo_uid },
+          { click: false }
+        );
+
+          } else if (!geo_uid_already_clicked) {
+          console.log('not already clicked');
+
+        map.setFeatureState(
+          { source: '2016_ct', sourceLayer: '2016_census_ct', id: clicked_geo_uid },
+          { click: true }
+        );
+
+          }
         }
-    });
+      }
+      });
 }
 ")
     )
