@@ -48,7 +48,7 @@ function() {
 
             // Set 'click' property to whatever the value of current_geo_uid_clicked is
             map.setFeatureState(
-                { source: '2016_ct_polygon', sourceLayer: '2016_census_ct_polygon', id: current_geo_uid },
+                { source: '2016_ct', sourceLayer: '2016_census_ct', id: current_geo_uid },
                 { click: current_geo_uid_clicked }
             );
         }

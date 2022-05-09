@@ -5,18 +5,18 @@ map <- function() {
     # CT
     mapboxer::add_source(mapboxer::mapbox_source(
       type = "vector",
-      url = "mapbox://purposeanalytics.2016_ct_polygon",
+      url = "mapbox://purposeanalytics.2016_ct",
       promoteId = "geo_uid"
     ),
-    id = "2016_ct_polygon"
+    id = "2016_ct"
     ) %>%
     ## Add a "blank" layer for clicking on, that contains all CTs
     mapboxer::add_layer(
       list(
         "id" = "ct_fill",
         "type" = "fill",
-        "source" = "2016_ct_polygon",
-        "source-layer" = "2016_census_ct_polygon",
+        "source" = "2016_ct",
+        "source-layer" = "2016_census_ct",
         "paint" = list(
           # "fill-color" = "white",
           "fill-opacity" = 0.25,
@@ -31,8 +31,8 @@ map <- function() {
     mapboxer::add_layer(
       list(
         id = "ct_line",
-        source = "2016_ct_polygon",
-        "source-layer" = "2016_census_ct_polygon",
+        source = "2016_ct",
+        "source-layer" = "2016_census_ct",
         type = "line",
         paint = list(
           "line-color" = "red",
