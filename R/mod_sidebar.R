@@ -42,10 +42,7 @@ mod_sidebar_ui <- function(id) {
       )
     ),
     shiny::div(
-      shiny::textOutput(ns("population")),
-      shiny::textOutput(ns("households")),
-      shiny::textOutput(ns("area_sq_km")),
-      shiny::textOutput(ns("population_density"))
+      shiny::tableOutput(ns("summary_statistics"))
     )
   )
 }
@@ -65,37 +62,21 @@ mod_sidebar_server <- function(id, selected_geographies) {
       )
     })
 
-    shiny::observeEvent(selected_geographies(), ignoreInit = TRUE, {
+    shiny::observeEvent(selected_geographies(), ignoreInit = FALSE, {
 
-      shiny::req(nrow(selected_geographies()) > 0)
+      if (nrow(selected_geographies()) == 0) {
+        summary_statistics <- dplyr::tibble(name = c("population", "households", "area_sq_km", "population_density")) %>%
+          dplyr::mutate(value = "---")
+      } else {
+
       summary_statistics <- selected_geographies() %>%
         dplyr::select(population, households, area_sq_km) %>%
         dplyr::summarise_all(sum) %>%
-        dplyr::mutate(population_density = round(population / area_sq_km))
+        dplyr::mutate(population_density = round(population / area_sq_km)) %>%
+        tidyr::pivot_longer(dplyr::everything())
+      }
 
-      output$population <- shiny::renderText(
-        glue::glue("Total population: {population}",
-          population = scales::comma(summary_statistics[["population"]])
-        )
-      )
-
-      output$households <- shiny::renderText(
-        glue::glue("Total households: {households}",
-          households = scales::comma(summary_statistics[["households"]])
-        )
-      )
-
-      output$area_sq_km <- shiny::renderText(
-        glue::glue("Total area: {area_sq_km} square kilometres",
-          area_sq_km = scales::comma(summary_statistics[["area_sq_km"]], accuracy = 0.01)
-        )
-      )
-
-      output$population_density <- shiny::renderText(
-        glue::glue("Average population density: {population_density} people per square kilometre",
-          population_density = scales::comma(summary_statistics[["population_density"]])
-        )
-      )
+      output$summary_statistics <- shiny::renderTable(summary_statistics)
     })
 
     return(inputs)

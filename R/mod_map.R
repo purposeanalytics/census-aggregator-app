@@ -22,7 +22,6 @@ mod_map_server <- function(id, inputs, selected_geographies) {
 
     output$map <- mapboxer::renderMapboxer(
       map() %>%
-        # Observe zoom-out level, once rendered, to know whether to zoom back out to "city view"
         htmlwidgets::onRender("
 function() {
 
@@ -112,9 +111,6 @@ function() {
               dplyr::bind_rows(input$map_onclick$props %>% dplyr::as_tibble())
           )
         }
-
-        # Sent the IDs to javascript
-        session$sendCustomMessage("clicked_ids", selected_geographies()[["geo_uid"]])
       }
     )
   })
