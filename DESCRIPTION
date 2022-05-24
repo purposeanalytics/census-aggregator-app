@@ -10,12 +10,16 @@ Description: What the package does (one paragraph).
 License: What license is it under?
 Imports: 
     config (>= 0.3.1),
+    dplyr,
+    glue,
     golem (>= 0.3.2),
+    htmlwidgets,
     magrittr,
     mapboxer,
     sf,
     shiny (>= 1.6.0),
-    shinyWidgets
+    shinyWidgets,
+    tidyr
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.1.2

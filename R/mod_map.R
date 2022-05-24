@@ -22,6 +22,8 @@ mod_map_server <- function(id, inputs, selected_geographies) {
 
     output$map <- mapboxer::renderMapboxer(
       map() %>%
+        show_census_layers("csd") %>%
+        hide_census_layers("ct") %>%
         htmlwidgets::onRender("
 function() {
 
@@ -77,14 +79,14 @@ function() {
     )
 
     # Update map based on inputs ----
-    shiny::reactive({
+    shiny::observeEvent(inputs(), {
       switch(inputs()[["aggregate_area"]],
         csd = mapboxer::mapboxer_proxy(ns("map")) %>%
-          toggle_layer_visible("csd") %>%
-          toggle_layer_invsibile("ct"),
+          show_census_layers("csd") %>%
+          hide_census_layers("ct"),
         ct = mapboxer::mapboxer_proxy(ns("map")) %>%
-          toggle_layer_visible("ct") %>%
-          toggle_layer_invsibile("csd")
+          show_census_layers("ct") %>%
+          hide_census_layers("csd"),
       ) %>%
         mapboxer::update_mapboxer()
     })
