@@ -34,8 +34,8 @@ function() {
     // disable map rotation using touch rotation gesture
     map.touchZoomRotate.disableRotation();
 
-      // When the user clicks the ct_fill layer, update the 'click' feature state for that geo_uid
-      map.on('click', 'ct_fill', (e) => {
+    // When the user clicks the ct_fill layer, update the 'click' feature state for that geo_uid
+    map.on('click', 'ct_fill', (e) => {
         map.getCanvas().style.cursor = 'pointer';
 
         // Cycle through rendered features to find the clicked one, and see what its 'click' value is
@@ -49,31 +49,74 @@ function() {
 
         for (var i = 0; i < features.length; i++) {
 
-        var current_geo_uid = features[i].id;
+            var current_geo_uid = features[i].id;
 
-        if (clicked_geo_uid === current_geo_uid) {
-          var geo_uid_already_clicked = features[i].state.click;
+            if (clicked_geo_uid === current_geo_uid) {
+                var geo_uid_already_clicked = features[i].state.click;
 
-          if (geo_uid_already_clicked) {
-          console.log('already clicked');
+                if (geo_uid_already_clicked) {
+                    console.log('already clicked');
 
-        map.setFeatureState(
-          { source: '2016_ct', sourceLayer: '2016_census_ct', id: clicked_geo_uid },
-          { click: false }
-        );
+                    map.setFeatureState(
+                        { source: '2016_ct', sourceLayer: '2016_census_ct', id: clicked_geo_uid },
+                        { click: false }
+                    );
 
-          } else if (!geo_uid_already_clicked) {
-          console.log('not already clicked');
+                } else if (!geo_uid_already_clicked) {
+                    console.log('not already clicked');
 
-        map.setFeatureState(
-          { source: '2016_ct', sourceLayer: '2016_census_ct', id: clicked_geo_uid },
-          { click: true }
-        );
+                    map.setFeatureState(
+                        { source: '2016_ct', sourceLayer: '2016_census_ct', id: clicked_geo_uid },
+                        { click: true }
+                    );
 
-          }
+                }
+            }
         }
-      }
-      });
+    });
+
+    // Same for csd_fill
+    map.on('click', 'csd_fill', (e) => {
+        map.getCanvas().style.cursor = 'pointer';
+
+        // Cycle through rendered features to find the clicked one, and see what its 'click' value is
+        // If true, it has already been clicked and needs to be 'unclicked' - set to false
+        // If false, has already been clicked + unclicked, needed to be 'clicked' - set to true
+        // If null, has not been clicked, needs to be 'clicked' - set to true
+
+        var clicked_geo_uid = e.features[0].id;
+
+        var features = map.queryRenderedFeatures({ layers: ['csd_fill'] });
+
+        for (var i = 0; i < features.length; i++) {
+
+            var current_geo_uid = features[i].id;
+
+            if (clicked_geo_uid === current_geo_uid) {
+                var geo_uid_already_clicked = features[i].state.click;
+
+                if (geo_uid_already_clicked) {
+                    console.log('already clicked');
+
+                    map.setFeatureState(
+                        { source: '2016_csd', sourceLayer: '2016_census_csd', id: clicked_geo_uid },
+                        { click: false }
+                    );
+
+                } else if (!geo_uid_already_clicked) {
+                    console.log('not already clicked');
+
+                    map.setFeatureState(
+                        { source: '2016_csd', sourceLayer: '2016_census_csd', id: clicked_geo_uid },
+                        { click: true }
+                    );
+
+                }
+            }
+        }
+    });
+
+
 }
 ")
     )
@@ -89,6 +132,11 @@ function() {
           hide_census_layers("csd"),
       ) %>%
         mapboxer::update_mapboxer()
+    })
+
+    # Reset geographies clicked when any inputs (TODO but works for now, since "any" is only switching aggregate area) change
+    shiny::observeEvent(inputs()[["aggregate_area"]], {
+      selected_geographies(dplyr::tibble())
     })
 
     # Keep track of geographies that are clicked ----
