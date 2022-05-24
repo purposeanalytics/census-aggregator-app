@@ -76,7 +76,6 @@ function() {
 ")
     )
 
-
     # Update map based on inputs ----
     shiny::reactive({
       switch(inputs()[["aggregate_area"]],

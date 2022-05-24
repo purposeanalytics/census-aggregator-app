@@ -1,78 +1,65 @@
 map <- function() {
   mapboxer::mapboxer(style = mapboxer::basemaps$Mapbox$streets_v11) %>%
-    mapboxer::fit_bounds(canada, pitch = 0) %>%
+    # mapboxer::fit_bounds(canada, pitch = 0) %>%
+    set_view_state(-106.6702, 52.1579, zoom = 8) %>%
     mapboxer::add_navigation_control(showCompass = FALSE) %>%
-    # CT
+    add_census_layer("ct") %>%
+    add_census_layer("csd")
+}
+
+add_census_layer <- function(map, geography) {
+  map %>%
     mapboxer::add_source(mapboxer::mapbox_source(
       type = "vector",
-      url = "mapbox://purposeanalytics.2016_ct",
-      promoteId = "geo_uid"
+      url = glue::glue("mapbox://purposeanalytics.2016_{geography}")
     ),
-    id = "2016_ct"
+    id = glue::glue("2016_{geography}")
     ) %>%
-    ## Add a "blank" layer for clicking on, that contains all CTs
+    add_census_fill_layer(glue::glue("2016_{geography}"), glue::glue("2016_census_{geography}")) %>%
+    add_census_line_layer(glue::glue("2016_{geography}"), glue::glue("2016_census_{geography}"))
+}
+
+add_census_fill_layer <- function(map, source, source_layer) {
+  map %>%
     mapboxer::add_layer(
       list(
-        "id" = "ct_fill",
+        "id" = glue::glue("{source}_fill"),
         "type" = "fill",
-        "source" = "2016_ct",
-        "source-layer" = "2016_census_ct",
+        "source" = source,
+        "source-layer" = source_layer,
         "paint" = list(
-          # "fill-color" = "white",
           "fill-opacity" = 0.25,
           "fill-color" = list(
             "case",
             list("boolean", c("feature-state", "click"), FALSE), "white",
             "blue"
           )
-        )
-      )
-    ) %>%
-    mapboxer::add_layer(
-      list(
-        id = "ct_line",
-        source = "2016_ct",
-        "source-layer" = "2016_census_ct",
-        type = "line",
-        paint = list(
-          "line-color" = "red",
-          # "line-color" = list(
-          #     "case",
-          #     list("boolean", c("feature-state", "click"), FALSE), "blue",
-          #     "red"
-          #   ),
-          "line-width" = 1.5,
-          "line-opacity" = 0.5
-        )
-        # ,
-        # layout = list(
-        #   "visibility" = "none"
-        # )
-      )
-    ) %>%
-    # CSD
-    mapboxer::add_source(mapboxer::mapbox_source(
-      type = "vector",
-      url = "purposeanalytics.2016_csd_test"
-    ),
-    id = "2016_csd"
-    ) %>%
-    mapboxer::add_layer(
-      list(
-        id = "csd_line",
-        source = "2016_csd",
-        "source-layer" = "2016_census_csd_test",
-        type = "line",
-        paint = list(
-          "line-color" = "blue",
-          "line-width" = 1.5,
-          "line-opacity" = 0.5
         ),
         layout = list(
           "visibility" = "none"
         )
       )
     )
+}
+
+add_census_line_layer <- function(map, source, source_layer) {
+  map %>%
+    mapboxer::add_layer(
+    list(
+      "id" = glue::glue("{source}_line"),
+      source = source,
+      "source-layer" = source_layer,
+      type = "line",
+      paint = list(
+        "line-color" = "red",
+        "line-width" = 1.5,
+        "line-opacity" = 0.5
+      ),
+      layout = list(
+        "visibility" = "none"
+      )
+    )
+  )
 }
 
 toggle_layer_visible <- function(map, id) {

@@ -87,14 +87,8 @@ upload_tiles(
   multipart = TRUE
 )
 
-# Convert from multipolygon to polygon for testing click issues
-ct_polygon <- ct %>%
-  st_cast("POLYGON")
+# Save CT geography only for boundary export
+ct_geography <- ct %>%
+  select(geo_uid)
 
-upload_tiles(
-  input = ct_polygon,
-  username = "purposeanalytics",
-  tileset_id = "2016_ct_polygon",
-  tileset_name = "2016_census_ct_polygon",
-  multipart = TRUE
-)
+usethis::use_data(ct_geography, overwrite = TRUE)
