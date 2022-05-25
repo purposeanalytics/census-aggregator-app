@@ -34,6 +34,14 @@ function() {
     // disable map rotation using touch rotation gesture
     map.touchZoomRotate.disableRotation();
 
+    // Listen to aggregate-area to that when CSD/CT is changed, all the 'click' feature states are removed
+    Shiny.addCustomMessageHandler('geography', function(geography) {
+
+      map.removeFeatureState({source: '2016_ct', sourceLayer: '2016_census_ct', stateKey: 'click'});
+      map.removeFeatureState({source: '2016_csd', sourceLayer: '2016_census_csd', stateKey: 'click'});
+
+    });
+
     // When the user clicks the ct_fill layer, update the 'click' feature state for that geo_uid
     map.on('click', 'ct_fill', (e) => {
         map.getCanvas().style.cursor = 'pointer';
@@ -134,9 +142,13 @@ function() {
         mapboxer::update_mapboxer()
     })
 
-    # Reset geographies clicked when any inputs (TODO but works for now, since "any" is only switching aggregate area) change
     shiny::observeEvent(inputs()[["aggregate_area"]], {
+      #
+      # Reset geographies clicked when aggregate_area input changes
       selected_geographies(dplyr::tibble())
+
+      # Send aggregate_area input to JS, to reset the click feature state whenever the aggregate_area input changes
+      session$sendCustomMessage("geography", inputs()[["aggregate_area"]])
     })
 
     # Keep track of geographies that are clicked ----
