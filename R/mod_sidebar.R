@@ -85,7 +85,7 @@ mod_sidebar_server <- function(id, selected_geographies) {
           "Area",
           "Population density"
         )) %>%
-          dplyr::mutate(value = "—")
+          dplyr::mutate(value = "-")
       } else {
 
         summary_statistics <- selected_geographies() %>%
