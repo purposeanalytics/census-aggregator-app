@@ -36,6 +36,8 @@ mod_sidebar_ui <- function(id) {
         color = "primary"
       )
     ),
+    breathe(),
+    shiny::textOutput(ns("bookmark")),
     shiny::div(
       shinyWidgets::actionBttn(
         ns("export_geography"),
@@ -68,14 +70,20 @@ mod_sidebar_server <- function(id, selected_geographies) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
-    # Update inputs with aggregate_area
-
+    # Update inputs with aggregate_area -----
     inputs <- shiny::reactive({
       list(
         aggregate_area = input$aggregate_area
       )
     })
 
+    # Set up bookmarking ----
+    shiny::observeEvent(input$bookmark_selections, {
+      bookmark_query <- construct_bookmark(input, session, exclude = c("export_data", "bookmark_selections", "export_geography"), selected_geographies())
+      output$bookmark <- renderText(bookmark_query)
+    })
+
+    # Summary statistics table ----
     shiny::observeEvent(selected_geographies(), ignoreInit = FALSE, {
       if (nrow(selected_geographies()) == 0) {
         summary_statistics <- dplyr::tibble(name = c(

@@ -44,7 +44,6 @@ function() {
 
     // When the user clicks the ct_fill layer, update the 'click' feature state for that geo_uid
     map.on('click', 'ct_fill', (e) => {
-        map.getCanvas().style.cursor = 'pointer';
 
         // Cycle through rendered features to find the clicked one, and see what its 'click' value is
         // If true, it has already been clicked and needs to be 'unclicked' - set to false
@@ -85,7 +84,6 @@ function() {
 
     // Same for csd_fill
     map.on('click', 'csd_fill', (e) => {
-        map.getCanvas().style.cursor = 'pointer';
 
         // Cycle through rendered features to find the clicked one, and see what its 'click' value is
         // If true, it has already been clicked and needs to be 'unclicked' - set to false
@@ -93,6 +91,8 @@ function() {
         // If null, has not been clicked, needs to be 'clicked' - set to true
 
         var clicked_geo_uid = e.features[0].id;
+
+        console.log(e.features[0]);
 
         var features = map.queryRenderedFeatures({ layers: ['csd_fill'] });
 
