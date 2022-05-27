@@ -70,6 +70,21 @@ mod_sidebar_server <- function(id, selected_geographies) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
+    # Observe any bookmarking to update inputs with ----
+    shiny::observe(priority = 1, {
+      query <- shiny::parseQueryString(session$clientData$url_search)
+      # Additional parsing of query to split by ,
+      query <- split_query(query)
+
+      # Only update inputs that are also in the query string
+      query_inputs <- intersect(names(input), names(query))
+
+      # Iterate over them and update
+      purrr::walk(query_inputs, function(x) {
+        shinyWidgets::updatePickerInput(session, inputId = x, selected = query[[x]])
+      })
+    })
+
     # Update inputs with aggregate_area -----
     inputs <- shiny::reactive({
       list(
@@ -95,7 +110,6 @@ mod_sidebar_server <- function(id, selected_geographies) {
         )) %>%
           dplyr::mutate(value = "-")
       } else {
-
         summary_statistics <- selected_geographies() %>%
           dplyr::select(population, households, area_sq_km) %>%
           dplyr::mutate(n = dplyr::n()) %>%
@@ -110,8 +124,7 @@ mod_sidebar_server <- function(id, selected_geographies) {
             name == "n" ~ as.character(value)
           ))
 
-        n_units <- switch(
-          inputs()[["aggregate_area"]],
+        n_units <- switch(inputs()[["aggregate_area"]],
           csd = "Census Subdivisions",
           ct = "Census Tracts"
         )

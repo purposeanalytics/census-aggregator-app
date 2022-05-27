@@ -130,7 +130,7 @@ function() {
     )
 
     # Update map based on inputs ----
-    shiny::observeEvent(inputs(), {
+    shiny::observeEvent(inputs()[["aggregate_area"]], {
       switch(inputs()[["aggregate_area"]],
         csd = mapboxer::mapboxer_proxy(ns("map")) %>%
           show_census_layers("csd") %>%
