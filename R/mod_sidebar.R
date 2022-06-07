@@ -71,19 +71,30 @@ mod_sidebar_server <- function(id, selected_geographies) {
     ns <- session$ns
 
     # Observe any bookmarking to update inputs with ----
-    shiny::observe(priority = 1, {
-      query <- shiny::parseQueryString(session$clientData$url_search)
-      # Additional parsing of query to split by ,
-      query <- split_query(query)
+    shiny::observe(
+      # Priority of 1 - happens AFTER tibble of geo_uid is reset, to ensure any bookmarked geo_uids are kept
+      priority = 1,
+      {
+        query <- shiny::parseQueryString(session$clientData$url_search)
+        # Additional parsing of query to split by ,
+        query <- split_query(query)
 
-      # Only update inputs that are also in the query string
-      query_inputs <- intersect(names(input), names(query))
+        # Only update inputs that are also in the query string
+        query_inputs <- intersect(names(input), names(query))
 
-      # Iterate over them and update
-      purrr::walk(query_inputs, function(x) {
-        shinyWidgets::updatePickerInput(session, inputId = x, selected = query[[x]])
-      })
-    })
+        # Iterate over them and update
+        purrr::walk(query_inputs, function(x) {
+          shinyWidgets::updatePickerInput(session, inputId = x, selected = query[[x]])
+        })
+
+        # Update selected_geographies() to have geo_uid
+        if (!is.null(query$geo_uid)) {
+          selected_geographies(
+            dplyr::tibble(geo_uid = query$geo_uid)
+          )
+        }
+      }
+    )
 
     # Update inputs with aggregate_area -----
     inputs <- shiny::reactive({

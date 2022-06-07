@@ -142,13 +142,17 @@ function() {
         mapboxer::update_mapboxer()
     })
 
-    shiny::observeEvent(inputs()[["aggregate_area"]], {
-      # Reset geographies clicked when aggregate_area input changes
-      selected_geographies(dplyr::tibble())
+    shiny::observeEvent(inputs()[["aggregate_area"]],
+      # Priority = 2 ensures this happens before the bookmark query parsing, which parses out the geography etc - we want that to happen AFTER, so that any geo_uids are retained and not reset
+      priority = 2,
+      {
+        # Reset geographies clicked when aggregate_area input changes
+        selected_geographies(dplyr::tibble())
 
-      # Send aggregate_area input to JS, to reset the click feature state whenever the aggregate_area input changes
-      session$sendCustomMessage("geography", inputs()[["aggregate_area"]])
-    })
+        # Send aggregate_area input to JS, to reset the click feature state whenever the aggregate_area input changes
+        session$sendCustomMessage("geography", inputs()[["aggregate_area"]])
+      }
+    )
 
     # Keep track of geographies that are clicked ----
     shiny::observeEvent(
