@@ -84,9 +84,6 @@ function() {
       {
         # Reset geographies clicked when aggregate_area input changes
         selected_geographies(dplyr::tibble())
-
-        # Send aggregate_area input to JS, to reset the click feature state whenever the aggregate_area input changes
-        session$sendCustomMessage("geography", inputs()[["aggregate_area"]])
       }
     )
 
