@@ -168,7 +168,7 @@ function() {
           # Otherwise, set current value of selected_geographies to be existing tibble, plus new geographies
           selected_geographies(
             selected_geographies() %>%
-              dplyr::bind_rows(input$map_onclick$props %>% dplyr::as_tibble())
+              dplyr::bind_rows(dplyr::tibble(geo_uid = clicked_id))
           )
         }
       }

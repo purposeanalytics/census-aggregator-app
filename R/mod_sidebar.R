@@ -110,7 +110,13 @@ mod_sidebar_server <- function(id, selected_geographies) {
         )) %>%
           dplyr::mutate(value = "-")
       } else {
-        summary_statistics <- selected_geographies() %>%
+        summary_statistics_source <- switch(input$aggregate_area,
+          "csd" = censusaggregatorapp::csd,
+          "ct" = censusaggregatorapp::ct
+        )
+
+        summary_statistics <- summary_statistics_source %>%
+          dplyr::inner_join(selected_geographies(), by = "geo_uid") %>%
           dplyr::select(population, households, area_sq_km) %>%
           dplyr::mutate(n = dplyr::n()) %>%
           dplyr::group_by(n) %>%
@@ -125,8 +131,13 @@ mod_sidebar_server <- function(id, selected_geographies) {
           ))
 
         n_units <- switch(inputs()[["aggregate_area"]],
-          csd = "Census Subdivisions",
-          ct = "Census Tracts"
+          csd = "Census Subdivision",
+          ct = "Census Tract"
+        )
+
+        n_units <- ifelse(nrow(selected_geographies()) > 1,
+          paste0(n_units, "s"),
+          n_units
         )
 
         summary_statistics_labels_and_units <- dplyr::tribble(
