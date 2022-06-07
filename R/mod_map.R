@@ -33,98 +33,6 @@ function() {
 
     // disable map rotation using touch rotation gesture
     map.touchZoomRotate.disableRotation();
-
-    // Listen to aggregate-area to that when CSD/CT is changed, all the 'click' feature states are removed
-    Shiny.addCustomMessageHandler('geography', function(geography) {
-
-      map.removeFeatureState({source: '2016_ct', sourceLayer: '2016_census_ct', stateKey: 'click'});
-      map.removeFeatureState({source: '2016_csd', sourceLayer: '2016_census_csd', stateKey: 'click'});
-
-    });
-
-    // When the user clicks the ct_fill layer, update the 'click' feature state for that geo_uid
-    map.on('click', 'ct_fill', (e) => {
-
-        // Cycle through rendered features to find the clicked one, and see what its 'click' value is
-        // If true, it has already been clicked and needs to be 'unclicked' - set to false
-        // If false, has already been clicked + unclicked, needed to be 'clicked' - set to true
-        // If null, has not been clicked, needs to be 'clicked' - set to true
-
-        var clicked_geo_uid = e.features[0].id;
-
-        var features = map.queryRenderedFeatures({ layers: ['ct_fill'] });
-
-        for (var i = 0; i < features.length; i++) {
-
-            var current_geo_uid = features[i].id;
-
-            if (clicked_geo_uid === current_geo_uid) {
-                var geo_uid_already_clicked = features[i].state.click;
-
-                if (geo_uid_already_clicked) {
-                    console.log('already clicked');
-
-                    map.setFeatureState(
-                        { source: '2016_ct', sourceLayer: '2016_census_ct', id: clicked_geo_uid },
-                        { click: false }
-                    );
-
-                } else if (!geo_uid_already_clicked) {
-                    console.log('not already clicked');
-
-                    map.setFeatureState(
-                        { source: '2016_ct', sourceLayer: '2016_census_ct', id: clicked_geo_uid },
-                        { click: true }
-                    );
-
-                }
-            }
-        }
-    });
-
-    // Same for csd_fill
-    map.on('click', 'csd_fill', (e) => {
-
-        // Cycle through rendered features to find the clicked one, and see what its 'click' value is
-        // If true, it has already been clicked and needs to be 'unclicked' - set to false
-        // If false, has already been clicked + unclicked, needed to be 'clicked' - set to true
-        // If null, has not been clicked, needs to be 'clicked' - set to true
-
-        var clicked_geo_uid = e.features[0].id;
-
-        console.log(e.features[0]);
-
-        var features = map.queryRenderedFeatures({ layers: ['csd_fill'] });
-
-        for (var i = 0; i < features.length; i++) {
-
-            var current_geo_uid = features[i].id;
-
-            if (clicked_geo_uid === current_geo_uid) {
-                var geo_uid_already_clicked = features[i].state.click;
-
-                if (geo_uid_already_clicked) {
-                    console.log('already clicked');
-
-                    map.setFeatureState(
-                        { source: '2016_csd', sourceLayer: '2016_census_csd', id: clicked_geo_uid },
-                        { click: false }
-                    );
-
-                } else if (!geo_uid_already_clicked) {
-                    console.log('not already clicked');
-
-                    map.setFeatureState(
-                        { source: '2016_csd', sourceLayer: '2016_census_csd', id: clicked_geo_uid },
-                        { click: true }
-                    );
-
-                }
-            }
-        }
-    });
-
-
 }
 ")
     )
@@ -134,9 +42,17 @@ function() {
       switch(inputs()[["aggregate_area"]],
         csd = mapboxer::mapboxer_proxy(ns("map")) %>%
           show_census_layers("csd") %>%
+          mapboxer::set_filter(
+            layer_id = "ct_fill_show",
+            filter = list("in", "geo_uid", "")
+          ) %>%
           hide_census_layers("ct"),
         ct = mapboxer::mapboxer_proxy(ns("map")) %>%
           show_census_layers("ct") %>%
+          mapboxer::set_filter(
+            layer_id = "csd_fill_show",
+            filter = list("in", "geo_uid", "")
+          ) %>%
           hide_census_layers("csd"),
       ) %>%
         mapboxer::update_mapboxer()
@@ -175,6 +91,19 @@ function() {
               dplyr::bind_rows(dplyr::tibble(geo_uid = clicked_id))
           )
         }
+
+        # Update filter of fill layer to include whatever is in selected_geographies()
+        filter_list <- append(
+          list("in", "geo_uid"),
+          as.list(selected_geographies()[["geo_uid"]])
+        )
+
+        mapboxer::mapboxer_proxy(ns("map")) %>%
+          mapboxer::set_filter(
+            layer_id = geography_to_layer_id(inputs()[["aggregate_area"]], "fill_show"),
+            filter = filter_list
+          ) %>%
+          mapboxer::update_mapboxer()
       }
     )
   })

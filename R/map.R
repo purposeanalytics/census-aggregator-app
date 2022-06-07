@@ -20,25 +20,44 @@ add_census_layer <- function(map, geography) {
 }
 
 add_census_fill_layer <- function(map, geography) {
+  click_layer_id <- geography_to_layer_id(geography, "fill_click")
+  show_layer_id <- geography_to_layer_id(geography, "fill_show")
+
   map %>%
     mapboxer::add_layer(
       list(
-        "id" = geography_to_layer_id(geography, "fill"),
+        "id" = click_layer_id,
         "type" = "fill",
         "source" = geography_to_source_id(geography),
         "source-layer" = geography_to_source_layer_id(geography),
         "paint" = list(
-          "fill-opacity" = 0.25,
-          "fill-color" = list(
-            "case",
-            list("boolean", c("feature-state", "click"), FALSE), "white",
-            "blue"
-          )
+          "fill-opacity" = 0,
+          "fill-color" = "white"
         ),
         layout = list(
           "visibility" = "none"
         )
       )
+    ) %>%
+    mapboxer::add_layer(
+      list(
+        "id" = show_layer_id,
+        "type" = "fill",
+        "source" = geography_to_source_id(geography),
+        "source-layer" = geography_to_source_layer_id(geography),
+        "paint" = list(
+          "fill-opacity" = 1,
+          "fill-color" = "white"
+        ),
+        layout = list(
+          "visibility" = "none"
+        )
+      )
+    ) %>%
+    mapboxer::set_filter(
+      layer_id = show_layer_id,
+      # Start with all data filtered OUT
+      filter = list("in", "geo_uid", "")
     )
 }
 
@@ -76,13 +95,15 @@ geography_to_source_layer_id <- function(geography) {
 
 show_census_layers <- function(map, geography) {
   map %>%
-    toggle_layer_visible(geography_to_layer_id(geography, "fill")) %>%
+    toggle_layer_visible(geography_to_layer_id(geography, "fill_click")) %>%
+    toggle_layer_visible(geography_to_layer_id(geography, "fill_show")) %>%
     toggle_layer_visible(geography_to_layer_id(geography, "line"))
 }
 
 hide_census_layers <- function(map, geography) {
   map %>%
-    toggle_layer_invisible(geography_to_layer_id(geography, "fill")) %>%
+    toggle_layer_invisible(geography_to_layer_id(geography, "fill_click")) %>%
+    toggle_layer_invisible(geography_to_layer_id(geography, "fill_show")) %>%
     toggle_layer_invisible(geography_to_layer_id(geography, "line"))
 }
 
