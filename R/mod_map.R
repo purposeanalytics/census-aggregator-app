@@ -37,26 +37,46 @@ function() {
 ")
     )
 
-    # Update map based on inputs ----
-    shiny::observeEvent(inputs()[["aggregate_area"]], {
-      switch(inputs()[["aggregate_area"]],
-        csd = mapboxer::mapboxer_proxy(ns("map")) %>%
-          show_census_layers("csd") %>%
-          mapboxer::set_filter(
-            layer_id = "ct_fill_show",
-            filter = list("in", "geo_uid", "")
-          ) %>%
-          hide_census_layers("ct"),
-        ct = mapboxer::mapboxer_proxy(ns("map")) %>%
-          show_census_layers("ct") %>%
-          mapboxer::set_filter(
-            layer_id = "csd_fill_show",
-            filter = list("in", "geo_uid", "")
-          ) %>%
-          hide_census_layers("csd"),
-      ) %>%
-        mapboxer::update_mapboxer()
-    })
+    # Update map based on inputs (CSD/CT) and geographies to be shown ----
+    # Geographies to be shown determined via click or bookmark
+    shiny::observeEvent(
+      {
+        inputs()[["aggregate_area"]]
+        selected_geographies()
+      },
+      {
+        filter_list <- append(
+          list("in", "geo_uid"),
+          as.list(selected_geographies()[["geo_uid"]])
+        )
+
+        switch(inputs()[["aggregate_area"]],
+          csd = mapboxer::mapboxer_proxy(ns("map")) %>%
+            mapboxer::set_filter(
+              layer_id = "csd_fill_show",
+              filter = filter_list
+            ) %>%
+            show_census_layers("csd") %>%
+            mapboxer::set_filter(
+              layer_id = "ct_fill_show",
+              filter = list("in", "geo_uid", "")
+            ) %>%
+            hide_census_layers("ct"),
+          ct = mapboxer::mapboxer_proxy(ns("map")) %>%
+            show_census_layers("ct") %>%
+            mapboxer::set_filter(
+              layer_id = "ct_fill_show",
+              filter = filter_list
+            ) %>%
+            mapboxer::set_filter(
+              layer_id = "csd_fill_show",
+              filter = list("in", "geo_uid", "")
+            ) %>%
+            hide_census_layers("csd"),
+        ) %>%
+          mapboxer::update_mapboxer()
+      }
+    )
 
     shiny::observeEvent(inputs()[["aggregate_area"]],
       # Priority = 2 ensures this happens before the bookmark query parsing, which parses out the geography etc - we want that to happen AFTER, so that any geo_uids are retained and not reset
@@ -91,19 +111,6 @@ function() {
               dplyr::bind_rows(dplyr::tibble(geo_uid = clicked_id))
           )
         }
-
-        # Update filter of fill layer to include whatever is in selected_geographies()
-        filter_list <- append(
-          list("in", "geo_uid"),
-          as.list(selected_geographies()[["geo_uid"]])
-        )
-
-        mapboxer::mapboxer_proxy(ns("map")) %>%
-          mapboxer::set_filter(
-            layer_id = geography_to_layer_id(inputs()[["aggregate_area"]], "fill_show"),
-            filter = filter_list
-          ) %>%
-          mapboxer::update_mapboxer()
       }
     )
   })
