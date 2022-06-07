@@ -13,7 +13,7 @@ canada_region <- c(C = 01)
 
 # Get without geography first, since "Area (sq km)" is as reported in the census, but with geography, it only has "Shape Area" which is the literal area of the polygon.
 
-# CSD
+# CSD -----
 
 csd <- get_census(dataset = dataset, regions = canada_region, level = "CSD") %>%
   clean_names() %>%
@@ -60,12 +60,19 @@ csd <- csd %>%
 upload_tiles(
   input = csd,
   username = "purposeanalytics",
-  tileset_id = "2016_csd_test",
-  tileset_name = "2016_census_csd_test",
+  tileset_id = "2016_csd",
+  tileset_name = "2016_census_csd",
   multipart = TRUE
 )
 
-# CT
+# Save without geography for usage in app
+
+csd <- csd %>%
+  st_set_geometry(NULL)
+
+usethis::use_data(csd, overwrite = TRUE)
+
+# CT ----
 
 ct <- get_census(dataset = dataset, regions = canada_region, level = "CT") %>%
   clean_names() %>%
@@ -87,8 +94,10 @@ upload_tiles(
   multipart = TRUE
 )
 
-# Save CT geography only for boundary export
-ct_geography <- ct %>%
-  select(geo_uid)
 
-usethis::use_data(ct_geography, overwrite = TRUE)
+# Save without geography for usage in app
+
+ct <- ct %>%
+  st_set_geometry(NULL)
+
+usethis::use_data(ct, overwrite = TRUE)
