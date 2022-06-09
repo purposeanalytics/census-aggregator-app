@@ -16,7 +16,7 @@ mod_map_ui <- function(id) {
 #' map Server Functions
 #'
 #' @noRd
-mod_map_server <- function(id, inputs, selected_geographies) {
+mod_map_server <- function(id, inputs, selected_geographies, map_rendered) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
@@ -33,24 +33,32 @@ function() {
 
     // disable map rotation using touch rotation gesture
     map.touchZoomRotate.disableRotation();
+
+    // Send an indicator to shiny that the widget has been rendered, so other reactives don't run until it's rendered
+    Shiny.setInputValue('map_rendered', true);
+
 }
 ")
     )
 
     # Update map based on inputs (CSD/CT) and geographies to be shown ----
-    # Geographies to be shown determined via click (or bookmark, TODO)
+    # Geographies to be shown determined via click or bookmark
     shiny::observeEvent(
       {
         inputs()[["aggregate_area"]]
         selected_geographies()
       },
       {
+        # Only run these once the map has been rendered for the first time
+        shiny::req(map_rendered())
+        shiny::req(inputs()$aggregate_area)
+
         filter_list <- append(
           list("in", "geo_uid"),
-          as.list(selected_geographies()[["geo_uid"]])
+          as.list(selected_geographies()$geo_uid)
         )
 
-        switch(inputs()[["aggregate_area"]],
+        switch(inputs()$aggregate_area,
           csd = mapboxer::mapboxer_proxy(ns("map")) %>%
             mapboxer::set_filter(
               layer_id = "csd_fill_show",
@@ -68,10 +76,10 @@ function() {
               layer_id = "ct_fill_show",
               filter = filter_list
             ) %>%
-            mapboxer::set_filter(
-              layer_id = "csd_fill_show",
-              filter = list("in", "geo_uid", "")
-            ) %>%
+            # mapboxer::set_filter(
+            #   layer_id = "csd_fill_show",
+            #   filter = list("in", "geo_uid", "")
+            # ) %>%
             hide_census_layers("csd"),
         ) %>%
           mapboxer::update_mapboxer()
@@ -79,7 +87,8 @@ function() {
     )
 
     # Reset geographies clicked when aggregate_area input changes ----
-    shiny::observeEvent(inputs()[["aggregate_area"]],
+    shiny::observeEvent(
+      inputs()[["aggregate_area"]],
       # Priority = 2 ensures this happens before the bookmark query parsing, which parses out the geography etc - we want that to happen AFTER, so that any geo_uids are retained and not reset
       # priority = 2,
       {

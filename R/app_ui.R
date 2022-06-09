@@ -32,6 +32,7 @@ golem_add_external_resources <- function() {
       path = app_sys("app/www"),
       app_title = "censusaggregationapp"
     ),
+    shinyjs::useShinyjs()
     # Add here other external resources
     # for example, you can add shinyalert::useShinyalert()
   )

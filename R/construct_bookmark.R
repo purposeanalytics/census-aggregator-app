@@ -6,6 +6,10 @@ construct_bookmark <- function(input, session, exclude = NULL, selected_geograph
   inputs <- setdiff(inputs, exclude)
   inputs <- setdiff(inputs, "bookmark")
 
+  # Exclude any shinyjs-delay inputs
+  shinyjs_input <- sapply(inputs, function(x) grepl("shinyjs-delay", x))
+  inputs <- inputs[!shinyjs_input]
+
   # Prep input values for including in a URL, and collapse multiple using ,
   bookmark_inputs <- purrr::map(inputs, function(x) {
     input[[x]] %>%
