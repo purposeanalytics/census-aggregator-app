@@ -38,7 +38,7 @@ function() {
     )
 
     # Update map based on inputs (CSD/CT) and geographies to be shown ----
-    # Geographies to be shown determined via click or bookmark
+    # Geographies to be shown determined via click (or bookmark, TODO)
     shiny::observeEvent(
       {
         inputs()[["aggregate_area"]]
@@ -78,9 +78,10 @@ function() {
       }
     )
 
+    # Reset geographies clicked when aggregate_area input changes ----
     shiny::observeEvent(inputs()[["aggregate_area"]],
       # Priority = 2 ensures this happens before the bookmark query parsing, which parses out the geography etc - we want that to happen AFTER, so that any geo_uids are retained and not reset
-      priority = 2,
+      # priority = 2,
       {
         # Reset geographies clicked when aggregate_area input changes
         selected_geographies(dplyr::tibble())
