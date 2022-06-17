@@ -17,7 +17,7 @@ canada_region <- c(C = 01)
 
 csd <- get_census(dataset = dataset, regions = canada_region, level = "CSD") %>%
   clean_names() %>%
-  select(geo_uid, area_sq_km, population, households)
+  select(geo_uid, pr_uid, area_sq_km, population, households)
 
 csd_sf <- get_census(dataset = dataset, regions = canada_region, level = "CSD", geo_format = "sf") %>%
   clean_names() %>%
@@ -26,6 +26,24 @@ csd_sf <- get_census(dataset = dataset, regions = canada_region, level = "CSD", 
 csd <- csd %>%
   left_join(csd_sf, by = "geo_uid") %>%
   st_as_sf(crs = st_crs(csd_sf))
+
+# Write arrow dataset, partitioned by province, for getting geometry / boundary export in app
+csd_geometry <- csd %>%
+  select(geo_uid, pr_uid)
+
+fs::dir_create("inst/data/csd/")
+
+csd_geometry %>%
+  group_by(pr_uid) %>%
+  write_sf_dataset("inst/data/csd/",
+    format = "parquet",
+    hive_style = FALSE
+  )
+
+# Now to upload to mapbox
+
+csd <- csd %>%
+  select(-pr_uid)
 
 # Optimizing as per recommendations in https://docs.mapbox.com/help/troubleshooting/uploads/#troubleshooting
 # Since the processing takes >1 hour, it times out
@@ -54,9 +72,6 @@ as.numeric(csd_simplified_size) / as.numeric(csd_size)
 
 # Upload
 
-csd <- csd %>%
-  head(1)
-
 upload_tiles(
   input = csd,
   username = "purposeanalytics",
@@ -76,7 +91,7 @@ usethis::use_data(csd, overwrite = TRUE)
 
 ct <- get_census(dataset = dataset, regions = canada_region, level = "CT") %>%
   clean_names() %>%
-  select(geo_uid, type, region_name, area_sq_km, population, households)
+  select(geo_uid, pr_uid, type, region_name, area_sq_km, population, households)
 
 ct_sf <- get_census(dataset = dataset, regions = canada_region, level = "CT", geo_format = "sf") %>%
   clean_names() %>%
@@ -86,6 +101,24 @@ ct <- ct %>%
   left_join(ct_sf, by = "geo_uid") %>%
   st_as_sf(crs = st_crs(ct_sf))
 
+# Write arrow dataset, partitioned by province, for getting geometry / boundary export in app
+ct_geometry <- ct %>%
+  select(geo_uid, pr_uid)
+
+fs::dir_create("inst/data/ct/")
+
+ct_geometry %>%
+  group_by(pr_uid) %>%
+  write_sf_dataset("inst/data/ct/",
+    format = "parquet",
+    hive_style = FALSE
+  )
+
+# Now to upload to mapbox
+
+ct <- ct %>%
+  select(-pr_uid)
+
 upload_tiles(
   input = ct,
   username = "purposeanalytics",
@@ -93,7 +126,6 @@ upload_tiles(
   tileset_name = "2016_census_ct",
   multipart = TRUE
 )
-
 
 # Save without geography for usage in app
 

@@ -39,8 +39,8 @@ mod_sidebar_ui <- function(id) {
     breathe(),
     shiny::textOutput(ns("bookmark")),
     shiny::div(
-      shinyWidgets::actionBttn(
-        ns("export_geography"),
+      shinyWidgets::downloadBttn(
+        ns("export_boundary"),
         "Export boundary",
         style = "bordered",
         color = "primary"
@@ -118,6 +118,24 @@ mod_sidebar_server <- function(id, selected_geographies, map_rendered, boomarks_
       list(
         aggregate_area = input$aggregate_area
       )
+    })
+
+    # Export boundary ----
+    output$export_boundary <- shiny::downloadHandler(
+        filename = function() {
+          "boundary.geojson"
+        },
+        content = function(con) {
+          dataset <- arrow::open_dataset(glue::glue("inst/data/{input$aggregate_area}"))
+
+          query <- dplyr::filter(dataset, .data$geo_uid %in% selected_geographies()[["geo_uid"]])
+
+          sfarrow::read_sf_dataset(query) %>%
+            sf::st_union() %>%
+            sf::st_write(con)
+        }
+      )
+    shiny::observeEvent(input$export_boundary, {
     })
 
     # Summary statistics table ----
