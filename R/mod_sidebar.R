@@ -127,6 +127,7 @@ mod_sidebar_server <- function(id, selected_geographies, map_rendered, boomarks_
         },
         content = function(con) {
 
+          # TODO: doesn't "do nothing" if nrow == 0, opens empty tab
           shiny::req(nrow(selected_geographies()) > 0)
 
           dataset <- arrow::open_dataset(glue::glue("inst/extdata/{input$aggregate_area}"))
