@@ -73,7 +73,7 @@ mod_sidebar_server <- function(id, selected_geographies, map_rendered, boomarks_
     # Set up bookmarking ----
     shiny::observeEvent(input$bookmark_selections, {
       bookmark_query <- construct_bookmark(input, session, exclude = c("export_data", "bookmark_selections", "export_geography"), selected_geographies())
-      output$bookmark <- renderText(bookmark_query)
+      output$bookmark <- shiny::renderText(bookmark_query)
     })
 
     # Observe any bookmarking to update inputs with ----
@@ -81,8 +81,8 @@ mod_sidebar_server <- function(id, selected_geographies, map_rendered, boomarks_
       # Priority of 1 - happens AFTER tibble of geo_uid is reset, to ensure any bookmarked geo_uids are kept
       priority = 1,
       {
-        req(boomarks_to_be_parsed())
-        req(map_rendered())
+        shiny::req(boomarks_to_be_parsed())
+        shiny::req(map_rendered())
 
         query <- shiny::parseQueryString(session$clientData$url_search)
         # Additional parsing of query to split by ,
@@ -126,7 +126,10 @@ mod_sidebar_server <- function(id, selected_geographies, map_rendered, boomarks_
           "boundary.geojson"
         },
         content = function(con) {
-          dataset <- arrow::open_dataset(glue::glue("inst/data/{input$aggregate_area}"))
+
+          shiny::req(nrow(selected_geographies()) > 0)
+
+          dataset <- arrow::open_dataset(glue::glue("inst/extdata/{input$aggregate_area}"))
 
           query <- dplyr::filter(dataset, .data$geo_uid %in% selected_geographies()[["geo_uid"]])
 
@@ -157,11 +160,11 @@ mod_sidebar_server <- function(id, selected_geographies, map_rendered, boomarks_
 
         summary_statistics <- summary_statistics_source %>%
           dplyr::inner_join(selected_geographies(), by = "geo_uid") %>%
-          dplyr::select(population, households, area_sq_km) %>%
+          dplyr::select(.data$population, .data$households, .data$area_sq_km) %>%
           dplyr::mutate(n = dplyr::n()) %>%
-          dplyr::group_by(n) %>%
+          dplyr::group_by(.data$n) %>%
           dplyr::summarise_all(sum) %>%
-          dplyr::mutate(population_density = round(population / area_sq_km)) %>%
+          dplyr::mutate(population_density = round(.data$population / .data$area_sq_km)) %>%
           dplyr::ungroup() %>%
           tidyr::pivot_longer(dplyr::everything()) %>%
           dplyr::mutate(value = dplyr::case_when(
@@ -192,7 +195,7 @@ mod_sidebar_server <- function(id, selected_geographies, map_rendered, boomarks_
         summary_statistics <- summary_statistics %>%
           dplyr::left_join(summary_statistics_labels_and_units, by = "name") %>%
           dplyr::mutate(value = glue::glue("{value} {units}", .na = "")) %>%
-          dplyr::select(label, value)
+          dplyr::select(.data$label, .data$value)
       }
 
       output$summary_statistics <- shiny::renderText({

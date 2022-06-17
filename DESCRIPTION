@@ -7,10 +7,11 @@ Authors@R:
            role = c("aut", "cre"),
            email = "your@email.com")
 Description: What the package does (one paragraph).
-License: What license is it under?
+License: MIT + file LICENSE
 Imports: 
     arrow,
     config (>= 0.3.1),
+    curl,
     dplyr,
     glue,
     golem (>= 0.3.2),
@@ -19,14 +20,17 @@ Imports:
     knitr,
     magrittr,
     mapboxer,
+    purrr,
+    rlang,
     scales,
     sf,
     sfarrow,
     shiny (>= 1.6.0),
+    shinyjs,
     shinyWidgets,
     tidyr
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.1.2
+RoxygenNote: 7.2.0
 Depends: 
     R (>= 2.10)

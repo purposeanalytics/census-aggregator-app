@@ -31,11 +31,11 @@ csd <- csd %>%
 csd_geometry <- csd %>%
   select(geo_uid, pr_uid)
 
-fs::dir_create("inst/data/csd/")
+fs::dir_create("inst/extdata/csd/")
 
 csd_geometry %>%
   group_by(pr_uid) %>%
-  write_sf_dataset("inst/data/csd/",
+  write_sf_dataset("inst/extdata/csd/",
     format = "parquet",
     hive_style = FALSE
   )
@@ -105,11 +105,11 @@ ct <- ct %>%
 ct_geometry <- ct %>%
   select(geo_uid, pr_uid)
 
-fs::dir_create("inst/data/ct/")
+fs::dir_create("inst/extdata/ct/")
 
 ct_geometry %>%
   group_by(pr_uid) %>%
-  write_sf_dataset("inst/data/ct/",
+  write_sf_dataset("inst/extdata/ct/",
     format = "parquet",
     hive_style = FALSE
   )

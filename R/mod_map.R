@@ -109,7 +109,7 @@ function() {
         if (clicked_id %in% selected_geographies()[["geo_uid"]]) {
           selected_geographies(
             selected_geographies() %>%
-              dplyr::filter(geo_uid != clicked_id)
+              dplyr::filter(.data$geo_uid != clicked_id)
           )
         } else {
           # Otherwise, set current value of selected_geographies to be existing tibble, plus new geographies
