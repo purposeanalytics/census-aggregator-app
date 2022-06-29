@@ -122,23 +122,23 @@ mod_sidebar_server <- function(id, selected_geographies, map_rendered, boomarks_
 
     # Export boundary ----
     output$export_boundary <- shiny::downloadHandler(
-        filename = function() {
-          "boundary.geojson"
-        },
-        content = function(con) {
+      filename = function() {
+        "boundary.geojson"
+      },
+      content = function(con) {
 
-          # TODO: doesn't "do nothing" if nrow == 0, opens empty tab
-          shiny::req(nrow(selected_geographies()) > 0)
+        # TODO: doesn't "do nothing" if nrow == 0, opens empty tab
+        shiny::req(nrow(selected_geographies()) > 0)
 
-          dataset <- arrow::open_dataset(glue::glue("inst/extdata/{input$aggregate_area}"))
+        dataset <- arrow::open_dataset(glue::glue("inst/extdata/{input$aggregate_area}"))
 
-          query <- dplyr::filter(dataset, .data$geo_uid %in% selected_geographies()[["geo_uid"]])
+        query <- dplyr::filter(dataset, .data$geo_uid %in% selected_geographies()[["geo_uid"]])
 
-          sfarrow::read_sf_dataset(query) %>%
-            sf::st_union() %>%
-            sf::st_write(con)
-        }
-      )
+        sfarrow::read_sf_dataset(query) %>%
+          sf::st_union() %>%
+          sf::st_write(con)
+      }
+    )
     shiny::observeEvent(input$export_boundary, {
     })
 
