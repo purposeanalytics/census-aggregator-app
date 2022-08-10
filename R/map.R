@@ -149,3 +149,17 @@ toggle_layer_invisible <- function(map, id) {
       "none"
     )
 }
+
+add_census_tooltips <- function(map, geography) {
+  tooltip_text <-
+    "
+  <b>Region</b>: {{region_name}}<br>
+  <b>Population</b>: {{population}}<br>
+  <b>Households</b>: {{households}}<br>
+  <b>Area</b>: {{area_sq_km}}<br>
+  <b>Population Density</b>:
+  "
+
+  map %>%
+    mapboxer::add_tooltips(geography_to_layer_id(geography, "fill_click"), tooltip_text)
+}

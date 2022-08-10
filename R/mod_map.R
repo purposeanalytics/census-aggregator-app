@@ -22,6 +22,8 @@ mod_map_server <- function(id, inputs, selected_geographies, map_rendered) {
 
     output$map <- mapboxer::renderMapboxer(
       map() %>%
+        add_census_tooltips("csd") %>%
+        add_census_tooltips("ct") %>%
         show_census_layers("csd") %>%
         hide_census_layers("ct") %>%
         htmlwidgets::onRender("
