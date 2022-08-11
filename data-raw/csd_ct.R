@@ -6,6 +6,7 @@ library(janitor)
 library(sf)
 library(mapboxapi)
 library(rmapshaper)
+library(sfarrow)
 
 dataset <- "CA16"
 
@@ -17,7 +18,7 @@ canada_region <- c(C = 01)
 
 csd <- get_census(dataset = dataset, regions = canada_region, level = "CSD") %>%
   clean_names() %>%
-  select(geo_uid, pr_uid, area_sq_km, population, households)
+  select(geo_uid, pr_uid, region_name, area_sq_km, population, households)
 
 csd_sf <- get_census(dataset = dataset, regions = canada_region, level = "CSD", geo_format = "sf") %>%
   clean_names() %>%
@@ -26,6 +27,13 @@ csd_sf <- get_census(dataset = dataset, regions = canada_region, level = "CSD", 
 csd <- csd %>%
   left_join(csd_sf, by = "geo_uid") %>%
   st_as_sf(crs = st_crs(csd_sf))
+
+# Derive population density for tooltips
+csd <- csd %>%
+  mutate(
+    population_density = population / area_sq_km,
+    population_density = scales::comma(population_density, accuracy = 1)
+  )
 
 # Write arrow dataset, partitioned by province, for getting geometry / boundary export in app
 csd_geometry <- csd %>%
@@ -80,10 +88,11 @@ upload_tiles(
   multipart = TRUE
 )
 
-# Save without geography for usage in app
+# Save without geography for usage in app (don't need population density either, since it needs to be derived)
 
 csd <- csd %>%
-  st_set_geometry(NULL)
+  st_set_geometry(NULL) %>%
+  select(-population_density)
 
 usethis::use_data(csd, overwrite = TRUE)
 
@@ -114,6 +123,13 @@ ct_geometry %>%
     hive_style = FALSE
   )
 
+# Derive population density for tooltips
+ct <- ct %>%
+  mutate(
+    population_density = population / area_sq_km,
+    population_density = scales::comma(population_density, accuracy = 1)
+  )
+
 # Now to upload to mapbox
 
 ct <- ct %>%
@@ -127,9 +143,10 @@ upload_tiles(
   multipart = TRUE
 )
 
-# Save without geography for usage in app
+# Save without geography (and population density) for usage in app
 
 ct <- ct %>%
-  st_set_geometry(NULL)
+  st_set_geometry(NULL) %>%
+  select(-population_density)
 
 usethis::use_data(ct, overwrite = TRUE)
