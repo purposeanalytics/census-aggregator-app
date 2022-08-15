@@ -22,5 +22,14 @@ app_server <- function(input, output, session) {
 
   inputs <- mod_sidebar_server("sidebar", selected_geographies, map_rendered, boomarks_to_be_parsed)
 
-  mod_map_server("map", inputs, selected_geographies, map_rendered)
+  # Observe geographies selected via polygon
+  polygon_filter <- shiny::reactiveVal()
+  shiny::observeEvent(input$polygon_filter, {
+    polygon_filter(input$polygon_filter)
+  })
+
+  mod_map_server(
+    "map", inputs, selected_geographies, map_rendered,
+    polygon_filter
+  )
 }

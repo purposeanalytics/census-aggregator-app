@@ -16,7 +16,8 @@ mod_map_ui <- function(id) {
 #' map Server Functions
 #'
 #' @noRd
-mod_map_server <- function(id, inputs, selected_geographies, map_rendered) {
+mod_map_server <- function(id, inputs, selected_geographies, map_rendered,
+                           polygon_filter) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
@@ -27,7 +28,7 @@ mod_map_server <- function(id, inputs, selected_geographies, map_rendered) {
         show_census_layers("csd") %>%
         hide_census_layers("ct") %>%
         htmlwidgets::onRender("
-function() {
+    function() {
 
     var map = mapboxer._widget['map-map'].map;
     // disable map rotation using right click + drag
@@ -109,19 +110,48 @@ function() {
     var draw = new MapboxDraw({
         displayControlsDefault: false,
         controls: {
+            polygon: true,
             trash: true
-        }
+        },
+        defaultMode: 'draw_polygon'
     });
 
     Shiny.addCustomMessageHandler('selection_tool', function(message) {
-      if (message === 'polygon') {
-        map.addControl(draw);
-        console.log(message);
-      } else if (message === 'click');
-        map.removeControl(draw);
-        console.log(message);
-    });
 
+        map.addControl(draw);
+
+map.on('draw.create', (e) => featuresFromPolygon(e, 'csd'));
+map.on('draw.delete', (e) => featuresFromPolygon(e, 'csd'));
+map.on('draw.update', (e) => featuresFromPolygon(e, 'csd'));
+
+    function featuresFromPolygon(e, geography) {
+
+var userPolygon = e.features[0];
+var polygonBoundingBox = turf.bbox(userPolygon)
+var southWest = [polygonBoundingBox[0], polygonBoundingBox[1]];
+var northEast = [polygonBoundingBox[2], polygonBoundingBox[3]];
+
+var northEastPointPixel = map.project(northEast);
+var southWestPointPixel = map.project(southWest);
+
+var features = map.queryRenderedFeatures([southWestPointPixel, northEastPointPixel], { layers: [geography + '_fill_click'] });
+var filter = [];
+
+features.reduce(function(memo, feature) {
+
+  if (! (undefined === turf.intersect(feature, userPolygon))) {
+    filter.push(feature.id);
+  }
+
+  return filter;
+})
+
+console.log(filter);
+
+Shiny.setInputValue('polygon_filter', filter);
+};
+
+})
 }
 ")
     )
@@ -187,21 +217,26 @@ function() {
       input$map_onclick,
       {
 
-        # Check if clicked area is already in selected geographies
-        # If it is, clicking again should *deselect* it - remove from the existing tibble
-        clicked_id <- input$map_onclick$props$geo_uid
+        # Only do this if the selection tool is click (not polygon)
 
-        if (clicked_id %in% selected_geographies()[["geo_uid"]]) {
-          selected_geographies(
-            selected_geographies() %>%
-              dplyr::filter(.data$geo_uid != clicked_id)
-          )
-        } else {
-          # Otherwise, set current value of selected_geographies to be existing tibble, plus new geographies
-          selected_geographies(
-            selected_geographies() %>%
-              dplyr::bind_rows(dplyr::tibble(geo_uid = clicked_id))
-          )
+        if (inputs()[["selection_tool"]] == "click") {
+
+          # Check if clicked area is already in selected geographies
+          # If it is, clicking again should *deselect* it - remove from the existing tibble
+          clicked_id <- input$map_onclick$props$geo_uid
+
+          if (clicked_id %in% selected_geographies()[["geo_uid"]]) {
+            selected_geographies(
+              selected_geographies() %>%
+                dplyr::filter(.data$geo_uid != clicked_id)
+            )
+          } else {
+            # Otherwise, set current value of selected_geographies to be existing tibble, plus new geographies
+            selected_geographies(
+              selected_geographies() %>%
+                dplyr::bind_rows(dplyr::tibble(geo_uid = clicked_id))
+            )
+          }
         }
       }
     )
@@ -211,6 +246,16 @@ function() {
       inputs()[["selection_tool"]],
       {
         session$sendCustomMessage("selection_tool", inputs()[["selection_tool"]])
+      }
+    )
+
+    # Keep track of geographies that are selected via polygon ----
+    shiny::observeEvent(
+      polygon_filter(),
+      {
+        selected_geographies(
+          tibble::tibble(geo_uid = polygon_filter())
+        )
       }
     )
   })
