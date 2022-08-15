@@ -118,40 +118,30 @@ mod_map_server <- function(id, inputs, selected_geographies, map_rendered,
 
     Shiny.addCustomMessageHandler('selection_tool', function(message) {
 
+    if (message === 'polygon') {
+
+      if (!(map._draw)) {
         map.addControl(draw);
+      }
 
-map.on('draw.create', (e) => featuresFromPolygon(e, 'csd'));
-map.on('draw.delete', (e) => featuresFromPolygon(e, 'csd'));
-map.on('draw.update', (e) => featuresFromPolygon(e, 'csd'));
+      map._draw = true;
 
-    function featuresFromPolygon(e, geography) {
+      map.on('draw.create', (e) => getFeaturesFromPolygon(e, map, 'csd'));
+      map.on('draw.delete', (e) => getFeaturesFromPolygon(e, map, 'csd'));
+      map.on('draw.update', (e) => getFeaturesFromPolygon(e, map, 'csd'));
 
-var userPolygon = e.features[0];
-var polygonBoundingBox = turf.bbox(userPolygon)
-var southWest = [polygonBoundingBox[0], polygonBoundingBox[1]];
-var northEast = [polygonBoundingBox[2], polygonBoundingBox[3]];
+      map.on('draw.create', (e) => getFeaturesFromPolygon(e, map, 'ct'));
+      map.on('draw.delete', (e) => getFeaturesFromPolygon(e, map, 'ct'));
+      map.on('draw.update', (e) => getFeaturesFromPolygon(e, map, 'ct'));
 
-var northEastPointPixel = map.project(northEast);
-var southWestPointPixel = map.project(southWest);
+    }
 
-var features = map.queryRenderedFeatures([southWestPointPixel, northEastPointPixel], { layers: [geography + '_fill_click'] });
-var filter = [];
+    if (message === 'click' && map._draw) {
+      map.removeControl(draw);
+      map._draw = false;
+    }
 
-features.reduce(function(memo, feature) {
-
-  if (! (undefined === turf.intersect(feature, userPolygon))) {
-    filter.push(feature.id);
-  }
-
-  return filter;
-})
-
-console.log(filter);
-
-Shiny.setInputValue('polygon_filter', filter);
-};
-
-})
+  })
 }
 ")
     )
