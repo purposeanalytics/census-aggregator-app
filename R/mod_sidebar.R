@@ -113,10 +113,11 @@ mod_sidebar_server <- function(id, selected_geographies, map_rendered, boomarks_
     )
 
 
-    # Update inputs with aggregate_area -----
+    # Update inputs with aggregate_area and selection_tool -----
     inputs <- shiny::reactive({
       list(
-        aggregate_area = input$aggregate_area
+        aggregate_area = input$aggregate_area,
+        selection_tool = input$selection_tool
       )
     })
 

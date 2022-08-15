@@ -2,7 +2,13 @@ map <- function() {
   mapboxer::mapboxer(style = "mapbox://styles/purposeanalytics/cl6mafpzk002r14pdbda7la8r") %>%
     mapboxer::set_view_state(-92, 52, zoom = 5) %>%
     mapboxer::add_navigation_control(showCompass = FALSE) %>%
-    mapboxer::add_draw_control() %>%
+    # mapboxer::add_draw_control(
+    #   displayControlsDefault = FALSE,
+    #   controls = list(
+    #     polygon = TRUE,
+    #     trash = TRUE
+    #   )
+    # ) %>%
     add_census_layer("ct") %>%
     add_census_layer("csd")
 }

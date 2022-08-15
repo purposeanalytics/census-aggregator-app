@@ -103,6 +103,25 @@ function() {
         // Reset the cursor style
         map.getCanvas().style.cursor = '';
       })
+
+    // Draw a polygon
+
+    var draw = new MapboxDraw({
+        displayControlsDefault: false,
+        controls: {
+            trash: true
+        }
+    });
+
+    Shiny.addCustomMessageHandler('selection_tool', function(message) {
+      if (message === 'polygon') {
+        map.addControl(draw);
+        console.log(message);
+      } else if (message === 'click');
+        map.removeControl(draw);
+        console.log(message);
+    });
+
 }
 ")
     )
@@ -184,6 +203,14 @@ function() {
               dplyr::bind_rows(dplyr::tibble(geo_uid = clicked_id))
           )
         }
+      }
+    )
+
+    # Send polygon selection to javascript (to turn on drawing) ---
+    shiny::observeEvent(
+      inputs()[["selection_tool"]],
+      {
+        session$sendCustomMessage("selection_tool", inputs()[["selection_tool"]])
       }
     )
   })

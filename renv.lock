@@ -184,17 +184,31 @@
       "Hash": "92a5f887f9ae3035ac7afde22ba73ee9",
       "Requirements": []
     },
-    "bslib": {
-      "Package": "bslib",
-      "Version": "0.2.5.1",
+    "brio": {
+      "Package": "brio",
+      "Version": "1.1.2",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "2f069f3f42847231aef7baa49bed97b0",
+      "Hash": "2f01e16ff9571fe70381c7b9ae560dc4",
+      "Requirements": []
+    },
+    "bslib": {
+      "Package": "bslib",
+      "Version": "0.4.0.9000",
+      "Source": "GitHub",
+      "RemoteType": "github",
+      "RemoteHost": "api.github.com",
+      "RemoteRepo": "bslib",
+      "RemoteUsername": "rstudio",
+      "RemoteRef": "HEAD",
+      "RemoteSha": "f33429be9677efde3dfb3efcffc2b81461d5556d",
+      "Hash": "49c5fd26675cb3637cb12e67036f539b",
       "Requirements": [
+        "cachem",
         "htmltools",
         "jquerylib",
         "jsonlite",
-        "magrittr",
+        "memoise",
         "rlang",
         "sass"
       ]
@@ -244,15 +258,29 @@
       "Package": "censusaggregatorapp",
       "Version": "0.0.0.9000",
       "Source": "unknown",
-      "Hash": "2fa3390946e0ef378171891b2c740096",
+      "Remotes": "sharlagelfand/mapboxer",
+      "Hash": "f7578895a2d8b365d9c10733d580e411",
       "Requirements": [
+        "arrow",
         "config",
+        "curl",
+        "dplyr",
+        "glue",
         "golem",
+        "htmlwidgets",
+        "kableExtra",
+        "knitr",
         "magrittr",
         "mapboxer",
+        "purrr",
+        "rlang",
+        "scales",
         "sf",
+        "sfarrow",
         "shiny",
-        "shinyWidgets"
+        "shinyWidgets",
+        "shinyjs",
+        "tidyr"
       ]
     },
     "class": {
@@ -644,16 +672,12 @@
     "golem": {
       "Package": "golem",
       "Version": "0.3.2",
-      "Source": "GitHub",
-      "RemoteType": "github",
-      "RemoteHost": "api.github.com",
-      "RemoteRepo": "golem",
-      "RemoteUsername": "Thinkr-open",
-      "RemoteRef": "HEAD",
-      "RemoteSha": "ffd91a697951a6ae9cfa1bbbbae4c62ee35eca59",
-      "Hash": "c40bb2956e8e7e171d208bf1abb4436e",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "b396a44b56209da3733a4a906b0cc457",
       "Requirements": [
         "attempt",
+        "brio",
         "cli",
         "config",
         "crayon",
@@ -723,13 +747,14 @@
     },
     "htmltools": {
       "Package": "htmltools",
-      "Version": "0.5.1.1",
+      "Version": "0.5.3",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "af2c2531e55df5cf230c4b5444fc973c",
+      "Hash": "6496090a9e00f8354b811d1a2d47b566",
       "Requirements": [
         "base64enc",
         "digest",
+        "fastmap",
         "rlang"
       ]
     },
@@ -1049,10 +1074,15 @@
     },
     "mapboxer": {
       "Package": "mapboxer",
-      "Version": "0.4.0",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "d3724836470c725270fa5822306c96be",
+      "Version": "0.4.2",
+      "Source": "GitHub",
+      "RemoteType": "github",
+      "RemoteHost": "api.github.com",
+      "RemoteRepo": "mapboxer",
+      "RemoteUsername": "sharlagelfand",
+      "RemoteRef": "HEAD",
+      "RemoteSha": "65de4c8abef05d6de8c2d8db13ec19872738bed4",
+      "Hash": "b658c0afa13f822a57d1e759612d3f73",
       "Requirements": [
         "geojsonsf",
         "htmltools",
@@ -1083,6 +1113,17 @@
       "Requirements": [
         "mime",
         "xfun"
+      ]
+    },
+    "memoise": {
+      "Package": "memoise",
+      "Version": "2.0.0",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "a0bc51650201a56d00a4798523cc91b3",
+      "Requirements": [
+        "cachem",
+        "rlang"
       ]
     },
     "mgcv": {
