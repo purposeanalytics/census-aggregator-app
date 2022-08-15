@@ -11,15 +11,11 @@ function getFeaturesFromPolygon(e, map, geography) {
   var features = map.queryRenderedFeatures([southWestPointPixel, northEastPointPixel], { layers: [geography + '_fill_click'] });
   var filter = [];
 
-  features.reduce(function (memo, feature) {
-
-    // This doesn't work 100%, seems to miss 'outer' polygons - TODO
+  for (const feature of features) {
     if (!(null === turf.intersect(feature, userPolygon))) {
       filter.push(feature.id);
     }
+  }
 
-    return filter;
-  })
-
-  Shiny.setInputValue('polygon_filter', filter);
+  Shiny.setInputValue(geography + '_polygon_filter', filter);
 };

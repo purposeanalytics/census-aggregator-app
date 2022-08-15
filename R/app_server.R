@@ -22,14 +22,28 @@ app_server <- function(input, output, session) {
 
   inputs <- mod_sidebar_server("sidebar", selected_geographies, map_rendered, boomarks_to_be_parsed)
 
-  # Observe geographies selected via polygon
-  polygon_filter <- shiny::reactiveVal()
-  shiny::observeEvent(input$polygon_filter, {
-    polygon_filter(input$polygon_filter)
-  })
+  # Observe geographies selected via polygon ----
+
+  # Keep track of geographies that are selected via polygon ----
+  shiny::observeEvent(
+    {
+      input$csd_polygon_filter
+      input$csd_polygon_filter
+    },
+    {
+      if (inputs()[["aggregate_area"]] == "csd") {
+        selected_geographies(
+          tibble::tibble(geo_uid = input$csd_polygon_filter)
+        )
+      } else if (inputs()[["aggregate_area"]] == "ct") {
+        selected_geographies(
+          tibble::tibble(geo_uid =  input$csd_polygon_filter)
+        )
+      }
+    }
+  )
 
   mod_map_server(
-    "map", inputs, selected_geographies, map_rendered,
-    polygon_filter
+    "map", inputs, selected_geographies, map_rendered
   )
 }

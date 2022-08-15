@@ -16,8 +16,7 @@ mod_map_ui <- function(id) {
 #' map Server Functions
 #'
 #' @noRd
-mod_map_server <- function(id, inputs, selected_geographies, map_rendered,
-                           polygon_filter) {
+mod_map_server <- function(id, inputs, selected_geographies, map_rendered, csd_polygon_filter, ct_polygon_filter) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
@@ -118,6 +117,8 @@ mod_map_server <- function(id, inputs, selected_geographies, map_rendered,
 
     Shiny.addCustomMessageHandler('selection_tool', function(message) {
 
+
+
     if (message === 'polygon') {
 
       if (!(map._draw)) {
@@ -125,7 +126,6 @@ mod_map_server <- function(id, inputs, selected_geographies, map_rendered,
       }
 
       map._draw = true;
-
       map.on('draw.create', (e) => getFeaturesFromPolygon(e, map, 'csd'));
       map.on('draw.delete', (e) => getFeaturesFromPolygon(e, map, 'csd'));
       map.on('draw.update', (e) => getFeaturesFromPolygon(e, map, 'csd'));
@@ -136,12 +136,13 @@ mod_map_server <- function(id, inputs, selected_geographies, map_rendered,
 
     }
 
-    if (message === 'click' && map._draw) {
-      map.removeControl(draw);
-      map._draw = false;
-    }
+      if (message === 'click' && map._draw) {
+        map.removeControl(draw);
+        map._draw = false;
+      }
 
   })
+
 }
 ")
     )
@@ -236,16 +237,6 @@ mod_map_server <- function(id, inputs, selected_geographies, map_rendered,
       inputs()[["selection_tool"]],
       {
         session$sendCustomMessage("selection_tool", inputs()[["selection_tool"]])
-      }
-    )
-
-    # Keep track of geographies that are selected via polygon ----
-    shiny::observeEvent(
-      polygon_filter(),
-      {
-        selected_geographies(
-          tibble::tibble(geo_uid = polygon_filter())
-        )
       }
     )
   })
