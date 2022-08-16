@@ -41,68 +41,7 @@ mod_map_server <- function(id, inputs, selected_geographies, map_rendered, csd_p
 
     // Highlight / fill geography on hover
 
-      let hoveredGeoUid = null;
-      // When the user moves their mouse over the csd_line_hover or ct_line_hover layer, we'll update the
-      // feature state for the feature under the mouse.
-      // Note that the mouse is observed on csd_fill_click and ct_fill_click, which are fill layers, so it's observed when their mouse is inside the geography
-      // But the layer that is actually updated is csd_line_hover or ct_line_hover, in order to just update the border of the geography
-      map.on('mousemove', 'csd_fill_click', (e) => {
-        map.getCanvas().style.cursor = 'pointer';
-        if (e.features.length > 0) {
-          if (hoveredGeoUid !== null) {
-            map.setFeatureState(
-              { source: '2016_csd', sourceLayer: '2016_census_csd', id: hoveredGeoUid },
-              { hover: false }
-            );
-          }
-        hoveredGeoUid = e.features[0].id;
-          map.setFeatureState(
-            { source: '2016_csd', sourceLayer: '2016_census_csd', id: hoveredGeoUid },
-            { hover: true }
-          );
-        }
-      });
-      // When the mouse leaves the csd_fill_click layer, update the feature state of the
-      // previously hovered feature.
-      map.on('mouseleave', 'csd_fill_click', () => {
-        if (hoveredGeoUid !== null) {
-          map.setFeatureState(
-            { source: '2016_csd', sourceLayer: '2016_census_csd', id: hoveredGeoUid },
-            { hover: false }
-          );
-        }
-        hoveredGeoUid = null;
-        // Reset the cursor style
-        map.getCanvas().style.cursor = '';
-      })
-
-      map.on('mousemove', 'ct_fill_click', (e) => {
-        map.getCanvas().style.cursor = 'pointer';
-        if (e.features.length > 0) {
-          if (hoveredGeoUid !== null) {
-            map.setFeatureState(
-              { source: '2016_ct', sourceLayer: '2016_census_ct', id: hoveredGeoUid },
-              { hover: false }
-            );
-          }
-        hoveredGeoUid = e.features[0].id;
-          map.setFeatureState(
-            { source: '2016_ct', sourceLayer: '2016_census_ct', id: hoveredGeoUid },
-            { hover: true }
-          );
-        }
-      });
-      map.on('mouseleave', 'ct_fill_click', () => {
-        if (hoveredGeoUid !== null) {
-          map.setFeatureState(
-            { source: '2016_ct', sourceLayer: '2016_census_ct', id: hoveredGeoUid },
-            { hover: false }
-          );
-        }
-        hoveredGeoUid = null;
-        // Reset the cursor style
-        map.getCanvas().style.cursor = '';
-      })
+    highlightGeographyOnHover(map)
 
     // Draw a polygon
 
@@ -116,8 +55,6 @@ mod_map_server <- function(id, inputs, selected_geographies, map_rendered, csd_p
     });
 
     Shiny.addCustomMessageHandler('selection_tool', function(message) {
-
-
 
     if (message === 'polygon') {
 
@@ -161,7 +98,7 @@ mod_map_server <- function(id, inputs, selected_geographies, map_rendered, csd_p
 
         filter_list <- append(
           list("in", "geo_uid"),
-          as.list(selected_geographies()$geo_uid)
+          as.list(selected_geographies()[["geo_uid"]])
         )
 
         switch(inputs()$aggregate_area,
