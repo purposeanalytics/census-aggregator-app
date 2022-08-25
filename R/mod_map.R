@@ -54,25 +54,29 @@ mod_map_server <- function(id, inputs, selected_geographies, map_rendered, csd_p
         defaultMode: 'draw_polygon'
     });
 
+    // When the selection tool changes
     Shiny.addCustomMessageHandler('selection_tool', function(message) {
 
     if (message === 'polygon') {
 
+    // If the map does not already have a drawing control
       if (!(map._draw)) {
         map.addControl(draw);
       }
 
-      map._draw = true;
+      map._draw = true; // Flag drawing control for above check
       map.on('draw.create', (e) => getFeaturesFromPolygon(e, map, 'csd'));
-      map.on('draw.delete', (e) => getFeaturesFromPolygon(e, map, 'csd'));
       map.on('draw.update', (e) => getFeaturesFromPolygon(e, map, 'csd'));
+      map.on('draw.delete', (e) => clearFeatures(e, 'csd'));
+      map.on('draw.modechange', (e) => clearPolygonAndFeatures(e, map, 'csd', draw));
 
       map.on('draw.create', (e) => getFeaturesFromPolygon(e, map, 'ct'));
-      map.on('draw.delete', (e) => getFeaturesFromPolygon(e, map, 'ct'));
       map.on('draw.update', (e) => getFeaturesFromPolygon(e, map, 'ct'));
-
+      map.on('draw.delete', (e) => clearFeatures(e, 'ct'));
+      map.on('draw.modechange', (e) => clearPolygonAndFeatures(e, map, 'ct', draw));
     }
 
+    // Remove drawing control and set to false if the selection tool is click
       if (message === 'click' && map._draw) {
         map.removeControl(draw);
         map._draw = false;
