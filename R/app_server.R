@@ -28,7 +28,7 @@ app_server <- function(input, output, session) {
   shiny::observeEvent(
     {
       input$csd_polygon_filter
-      input$csd_polygon_filter
+      input$ct_polygon_filter
     },
     {
       if (inputs()[["aggregate_area"]] == "csd") {
@@ -48,7 +48,7 @@ app_server <- function(input, output, session) {
           )
         } else {
           selected_geographies(
-            tibble::tibble(geo_uid = unique(input$csd_polygon_filter))
+            tibble::tibble(geo_uid = unique(input$ct_polygon_filter))
           )
         }
       }
