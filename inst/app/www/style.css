@@ -125,3 +125,9 @@ table {
   font-size: var(--bigger-size);
   font-weight: var(--bold-weight);
 }
+
+/* Polygon drawing */
+
+.mapbox-gl-draw_polygon.active {
+  background-color: rgba(0,0,0,0.3);
+}

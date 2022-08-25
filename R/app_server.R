@@ -33,11 +33,11 @@ app_server <- function(input, output, session) {
     {
       if (inputs()[["aggregate_area"]] == "csd") {
         selected_geographies(
-          tibble::tibble(geo_uid = input$csd_polygon_filter)
+          tibble::tibble(geo_uid = unique(input$csd_polygon_filter))
         )
       } else if (inputs()[["aggregate_area"]] == "ct") {
         selected_geographies(
-          tibble::tibble(geo_uid =  input$csd_polygon_filter)
+          tibble::tibble(geo_uid = unique(input$csd_polygon_filter))
         )
       }
     }

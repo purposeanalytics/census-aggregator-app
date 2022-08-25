@@ -237,21 +237,48 @@
     },
     "cancensus": {
       "Package": "cancensus",
-      "Version": "0.4.3",
+      "Version": "0.5.0",
       "Source": "GitHub",
       "RemoteType": "github",
       "RemoteHost": "api.github.com",
       "RemoteRepo": "cancensus",
       "RemoteUsername": "mountainmath",
       "RemoteRef": "HEAD",
-      "RemoteSha": "3e43783ed9097e8cd518f3706db2b6bbf46da692",
-      "Hash": "6ad16d0bfd186a2f5c68742e926408cc",
+      "RemoteSha": "ff697467a241a885c17225a2a13e1eb6155f5d20",
+      "Hash": "4df5bdd860058eed1d26edf3fd47da19",
       "Requirements": [
         "digest",
         "dplyr",
         "httr",
         "jsonlite",
         "rlang"
+      ]
+    },
+    "censusaggregate": {
+      "Package": "censusaggregate",
+      "Version": "0.0.0.9000",
+      "Source": "GitHub",
+      "RemoteType": "github",
+      "RemoteHost": "api.github.com",
+      "RemoteRepo": "census-aggregator-package",
+      "RemoteUsername": "purposeanalytics",
+      "RemoteRef": "HEAD",
+      "RemoteSha": "42ffbde82c655b109d26e0453aa48e9ee468c179",
+      "Hash": "cce65447d8deaa9f03ed7d48c16b30eb",
+      "Requirements": [
+        "cancensus",
+        "curl",
+        "dplyr",
+        "forcats",
+        "glue",
+        "magrittr",
+        "plotly",
+        "purrr",
+        "rlang",
+        "scales",
+        "stringr",
+        "tibble",
+        "tidyr"
       ]
     },
     "censusaggregatorapp": {
@@ -415,6 +442,14 @@
       "Hash": "022c42d49c28e95d69ca60446dbabf88",
       "Requirements": []
     },
+    "data.table": {
+      "Package": "data.table",
+      "Version": "1.14.0",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "d1b8b1a821ee564a3515fa6c6d5c52dc",
+      "Requirements": []
+    },
     "desc": {
       "Package": "desc",
       "Version": "1.4.0",
@@ -507,6 +542,19 @@
       "Repository": "CRAN",
       "Hash": "77bd60a6157420d4ffa93b27cf6a58b8",
       "Requirements": []
+    },
+    "forcats": {
+      "Package": "forcats",
+      "Version": "0.5.1",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "81c3244cab67468aac4c60550832655d",
+      "Requirements": [
+        "ellipsis",
+        "magrittr",
+        "rlang",
+        "tibble"
+      ]
     },
     "foreign": {
       "Package": "foreign",
@@ -1081,8 +1129,8 @@
       "RemoteRepo": "mapboxer",
       "RemoteUsername": "sharlagelfand",
       "RemoteRef": "HEAD",
-      "RemoteSha": "65de4c8abef05d6de8c2d8db13ec19872738bed4",
-      "Hash": "b658c0afa13f822a57d1e759612d3f73",
+      "RemoteSha": "6c507e41d2894387a23b5886ceaac535c3ecd21e",
+      "Hash": "4d535b25aa9d258c38fd0951acb24d37",
       "Requirements": [
         "geojsonsf",
         "htmltools",
@@ -1214,6 +1262,36 @@
         "rprojroot",
         "rstudioapi",
         "withr"
+      ]
+    },
+    "plotly": {
+      "Package": "plotly",
+      "Version": "4.10.0",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "fbb11e44d057996ca5fe40d959cacfb0",
+      "Requirements": [
+        "RColorBrewer",
+        "base64enc",
+        "crosstalk",
+        "data.table",
+        "digest",
+        "dplyr",
+        "ggplot2",
+        "htmltools",
+        "htmlwidgets",
+        "httr",
+        "jsonlite",
+        "lazyeval",
+        "magrittr",
+        "promises",
+        "purrr",
+        "rlang",
+        "scales",
+        "tibble",
+        "tidyr",
+        "vctrs",
+        "viridisLite"
       ]
     },
     "png": {
