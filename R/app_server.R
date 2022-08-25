@@ -26,10 +26,24 @@ app_server <- function(input, output, session) {
 
   # Keep track of geographies that are selected via polygon ----
   shiny::observeEvent(
+    input$ct_polygon_filter,
     {
-      input$csd_polygon_filter
-      input$ct_polygon_filter
-    },
+      if (inputs()[["aggregate_area"]] == "ct") {
+        if (all(input$ct_polygon_filter == "")) {
+          selected_geographies(
+            tibble::tibble()
+          )
+        } else {
+          selected_geographies(
+            tibble::tibble(geo_uid = unique(input$ct_polygon_filter))
+          )
+        }
+      }
+    }
+  )
+
+  shiny::observeEvent(
+    input$csd_polygon_filter,
     {
       if (inputs()[["aggregate_area"]] == "csd") {
         if (all(input$csd_polygon_filter == "")) {
@@ -39,16 +53,6 @@ app_server <- function(input, output, session) {
         } else {
           selected_geographies(
             tibble::tibble(geo_uid = unique(input$csd_polygon_filter))
-          )
-        }
-      } else if (inputs()[["aggregate_area"]] == "ct") {
-        if (all(input$ct_polygon_filter == "")) {
-          selected_geographies(
-            tibble::tibble()
-          )
-        } else {
-          selected_geographies(
-            tibble::tibble(geo_uid = unique(input$ct_polygon_filter))
           )
         }
       }
