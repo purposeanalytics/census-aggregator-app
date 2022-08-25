@@ -65,6 +65,12 @@ mod_map_server <- function(id, inputs, selected_geographies, map_rendered, csd_p
       }
 
       map._draw = true; // Flag drawing control for above check
+
+    // Clear polygon and features any time the aggregate area changes
+    Shiny.addCustomMessageHandler('aggregate_area', function(message) {
+      //TODO
+    })
+
       map.on('draw.create', (e) => getFeaturesFromPolygon(e, map, 'csd'));
       map.on('draw.update', (e) => getFeaturesFromPolygon(e, map, 'csd'));
       map.on('draw.delete', (e) => clearFeatures(e, 'csd'));
@@ -178,6 +184,14 @@ mod_map_server <- function(id, inputs, selected_geographies, map_rendered, csd_p
       inputs()[["selection_tool"]],
       {
         session$sendCustomMessage("selection_tool", inputs()[["selection_tool"]])
+      }
+    )
+
+    # Send aggregate area event to javascript (to clear drawn polygon when area changes) ---
+    shiny::observeEvent(
+      inputs()[["aggregate_area"]],
+      {
+        session$sendCustomMessage("aggregate_area", inputs()[["aggregate_area"]])
       }
     )
   })
