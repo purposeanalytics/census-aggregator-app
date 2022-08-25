@@ -39,10 +39,6 @@ mod_map_server <- function(id, inputs, selected_geographies, map_rendered, csd_p
     // Send an indicator to shiny that the widget has been rendered, so other reactives don't run until it's rendered
     Shiny.setInputValue('map_rendered', true);
 
-    // Highlight / fill geography on hover
-
-    highlightGeographyOnHover(map)
-
     // Draw a polygon
 
     var draw = new MapboxDraw({
@@ -80,6 +76,12 @@ mod_map_server <- function(id, inputs, selected_geographies, map_rendered, csd_p
       map.on('draw.update', (e) => getFeaturesFromPolygon(e, map, 'ct'));
       map.on('draw.delete', (e) => clearFeatures(e, 'ct'));
       map.on('draw.modechange', (e) => clearPolygonAndFeatures(e, map, 'ct', draw));
+    }
+
+    // TODO - does not work on init!
+    if (message == 'click') {
+      // Highlight / fill geography on hover - not when polygon is being drawn though!
+      highlightGeographyOnHover(map)
     }
 
     // Remove drawing control and set to false if the selection tool is click
@@ -182,6 +184,8 @@ mod_map_server <- function(id, inputs, selected_geographies, map_rendered, csd_p
     # Send polygon selection to javascript (to turn on drawing) ---
     shiny::observeEvent(
       inputs()[["selection_tool"]],
+      ignoreNULL = FALSE,
+      ignoreInit = FALSE,
       {
         session$sendCustomMessage("selection_tool", inputs()[["selection_tool"]])
       }
