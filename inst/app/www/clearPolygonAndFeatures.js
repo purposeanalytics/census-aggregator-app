@@ -1,3 +1,4 @@
+// Thank you kindly: https://stackoverflow.com/questions/51073328/allow-drawing-only-one-shape-at-a-time-with-mapbox-gl-draw
 function clearPolygonAndFeatures(e, map, geography, draw) {
   // Clear polygon
   const data = draw.getAll();
