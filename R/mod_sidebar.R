@@ -72,7 +72,7 @@ mod_sidebar_server <- function(id, selected_geographies, map_rendered, boomarks_
 
     # Set up bookmarking ----
     shiny::observeEvent(input$bookmark_selections, {
-      bookmark_query <- construct_bookmark(input, session, exclude = c("export_data", "bookmark_selections", "export_geography"), selected_geographies())
+      bookmark_query <- construct_bookmark(input, session, exclude = c("selection_tool", "export_data", "bookmark_selections", "export_geography", "export_boundary_bttn"), selected_geographies())
       output$bookmark <- shiny::renderText(bookmark_query)
     })
 
