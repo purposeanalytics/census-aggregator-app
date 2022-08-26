@@ -96,17 +96,21 @@ mod_sidebar_server <- function(id, selected_geographies, map_rendered, boomarks_
           # Add an additional delay, to allow for map to be rendered
           # TODO not great
           ms = 1000,
-          purrr::walk(query_inputs, function(x) {
-            shinyWidgets::updatePickerInput(session, inputId = x, selected = query[[x]])
-          })
+          {
+            purrr::walk(query_inputs, function(x) {
+              shinyWidgets::updatePickerInput(session, inputId = x, selected = query[[x]])
+            })
+
+            # Update selected_geographies() to have geo_uid
+            if (!is.null(query$geo_uid)) {
+              selected_geographies(
+                dplyr::tibble(geo_uid = query$geo_uid)
+              )
+            }
+          }
         )
 
-        # Update selected_geographies() to have geo_uid
-        if (!is.null(query$geo_uid)) {
-          selected_geographies(
-            dplyr::tibble(geo_uid = query$geo_uid)
-          )
-        }
+
 
         boomarks_to_be_parsed(FALSE)
       }
