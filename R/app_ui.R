@@ -6,10 +6,19 @@
 app_ui <- function(request) {
   shiny::tagList(
     golem_add_external_resources(),
-    shiny::div(
-      style = "display: flex;",
-      mod_map_ui("map"),
-      mod_sidebar_ui("sidebar")
+    # shiny::div(
+    # style = "display: flex;",
+    shiny::fluidPage(theme = bslib::bs_theme(version = 4),
+      shiny::fluidRow(
+        shiny::column(
+          width = 8,
+          mod_map_ui("map")
+        ),
+        shiny::column(
+          width = 4,
+          mod_sidebar_ui("sidebar")
+        )
+      )
     )
   )
 }

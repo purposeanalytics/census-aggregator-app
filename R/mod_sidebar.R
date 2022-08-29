@@ -10,8 +10,8 @@
 mod_sidebar_ui <- function(id) {
   ns <- NS(id)
   shiny::div(
-    style = "width: 30%; max-width: 500px;",
-    shiny::div(style = "margin: 100px;"),
+    # style = "width: 30%; max-width: 500px;",
+    # shiny::div(style = "margin: 100px;"),
     shinyWidgets::prettyRadioButtons(
       ns("aggregate_area"),
       "Choose aggregate area",
