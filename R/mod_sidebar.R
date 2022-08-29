@@ -29,20 +29,26 @@ mod_sidebar_ui <- function(id) {
       )
     ),
     shiny::div(
-      shinyWidgets::actionBttn(
-        ns("bookmark_selections"),
-        "Bookmark selections",
-        style = "bordered",
-        color = "primary"
+      shinyjs::disabled(
+        # shinyWidgets::actionBttn(
+        shiny::actionButton(
+          ns("bookmark_selections"),
+          "Bookmark selections" # ,
+          # style = "bordered",
+          # color = "primary"
+        )
       )
     ),
     breathe(),
     shiny::div(
-      shinyWidgets::downloadBttn(
-        ns("export_boundary"),
-        "Export boundary",
-        style = "bordered",
-        color = "primary"
+      # shinyWidgets::downloadBttn
+      shinyjs::disabled(
+        shiny::downloadButton(
+          ns("export_boundary"),
+          "Export boundary",
+          # style = "bordered",
+          # color = "primary"
+        )
       )
     ),
     breathe(),
@@ -52,11 +58,14 @@ mod_sidebar_ui <- function(id) {
     ),
     breathe(),
     shiny::div(
-      shinyWidgets::actionBttn(
-        ns("export_data"),
-        "Export data",
-        style = "bordered",
-        color = "primary"
+      shinyjs::disabled(
+        # shinyWidgets::actionBttn(
+        shiny::actionButton(
+          ns("export_data"),
+          "Export data",
+          # style = "bordered",
+          # color = "primary"
+        )
       )
     ),
   )
@@ -149,6 +158,12 @@ mod_sidebar_server <- function(id, selected_geographies, map_rendered, boomarks_
     # Summary statistics table ----
     shiny::observeEvent(selected_geographies(), ignoreInit = FALSE, {
       if (nrow(selected_geographies()) == 0) {
+
+        # Disable buttons
+        shinyjs::disable("bookmark_selections")
+        shinyjs::disable("export_boundary")
+        shinyjs::disable("export_data")
+
         summary_statistics <- dplyr::tibble(name = c(
           "Areas selected",
           "Population",
@@ -158,6 +173,11 @@ mod_sidebar_server <- function(id, selected_geographies, map_rendered, boomarks_
         )) %>%
           dplyr::mutate(value = "-")
       } else {
+        # Enable buttons
+        shinyjs::enable("bookmark_selections")
+        shinyjs::enable("export_boundary")
+        shinyjs::enable("export_data")
+
         summary_statistics_source <- switch(input$aggregate_area,
           "csd" = censusaggregatorapp::csd,
           "ct" = censusaggregatorapp::ct
