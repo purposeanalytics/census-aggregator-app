@@ -62,14 +62,17 @@ mod_map_server <- function(id, inputs, selected_geographies, map_rendered, csd_p
 
       map._draw = true; // Flag drawing control for above check
 
-    // Clear polygon and features any time the aggregate area changes
+    // Clear everything any time the aggregate area changes - by removing and adding the control back on
+    // This ensures that the polygon is deleted and the features are cleared
     Shiny.addCustomMessageHandler('aggregate_area', function(message) {
-      //TODO
+        map.removeControl(draw);
+        map.addControl(draw);
     })
 
       map.on('draw.create', (e) => getFeaturesFromPolygon(e, map, 'csd'));
       map.on('draw.update', (e) => getFeaturesFromPolygon(e, map, 'csd'));
       map.on('draw.delete', (e) => clearFeatures(e, 'csd'));
+      // Only allows drawing one polygon at a time - clears existing polygon and features if you go to draw a new one
       map.on('draw.modechange', (e) => clearPolygonAndFeatures(e, map, 'csd', draw));
 
       map.on('draw.create', (e) => getFeaturesFromPolygon(e, map, 'ct'));
