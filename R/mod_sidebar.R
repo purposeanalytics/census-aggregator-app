@@ -9,54 +9,56 @@
 #' @importFrom shiny NS tagList
 mod_sidebar_ui <- function(id) {
   ns <- NS(id)
-  shiny::div(
-    shinyWidgets::prettyRadioButtons(
-      ns("aggregate_area"),
-      "Choose aggregate area",
-      choices = list(
-        "Census Subdivisions" = "csd",
-        "Census Tracts" = "ct"
-      )
-    ),
-    shinyWidgets::prettyRadioButtons(
-      ns("selection_tool"),
-      "Choose selection tool",
-      choices = list(
-        "Click to select geographies" = "click",
-        "Draw a polygon" = "polygon"
-      )
-    ),
+  bslib::card(
     shiny::div(
-      shinyjs::disabled(
-        shiny::actionButton(
-          ns("bookmark_selections"),
-          "Bookmark selections"
+      shinyWidgets::prettyRadioButtons(
+        ns("aggregate_area"),
+        "Choose aggregate area",
+        choices = list(
+          "Census Subdivisions" = "csd",
+          "Census Tracts" = "ct"
         )
-      )
-    ),
-    breathe(),
-    shiny::div(
-      shinyjs::disabled(
-        shiny::downloadButton(
-          ns("export_boundary"),
-          "Export boundary"
+      ),
+      shinyWidgets::prettyRadioButtons(
+        ns("selection_tool"),
+        "Choose selection tool",
+        choices = list(
+          "Click to select geographies" = "click",
+          "Draw a polygon" = "polygon"
         )
-      )
-    ),
-    breathe(),
-    shiny::div(
-      shiny::div("Summary of selected areas", class = "summary-statistics-header breathe"),
-      shiny::htmlOutput(ns("summary_statistics"))
-    ),
-    breathe(),
-    shiny::div(
-      shinyjs::disabled(
-        shiny::actionButton(
-          ns("export_data"),
-          "Export data"
+      ),
+      shiny::div(
+        shinyjs::disabled(
+          shiny::actionButton(
+            ns("bookmark_selections"),
+            "Bookmark selections"
+          )
         )
-      )
-    ),
+      ),
+      breathe(),
+      shiny::div(
+        shinyjs::disabled(
+          shiny::downloadButton(
+            ns("export_boundary"),
+            "Export boundary"
+          )
+        )
+      ),
+      breathe(),
+      shiny::div(
+        shiny::div("Summary of selected areas", class = "summary-statistics-header breathe"),
+        shiny::htmlOutput(ns("summary_statistics"))
+      ),
+      breathe(),
+      shiny::div(
+        shinyjs::disabled(
+          shiny::actionButton(
+            ns("export_data"),
+            "Export data"
+          )
+        )
+      ),
+    )
   )
 }
 
@@ -160,7 +162,7 @@ mod_sidebar_server <- function(id, selected_geographies, map_rendered, boomarks_
           "Area",
           "Population density"
         )) %>%
-          dplyr::mutate(value = "-")
+          dplyr::mutate(value = "\u2014")
       } else {
         # Enable buttons
         shinyjs::enable("bookmark_selections")
@@ -215,6 +217,7 @@ mod_sidebar_server <- function(id, selected_geographies, map_rendered, boomarks_
       output$summary_statistics <- shiny::renderText({
         summary_statistics %>%
           knitr::kable("html", col.names = NULL, escape = FALSE, align = "lr") %>%
+          kableExtra::kable_styling(full_width = FALSE, position = "left") %>%
           kableExtra::column_spec(column = 1, bold = TRUE)
       })
     })
