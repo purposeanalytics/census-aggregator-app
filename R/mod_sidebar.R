@@ -10,8 +10,6 @@
 mod_sidebar_ui <- function(id) {
   ns <- NS(id)
   shiny::div(
-    # style = "width: 30%; max-width: 500px;",
-    # shiny::div(style = "margin: 100px;"),
     shinyWidgets::prettyRadioButtons(
       ns("aggregate_area"),
       "Choose aggregate area",
@@ -30,24 +28,18 @@ mod_sidebar_ui <- function(id) {
     ),
     shiny::div(
       shinyjs::disabled(
-        # shinyWidgets::actionBttn(
         shiny::actionButton(
           ns("bookmark_selections"),
-          "Bookmark selections" # ,
-          # style = "bordered",
-          # color = "primary"
+          "Bookmark selections"
         )
       )
     ),
     breathe(),
     shiny::div(
-      # shinyWidgets::downloadBttn
       shinyjs::disabled(
         shiny::downloadButton(
           ns("export_boundary"),
-          "Export boundary",
-          # style = "bordered",
-          # color = "primary"
+          "Export boundary"
         )
       )
     ),
@@ -59,12 +51,9 @@ mod_sidebar_ui <- function(id) {
     breathe(),
     shiny::div(
       shinyjs::disabled(
-        # shinyWidgets::actionBttn(
         shiny::actionButton(
           ns("export_data"),
-          "Export data",
-          # style = "bordered",
-          # color = "primary"
+          "Export data"
         )
       )
     ),
