@@ -109,16 +109,26 @@ mod_sidebar_server <- function(id, selected_geographies, map_rendered, boomarks_
               shinyWidgets::updatePickerInput(session, inputId = x, selected = query[[x]])
             })
 
-            # Update selected_geographies() to have geo_uid
+            # Update selected_geographies() to have geo_uid, zoom to bounds
             if (!is.null(query$geo_uid)) {
               selected_geographies(
                 dplyr::tibble(geo_uid = query$geo_uid)
               )
+
+              # browser()
+
+              dataset <- arrow::open_dataset(glue::glue("inst/extdata/{input$aggregate_area}"))
+
+              query <- dplyr::filter(dataset, .data$geo_uid %in% selected_geographies()[["geo_uid"]])
+
+              bbox <- sfarrow::read_sf_dataset(query) %>% sf::st_bbox()
+
+              mapboxer::mapboxer_proxy("map-map") %>%
+                mapboxer::fit_bounds(bbox) %>%
+                mapboxer::update_mapboxer()
             }
           }
         )
-
-
 
         boomarks_to_be_parsed(FALSE)
       }
