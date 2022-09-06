@@ -131,3 +131,9 @@ table {
 .mapbox-gl-draw_polygon.active {
   background-color: rgba(0,0,0,0.3);
 }
+
+/* Cursor on disabled buttons */
+button:disabled, .btn.disabled {
+  cursor: not-allowed;
+  pointer-events: all !important;
+}
