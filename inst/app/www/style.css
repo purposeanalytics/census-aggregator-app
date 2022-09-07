@@ -137,3 +137,14 @@ button:disabled, .btn.disabled {
   cursor: not-allowed;
   pointer-events: all !important;
 }
+
+/* Style secondary buttons (link style) to have no background colour, no outline, no padding */
+/* Just link a link! */
+.btn-link, .btn-link:disabled, .btn-link:hover, .btn-link:active, .btn-link:focus,
+.shiny-download-link.btn-link, .shiny-download-link.btn-link:disabled,
+.shiny-download-link.btn-link:hover, .shiny-download-link.btn-link:active,
+.shiny-download-link.btn-link:focus {
+  background-color: inherit !important;
+  border-style: none !important;
+  padding: 0;
+}

@@ -28,11 +28,12 @@ mod_sidebar_ui <- function(id) {
         )
       ),
       shiny::div(
-        shinyjs::disabled(
+        # shinyjs::disabled(
           shiny::actionButton(
             ns("bookmark_selections"),
-            "Bookmark selections"
-          )
+            "Bookmark selections",
+            class = "btn-link"
+          # )
         )
       ),
       breathe(),
@@ -40,7 +41,8 @@ mod_sidebar_ui <- function(id) {
         shinyjs::disabled(
           shiny::downloadButton(
             ns("export_boundary"),
-            "Export boundary"
+            "Export boundary",
+            class = "btn-link"
           )
         )
       ),
@@ -54,7 +56,8 @@ mod_sidebar_ui <- function(id) {
         shinyjs::disabled(
           shiny::actionButton(
             ns("export_data"),
-            "Export data"
+            "Export data",
+            width = "100%"
           )
         )
       ),
@@ -217,7 +220,7 @@ mod_sidebar_server <- function(id, selected_geographies, map_rendered, boomarks_
       output$summary_statistics <- shiny::renderText({
         summary_statistics %>%
           knitr::kable("html", col.names = NULL, escape = FALSE, align = "lr") %>%
-          kableExtra::kable_styling(full_width = FALSE, position = "left") %>%
+          kableExtra::kable_styling(full_width = FALSE, position = "left", bootstrap_options = "none") %>%
           kableExtra::column_spec(column = 1, bold = TRUE)
       })
     })

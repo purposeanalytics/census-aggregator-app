@@ -4,6 +4,7 @@ library(dplyr)
 library(censusaggregate)
 library(cancensus)
 library(purrr)
+library(stringr)
 
 vectors <- tibble::tribble(
   ~vector, ~vector_label, ~vector_label_short,
@@ -224,8 +225,14 @@ vectors_and_children <- map_dfr(
   }
 )
 
+# Save vectors
+vectors <- vectors_and_children %>%
+  left_join(vectors, by = c("vector", "label" = "vector_label"))
+
+usethis::use_data(vectors, overwrite = TRUE)
+
 # For now, limit to vectors that have.... <= 25 children
-vectors_and_children <- vectors_and_children %>%
+vectors_and_children_few <- vectors_and_children %>%
   add_count(highest_parent_vector) %>%
   filter(n <= 25) %>%
   select(-n)
@@ -236,7 +243,84 @@ csd_data <- get_census(
   dataset = "CA16",
   regions = list(C = 01),
   level = "CSD",
-  vectors = head(vectors_and_children[["vector"]], 5)
+  vectors = unique(vectors_and_children_few[["vector"]]), labels = "short"
 )
 
-usethis::use_data(vectors, overwrite = TRUE)
+ct_data <- get_census(
+  dataset = "CA16",
+  regions = list(C = 01),
+  level = "CT",
+  vectors = unique(vectors_and_children_few[["vector"]]), labels = "short"
+)
+
+# Many
+vectors_and_children_many <- vectors_and_children %>%
+  add_count(highest_parent_vector) %>%
+  filter(n > 25) %>%
+  select(-n)
+
+# Get data for ALL CSDs?
+
+csd_data_many <- get_census(
+  dataset = "CA16",
+  regions = list(C = 01),
+  level = "CSD",
+  vectors = vectors_and_children_many[["vector"]], labels = "short"
+)
+
+ct_data_many <- get_census(
+  dataset = "CA16",
+  regions = list(C = 01),
+  level = "CT",
+  vectors = head(vectors_and_children_many[["vector"]], 200), labels = "short"
+)
+
+ct_data_many_2 <- get_census(
+  dataset = "CA16",
+  regions = list(C = 01),
+  level = "CT",
+  vectors = vectors_and_children_many[["vector"]][201:474], labels = "short"
+)
+
+# Pivot and combine
+pivot_census_data <- function(data) {
+  data %>%
+    dplyr::select(
+      geo_uid = .data$GeoUID,
+      dplyr::starts_with("v_CA16_")
+    ) %>%
+    tidyr::pivot_longer(dplyr::starts_with("v_CA16_"), names_to = "vector")
+}
+
+csd_values <- bind_rows(
+  csd_data %>%
+    pivot_census_data(),
+  csd_data_many %>%
+    pivot_census_data()
+) %>%
+  filter(!is.na(value)) %>%
+  filter(value != 0)
+
+ct_values <- bind_rows(
+  ct_data %>%
+    pivot_census_data(),
+  ct_data_many %>%
+    pivot_census_data(),
+  ct_data_many_2 %>%
+    pivot_census_data()
+) %>%
+  filter(!is.na(value)) %>%
+  filter(value != 0)
+
+# Save via arrow, partitioned by first 2 characters of geo_uid
+
+library(arrow)
+csd_values %>%
+  mutate(id = str_sub(geo_uid, 1, 2)) %>%
+  group_by(id) %>%
+  write_dataset(here::here("inst", "extdata", "csd_values"))
+
+ct_values %>%
+  mutate(id = str_sub(geo_uid, 1, 2)) %>%
+  group_by(id) %>%
+  write_dataset(here::here("inst", "extdata", "ct_values"))
