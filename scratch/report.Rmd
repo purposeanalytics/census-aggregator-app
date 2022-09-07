@@ -1,0 +1,551 @@
+---
+output:
+  html_document:
+    theme:
+      version: 4
+---
+
+```{r setup, echo = FALSE}
+knitr::opts_chunk$set(
+  echo = FALSE, message = FALSE, warning = FALSE, cache = FALSE,
+  out.width = "100%", fig.height = 2.25
+)
+```
+
+```{css}
+.section-heading {
+  background-color: lightgrey;
+  padding-left: 5px;
+}
+
+.box {
+  height: 100px;
+  background-color: lightgrey;
+  text-align: center;
+  padding: 10px;
+  margin-right: 2px;
+}
+
+.box-last {
+  margin-right: 0;
+  margin-left: 2px;
+}
+```
+
+```{r html-utils}
+section_heading <- function(title) {
+  htmltools::div(
+    class = "section-heading",
+    htmltools::h1(title)
+  )
+}
+
+subsection_heading <- function(title, class = NULL) {
+  htmltools::div(
+    class = "section-heading",
+    htmltools::h2(title)
+  )
+}
+
+snapshot_card <- function(title, value, ..., class = NULL) {
+  htmltools::div(
+    class = paste("box", class),
+    htmltools::h4(title),
+    htmltools::p(value),
+    htmltools::p(...)
+  )
+}
+```
+
+```{r packages}
+library(dplyr)
+library(censusaggregate)
+library(purrr)
+library(scales)
+library(knitr)
+library(kableExtra)
+library(tidyr)
+library(stringr)
+library(bslib)
+library(arrow)
+devtools::load_all()
+```
+
+```{r data}
+regions <- c("3520005", "3521005", "3521010")
+level <- "CSD"
+dataset <- glue::glue("extdata/{geography}_values", geography = tolower(level))
+
+data <- open_dataset(app_sys(dataset))
+
+vectors_data <- data %>%
+  filter(geo_uid %in% regions) %>%
+  select(-id) %>%
+  collect()
+
+vectors_data <- vectors_data %>%
+  mutate(geo_uid = forcats::fct_expand(geo_uid, regions))
+
+metadata <- switch(level,
+  "CSD" = csd,
+  "CT" = ct
+) %>%
+  filter(geo_uid %in% regions)
+
+vectors_data <- vectors_data %>%
+  tidyr::complete(vector, geo_uid, fill = list(value = 0)) %>%
+  left_join(metadata, by = "geo_uid")
+
+vectors_data <- vectors_data %>%
+  left_join(vectors, by = "vector") %>%
+  derive_aggregation_type()
+
+# Aggregate vectors - treat v_CA16_407 (land area) separately, since it will be used for population density, and v_CA16_402 (population 2011) separately, since it will be used for population change
+
+vectors_data_filtered <- vectors_data %>%
+  filter(!(vector %in% c("v_CA16_407", "v_CA16_402")))
+
+data_breakdown <- vectors_data_filtered %>%
+  aggregate_census_vectors() %>%
+  distinct() %>%
+  left_join(vectors, by = c("highest_parent_vector", "vector", "type", "label", "units", "parent_vector", "aggregation", "details")) %>%
+  select(highest_parent_vector, vector, label, vector_label_short, value, value_proportion) %>%
+  group_by(highest_parent_vector) %>%
+  tidyr::fill(vector_label_short, .direction = "updown") %>%
+  ungroup()
+```
+
+```{r}
+section_heading("Snapshot")
+```
+
+::::: {.row}
+
+```{r snapshot}
+# Number of geographies (CSDs/CTs), population, number of households, population change (2011 to 2016), population density
+
+areas_selected <- glue::glue("{n} {geography}{s}",
+  n = length(unlist(regions)),
+  geography = case_when(
+    level == "CSD" ~ "Census subdivision",
+    level == "CT" ~ "Census tract"
+  ),
+  s = ifelse(n > 1, "s", "")
+)
+
+population <- data_breakdown %>%
+  filter(vector_label_short == "population_2016") %>%
+  pull(value) %>%
+  comma()
+
+households <- metadata %>%
+  select(geo_uid, households) %>%
+  distinct() %>%
+  summarise(across(households, sum, na.rm = TRUE)) %>%
+  pull(households) %>%
+  comma()
+
+population_change <- vectors_data %>%
+  aggregate_population_change() %>%
+  pull(value) %>%
+  percent(accuracy = 0.1)
+
+population_density <- vectors_data %>%
+  filter(label %in% c("Population, 2016", "Land area in square kilometres")) %>%
+  aggregate_population_density() %>%
+  pull(value) %>%
+  comma()
+```
+
+:::: {.col-sm-3}
+
+```{r population}
+snapshot_card("Population", population)
+```
+
+::::
+
+:::: {.col-sm-3}
+
+```{r population_change}
+snapshot_card("Population change", population_change)
+```
+
+::::
+
+:::: {.col-sm-3}
+
+```{r population_density}
+snapshot_card("Population density", population_density, "people per square km")
+```
+
+::::
+
+:::: {.col-sm-3}
+
+```{r households}
+snapshot_card("Households", households, class = "box-last")
+```
+
+::::
+
+:::::
+
+```{r}
+section_heading("Population by age cohorts")
+```
+
+:::: {.row}
+
+::: {.col-sm-8}
+
+```{r age, fig.height = 2.25, eval = FALSE}
+# Breakdowns:
+# 0-14; 15-24; 25-44; 45-64; 65-84, 85+
+
+# TODO
+
+age_vectors <- cancensus::child_census_vectors("v_CA16_1", keep_parent = TRUE) %>%
+  filter(str_detect(label, "to") | str_detect(label, "and over"), units == "Number") %>%
+  mutate(label_derived = str_replace(label, "years and over", "to NA years")) %>%
+  separate(label_derived, into = c("min", "max"), sep = " to ", convert = TRUE) %>%
+  mutate(
+    max = str_remove(max, " years"), max = as.numeric(max),
+    gap = max - min,
+    group = case_when(
+      min == 0 & max == 14 ~ "0 to 14",
+      min >= 15 & max <= 24 & gap == 4 ~ "15 to 24",
+      min >= 25 & max <= 44 & gap == 4 ~ "25 to 44",
+      min >= 45 & max <= 64 & gap == 4 ~ "45 to 65",
+      min >= 65 & max <= 84 & gap == 4 ~ "65 to 84",
+      min == 85 & is.na(max) ~ "85+"
+    )
+  ) %>%
+  filter(!is.na(group)) %>%
+  select(vector, group)
+
+age_vectors_data <- get_census_vectors_and_children(
+  regions = regions,
+  level = level,
+  vectors = c("v_CA16_1", age_vectors[["vector"]]),
+  quiet = TRUE
+)
+
+age_cohorts <- age_vectors_data %>%
+  filter(vector %in% c("v_CA16_1", age_vectors[["vector"]])) %>%
+  left_join(age_vectors, by = "vector") %>%
+  mutate(
+    vector_new = group, label = group, details = group, highest_parent_vector = "v_CA16_1",
+    vector = coalesce(vector_new, vector)
+  ) %>%
+  aggregate_census_vectors() %>%
+  filter(vector != highest_parent_vector)
+
+age_cohorts %>%
+  plot_census_vector(vector_description = "age cohorts")
+```
+
+:::
+
+::: {.col-sm-4}
+
+```{r, eval = FALSE}
+age_cohorts %>%
+  table_census_vector()
+```
+
+:::
+
+::::
+
+```{r}
+section_heading("Households, families, education, and language")
+```
+
+::::: {.row}
+
+:::: {.col-sm-6}
+
+```{r}
+subsection_heading("Private households by size")
+```
+
+```{r household_size}
+household_size <- data_breakdown %>%
+  filter(
+    vector_label_short == "household_size",
+    vector != highest_parent_vector
+  ) %>%
+  derive_census_vector_order()
+
+household_size %>%
+  plot_census_vector(vector_description = "household size")
+
+household_size %>%
+  table_census_vector()
+```
+
+::::
+
+:::: {.col-sm-6}
+
+```{r}
+subsection_heading("Family type")
+```
+
+
+```{r family_type}
+family_type <- data_breakdown %>%
+  filter(
+    vector_label_short == "family_type",
+    vector != highest_parent_vector
+  ) %>%
+  derive_census_vector_order()
+
+family_type %>%
+  plot_census_vector(vector_description = "family types")
+
+family_type %>%
+  table_census_vector()
+```
+
+::::
+
+:::::
+
+::::: {.row}
+
+:::: {.col-sm-6}
+
+```{r}
+subsection_heading("Multiple family households")
+```
+
+```{r household_type}
+multiple_family_households <- data_breakdown %>%
+  filter(
+    vector_label_short == "household_type",
+    vector != highest_parent_vector
+  ) %>%
+  derive_census_vector_order()
+
+multiple_family_households %>%
+  plot_census_vector(vector_description = "multiple family households")
+
+multiple_family_households %>%
+  table_census_vector()
+```
+
+::::
+
+:::: {.col-sm-6}
+
+```{r}
+subsection_heading("Educational attainment")
+```
+
+```{r educational_attainment}
+educational_attainment <- data_breakdown %>%
+  filter(
+    vector_label_short == "educational_attainment",
+    vector != highest_parent_vector
+  ) %>%
+  derive_census_vector_order()
+
+educational_attainment %>%
+  plot_census_vector(vector_description = "educational attainment")
+
+educational_attainment %>%
+  table_census_vector()
+```
+
+::::
+
+:::::
+
+::::: {.row}
+
+:::: {.col-sm-6}
+
+```{r}
+subsection_heading("Knowledge of English")
+```
+
+```{r knowledge_of_english}
+knowledge_of_english <- data_breakdown %>%
+  filter(
+    vector_label_short == "knowledge_of_english",
+    vector != highest_parent_vector
+  ) %>%
+  derive_census_vector_order()
+
+knowledge_of_english %>%
+  plot_census_vector(vector_description = "knowledge of English")
+
+knowledge_of_english %>%
+  table_census_vector()
+```
+
+::::
+
+:::: {.col-sm-6}
+
+```{r}
+subsection_heading("Language spoken at home")
+```
+
+::::
+
+:::::
+
+```{r}
+section_heading("Income and housing")
+```
+
+::::: {.row}
+
+:::: {.col-sm-6}
+
+```{r}
+subsection_heading("Household income")
+```
+
+::::
+
+:::: {.col-sm-6}
+
+```{r}
+subsection_heading("Low income")
+```
+
+```{r lim_at}
+# TODO - needs to be divided by population
+
+data_breakdown %>%
+  filter(vector_label_short == "lim_at")
+```
+
+::::
+
+:::::
+
+::::: {.row}
+
+:::: {.col-sm-6}
+
+```{r}
+subsection_heading("Household tenure")
+```
+
+```{r household_tenure}
+data_breakdown %>%
+  filter(
+    vector_label_short == "household_tenure",
+    vector != highest_parent_vector
+  ) %>%
+  derive_census_vector_order() %>%
+  plot_census_vector(vector_description = "household tenure")
+```
+
+::::
+
+:::: {.col-sm-6}
+
+```{r}
+subsection_heading("Shelter cost")
+```
+
+```{r unaffordable_housing}
+data_breakdown %>%
+  filter(vector_label_short == "unaffordable_housing")
+```
+
+::::
+
+:::::
+
+::::: {.row}
+
+:::: {.col-sm-6}
+
+```{r}
+subsection_heading("Unaffordable housing cost")
+```
+
+::::
+
+:::::
+
+```{r}
+section_heading("Diversity and immigration")
+```
+
+::::: {.row}
+
+:::: {.col-sm-6}
+
+```{r}
+subsection_heading("Immigrant status")
+```
+
+```{r immigrant_status}
+data_breakdown %>%
+  filter(
+    vector_label_short == "immigrant_status",
+    vector != highest_parent_vector
+  ) %>%
+  derive_census_vector_order() %>%
+  plot_census_vector(vector_description = "immigrant status")
+```
+
+::::
+
+:::: {.col-sm-6}
+
+```{r}
+subsection_heading("Aboriginal identity")
+```
+
+```{r aboriginal_identity}
+data_breakdown %>%
+  filter(
+    vector_label_short == "aboriginal_identity",
+    vector != highest_parent_vector
+  ) %>%
+  derive_census_vector_order() %>%
+  plot_census_vector(vector_description = "Aboriginal identity")
+```
+
+::::
+
+:::::
+
+::::: {.row}
+
+:::: {.col-sm-6}
+
+```{r}
+subsection_heading("Country of origin")
+```
+
+::::
+
+:::: {.col-sm-6}
+
+```{r}
+subsection_heading("Visible minority population")
+```
+
+```{r visible_minority}
+data_breakdown %>%
+  filter(
+    vector_label_short == "visible_minority",
+    vector != highest_parent_vector
+  ) %>%
+  derive_census_vector_order(TRUE) %>%
+  plot_census_vector(vector_description = "visible minority population")
+```
+
+::::
+
+:::::
