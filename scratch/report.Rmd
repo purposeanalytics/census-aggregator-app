@@ -394,6 +394,20 @@ knowledge_of_english %>%
 subsection_heading("Language spoken at home")
 ```
 
+```{r language_at_home}
+language_at_home <- data_breakdown %>% 
+  filter(vector_label_short == "top_10_languages") %>% 
+  filter(vector != highest_parent_vector) %>%
+  top_n(10, wt = value) %>%
+  arrange(-value)
+
+language_at_home %>%
+  plot_census_vector(vector_description = "top 10 languages spoken at home")
+
+language_at_home %>%
+  table_census_vector()
+```
+
 ::::
 
 :::::
@@ -526,6 +540,20 @@ data_breakdown %>%
 
 ```{r}
 subsection_heading("Country of origin")
+```
+
+```{r language_at_home}
+ethnic_origin <- data_breakdown %>% 
+  filter(vector_label_short == "ethnic_origin") %>% 
+  filter(vector != highest_parent_vector) %>%
+  top_n(10, wt = value) %>%
+  arrange(-value)
+
+ethnic_origin %>%
+  plot_census_vector(vector_description = "ethnic_origin")
+
+ethnic_origin %>%
+  table_census_vector()
 ```
 
 ::::
