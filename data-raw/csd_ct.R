@@ -12,21 +12,25 @@ dataset <- "CA16"
 
 canada_region <- c(C = 01)
 
-# Get without geography first, since "Area (sq km)" is as reported in the census, but with geography, it only has "Shape Area" which is the literal area of the polygon.
+area_vector <- "v_CA16_407"
 
 # CSD -----
 
-csd <- get_census(dataset = dataset, regions = canada_region, level = "CSD") %>%
-  clean_names() %>%
-  select(geo_uid, pr_uid, region_name, area_sq_km, population, households)
+# Get "Land area in square kilometres" vector (for calculating population density), since it is
+# how StatCan calculates population density. The Area field returned by cancensus is computed
+# from the polygons, and might include water areas (which StatCan removes) - we want to be consistent
+# with how StatCan calculates and displays these.
 
-csd_sf <- get_census(dataset = dataset, regions = canada_region, level = "CSD", geo_format = "sf") %>%
+csd <- get_census(
+  dataset = dataset,
+  regions = canada_region,
+  level = "CSD",
+  geo_format = "sf",
+  vectors = area_vector,
+  labels = "short"
+) %>%
   clean_names() %>%
-  select(geo_uid, geometry)
-
-csd <- csd %>%
-  left_join(csd_sf, by = "geo_uid") %>%
-  st_as_sf(crs = st_crs(csd_sf))
+  select(geo_uid, pr_uid, region_name = name, population, households, area_sq_km = contains(tolower(area_vector)), geometry)
 
 # Derive population density for tooltips
 csd <- csd %>%
@@ -92,23 +96,22 @@ upload_tiles(
 
 csd <- csd %>%
   st_set_geometry(NULL) %>%
-  select(-population_density)
+  select(-population_density, -region_name)
 
 usethis::use_data(csd, overwrite = TRUE)
 
 # CT ----
 
-ct <- get_census(dataset = dataset, regions = canada_region, level = "CT") %>%
+ct <- get_census(
+  dataset = dataset,
+  regions = canada_region,
+  level = "CT",
+  geo_format = "sf",
+  vectors = area_vector,
+  labels = "short"
+) %>%
   clean_names() %>%
-  select(geo_uid, pr_uid, type, region_name, area_sq_km, population, households)
-
-ct_sf <- get_census(dataset = dataset, regions = canada_region, level = "CT", geo_format = "sf") %>%
-  clean_names() %>%
-  select(geo_uid, geometry)
-
-ct <- ct %>%
-  left_join(ct_sf, by = "geo_uid") %>%
-  st_as_sf(crs = st_crs(ct_sf))
+  select(geo_uid, pr_uid, region_name, population, households, area_sq_km = contains(tolower(area_vector)), geometry)
 
 # Write arrow dataset, partitioned by province, for getting geometry / boundary export in app
 ct_geometry <- ct %>%
@@ -147,6 +150,6 @@ upload_tiles(
 
 ct <- ct %>%
   st_set_geometry(NULL) %>%
-  select(-population_density)
+  select(-population_density, -region_name)
 
 usethis::use_data(ct, overwrite = TRUE)
