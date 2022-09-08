@@ -7,6 +7,8 @@ library(sf)
 library(mapboxapi)
 library(rmapshaper)
 library(sfarrow)
+library(purrr)
+library(mapview)
 
 dataset <- "CA16"
 
@@ -39,15 +41,47 @@ csd <- csd %>%
     population_density = scales::comma(population_density, accuracy = 1)
   )
 
+# Simplify features - based on number of points - required for uploading to mapbox
+# without it timing out, and also to make data storage easier for us
+
+# Size before:
+csd_size <- object.size(csd)
+
+csd <- csd %>%
+  split(.$geo_uid) %>%
+  map_dfr(function(feature) {
+
+    pts <- npts(feature)
+
+    if (pts > 10000) {
+      ms_simplify(feature, keep = 0.1, keep_shapes = TRUE)
+    } else if (pts > 5000) {
+      ms_simplify(feature, keep = 0.3, keep_shapes = TRUE)
+    } else if (pts > 500) {
+      ms_simplify(feature, keep = 0.5, keep_shapes = TRUE)
+    } else {
+      feature
+    }
+  })
+
+# Size after:
+csd_simplified_size <- object.size(csd)
+
+as.numeric(csd_simplified_size) / as.numeric(csd_size)
+
 # Write arrow dataset, partitioned by province, for getting geometry / boundary export in app
 csd_geometry <- csd %>%
   select(geo_uid, pr_uid)
 
-fs::dir_create("inst/extdata/csd/")
+dir <- "inst/extdata/csd/"
+if (dir.exists(dir)) {
+  fs::dir_delete(dir)
+}
+fs::dir_create(dir)
 
 csd_geometry %>%
   group_by(pr_uid) %>%
-  write_sf_dataset("inst/extdata/csd/",
+  write_sf_dataset(dir,
     format = "parquet",
     hive_style = FALSE
   )
@@ -65,22 +99,6 @@ csd <- csd %>%
 
 csd <- csd %>%
   st_transform(3857)
-
-# One option is to break multipolygon into a single polygon, which will also speed up uploading
-# But we don't want to do this - selection (click) should be on multipolygons, so we really don't want to let people select single polygons
-
-# Size before:
-csd_size <- object.size(csd)
-
-# Simplify features
-
-csd <- csd %>%
-  ms_simplify(keep = 0.2, keep_shapes = TRUE)
-
-# Size after:
-csd_simplified_size <- object.size(csd)
-
-as.numeric(csd_simplified_size) / as.numeric(csd_size)
 
 # Upload
 
@@ -117,11 +135,16 @@ ct <- get_census(
 ct_geometry <- ct %>%
   select(geo_uid, pr_uid)
 
-fs::dir_create("inst/extdata/ct/")
+dir <- "inst/extdata/ct/"
+if (dir.exists(dir)) {
+  fs::dir_delete(dir)
+}
+fs::dir_create(dir)
+
 
 ct_geometry %>%
   group_by(pr_uid) %>%
-  write_sf_dataset("inst/extdata/ct/",
+  write_sf_dataset(dir,
     format = "parquet",
     hive_style = FALSE
   )
