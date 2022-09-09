@@ -10,6 +10,7 @@
 mod_sidebar_ui <- function(id) {
   ns <- NS(id)
   bslib::card(
+    shinybusy::add_busy_spinner("circle", color = "white", height = "30px", width = "30px"),
     shiny::div(
       shinyWidgets::prettyRadioButtons(
         ns("aggregate_area"),
@@ -28,12 +29,12 @@ mod_sidebar_ui <- function(id) {
         )
       ),
       shiny::div(
-        # shinyjs::disabled(
+        shinyjs::disabled(
           shiny::actionButton(
             ns("bookmark_selections"),
             "Bookmark selections",
             class = "btn-link"
-          # )
+          )
         )
       ),
       breathe(),
@@ -54,7 +55,7 @@ mod_sidebar_ui <- function(id) {
       breathe(),
       shiny::div(
         shinyjs::disabled(
-          shiny::actionButton(
+          shiny::downloadButton(
             ns("export_data"),
             "Export data",
             width = "100%"
@@ -128,26 +129,22 @@ mod_sidebar_server <- function(id, selected_geographies, map_rendered, boomarks_
     })
 
     # Export boundary ----
+
     output$export_boundary <- shiny::downloadHandler(
       filename = function() {
         "boundary.geojson"
       },
       content = function(con) {
-
-        # TODO: doesn't "do nothing" if nrow == 0, opens empty tab
-        shiny::req(nrow(selected_geographies()) > 0)
-
         dataset <- arrow::open_dataset(glue::glue("inst/extdata/{input$aggregate_area}"))
 
         query <- dplyr::filter(dataset, .data$geo_uid %in% selected_geographies()[["geo_uid"]])
 
         sfarrow::read_sf_dataset(query) %>%
+          sf::st_make_valid() %>%
           sf::st_union() %>%
           sf::st_write(con)
       }
     )
-    shiny::observeEvent(input$export_boundary, {
-    })
 
     # Summary statistics table ----
     shiny::observeEvent(selected_geographies(), ignoreInit = FALSE, {
@@ -224,6 +221,32 @@ mod_sidebar_server <- function(id, selected_geographies, map_rendered, boomarks_
           kableExtra::column_spec(column = 1, bold = TRUE)
       })
     })
+
+    # Export data ----
+    output$export_data <- shiny::downloadHandler(
+      filename = function() {
+        "report.html"
+      },
+      content = function(file) {
+        tempReport <- file.path(tempdir(), "report.Rmd")
+        file.copy(here::here("scratch", "report.Rmd"), tempReport, overwrite = TRUE)
+
+        # Set up parameters to pass to Rmd document
+        params <- list(
+          geo_uid = selected_geographies()$geo_uid,
+          level = input$aggregate_area
+        )
+
+        # Knit the document, passing in the `params` list, and eval it in a
+        # child of the global environment (this isolates the code in the document
+        # from the code in this app).
+        rmarkdown::render(tempReport,
+          output_file = file,
+          params = params,
+          envir = new.env(parent = globalenv())
+        )
+      }
+    )
 
     return(inputs)
   })

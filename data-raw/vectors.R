@@ -297,9 +297,13 @@ csd_values <- bind_rows(
     pivot_census_data(),
   csd_data_many %>%
     pivot_census_data()
-) %>%
-  filter(!is.na(value)) %>%
-  filter(value != 0)
+)
+
+csd_values <- csd_values %>%
+  # filter(!is.na(value)) %>%
+  # Remove 0s for children of v_CA16_3999 (ethnic origin) and v_CA16_1355 (visible minority)
+  mutate(remove = value == 0 & vector %in% c(breakdown_vectors[["v_CA16_3999"]], breakdown_vectors[["v_CA16_1355"]])) %>%
+  filter(!remove)
 
 ct_values <- bind_rows(
   ct_data %>%
@@ -309,8 +313,10 @@ ct_values <- bind_rows(
   ct_data_many_2 %>%
     pivot_census_data()
 ) %>%
-  filter(!is.na(value)) %>%
-  filter(value != 0)
+  # filter(!is.na(value)) %>%
+  # Remove 0s for children of v_CA16_3999 (ethnic origin) and v_CA16_1355 (visible minority)
+  mutate(remove = value == 0 & vector %in% c(breakdown_vectors[["v_CA16_3999"]], breakdown_vectors[["v_CA16_1355"]])) %>%
+  filter(!remove)
 
 # Save via arrow, partitioned by first 2 characters of geo_uid
 
