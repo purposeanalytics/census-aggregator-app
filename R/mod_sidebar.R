@@ -140,7 +140,6 @@ mod_sidebar_server <- function(id, selected_geographies, map_rendered, boomarks_
         query <- dplyr::filter(dataset, .data$geo_uid %in% selected_geographies()[["geo_uid"]])
 
         sfarrow::read_sf_dataset(query) %>%
-          sf::st_make_valid() %>%
           sf::st_union() %>%
           sf::st_write(con)
       }
