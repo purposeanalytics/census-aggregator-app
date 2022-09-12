@@ -70,6 +70,11 @@ csd <- csd %>%
     }
   })
 
+# Make geometries valid
+
+csd <- csd %>%
+  st_make_valid()
+
 # Size after:
 csd_simplified_size <- object.size(csd)
 
