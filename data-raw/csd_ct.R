@@ -41,6 +41,12 @@ csd <- csd %>%
     population_density = scales::comma(population_density, accuracy = 1)
   )
 
+# Exclude CSDs with >10% missing data (mainly 50-100% missing), since we will not be able to render reports for them anyways
+csd_remove <- readRDS(here::here("data-raw", "csd_remove.rds"))
+
+csd <- csd %>%
+  anti_join(csd_remove, by = "geo_uid")
+
 # Simplify features - based on number of points - required for uploading to mapbox
 # without it timing out, and also to make data storage easier for us
 
@@ -131,6 +137,12 @@ ct <- get_census(
   clean_names() %>%
   select(geo_uid, pr_uid, region_name, population, households, area_sq_km = contains(tolower(area_vector)), geometry)
 
+# Exclude CTs with >10% missing data (mainly 50-100% missing), since we will not be able to render reports for them anyways
+ct_remove <- readRDS(here::here("data-raw", "ct_remove.rds"))
+
+ct <- ct %>%
+  anti_join(ct_remove, by = "geo_uid")
+
 # Write arrow dataset, partitioned by province, for getting geometry / boundary export in app
 ct_geometry <- ct %>%
   select(geo_uid, pr_uid)
@@ -140,7 +152,6 @@ if (dir.exists(dir)) {
   fs::dir_delete(dir)
 }
 fs::dir_create(dir)
-
 
 ct_geometry %>%
   group_by(pr_uid) %>%
