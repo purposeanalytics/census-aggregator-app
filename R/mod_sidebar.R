@@ -43,7 +43,8 @@ mod_sidebar_ui <- function(id) {
           shiny::downloadButton(
             ns("export_boundary"),
             "Export boundary",
-            class = "btn-link"
+            class = "btn-link",
+            icon = NULL
           )
         )
       ),
@@ -58,7 +59,8 @@ mod_sidebar_ui <- function(id) {
           shiny::downloadButton(
             ns("export_data"),
             "Export data",
-            width = "100%"
+            width = "100%",
+            icon = NULL
           )
         )
       ),
@@ -228,7 +230,7 @@ mod_sidebar_server <- function(id, selected_geographies, map_rendered, boomarks_
       },
       content = function(file) {
         tempReport <- file.path(tempdir(), "report.Rmd")
-        file.copy(here::here("scratch", "report.Rmd"), tempReport, overwrite = TRUE)
+        file.copy(app_sys("report/report.Rmd"), tempReport, overwrite = TRUE)
 
         # Set up parameters to pass to Rmd document
         params <- list(
