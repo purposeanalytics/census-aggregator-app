@@ -16,6 +16,7 @@ vectors <- tibble::tribble(
   "v_CA16_1", "Total - Age", "age",
   "v_CA16_418", "Private households by household size", "household_size",
   "v_CA16_484", "Total number of census families in private households - 100% data", "family_type",
+  "v_CA16_491", "Total - Couple census families in private households - 100% data", "couples",
   "v_CA16_504", "Total - Private households by household type - 100% data", "household_type",
   "v_CA16_512", "Total - Knowledge of official languages for the total population excluding institutional residents - 100% data", "knowledge_of_english",
   "v_CA16_1355", "Total - Language spoken most often at home for the total population excluding institutional residents - 100% data", "top_10_languages",
@@ -92,7 +93,8 @@ breakdown_vectors <- list(
   "v_CA16_3405" = c("v_CA16_3411", "v_CA16_3432"),
   "v_CA16_3852" = c("v_CA16_3855"),
   "v_CA16_5051" = c("v_CA16_5054", "v_CA16_5057", "v_CA16_5060"),
-  "v_CA16_484" = c("v_CA16_485", "v_CA16_488", "v_CA16_489"),
+  "v_CA16_484" = c("v_CA16_488", "v_CA16_489"),
+  "v_CA16_491" = "v_CA16_493", # Collapse into the one above - couples with children can just be part of family characteristics
   "v_CA16_504" = c("v_CA16_505", "v_CA16_508", "v_CA16_509"),
   "v_CA16_402" = NA,
   "v_CA16_407" = NA,
@@ -126,6 +128,16 @@ vectors_and_children <- map_dfr(
       filter_breakdown_vectors(vector)
   }
 )
+
+# Remove "couples" parent vector, change "couples with children" to be child of "family_type"
+couples_with_children <- tribble(
+  ~vector, ~parent_vector, ~highest_parent_vector,
+  "v_CA16_493", "v_CA16_484", "v_CA16_484"
+)
+
+vectors_and_children <- vectors_and_children %>%
+  filter(vector != "v_CA16_491") %>%
+  rows_update(couples_with_children, by = "vector")
 
 # Save vectors
 vectors <- vectors_and_children %>%
