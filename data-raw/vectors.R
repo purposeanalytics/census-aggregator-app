@@ -12,6 +12,7 @@ vectors <- tibble::tribble(
   ~vector, ~vector_label, ~vector_label_short,
   "v_CA16_401", "Population, 2016", "population_2016",
   "v_CA16_402", "Population, 2011", "population_2011",
+  "v_CA16_424", "Number of persons in private households", "population_in_private_households",
   "v_CA16_407", "Land area in square kilometres", "area",
   "v_CA16_1", "Total - Age", "age",
   "v_CA16_418", "Private households by household size", "household_size",
@@ -142,6 +143,15 @@ vectors_and_children <- vectors_and_children %>%
 # Save vectors
 vectors <- vectors_and_children %>%
   left_join(vectors, by = c("vector", "label" = "vector_label"))
+
+# Change parent vector and highest parent vector of LIM-AT to be v_CA16_424 (Number of persons in private households)
+lim_at_parents <- tribble(
+  ~vector, ~highest_parent_vector, ~parent_vector,
+  "v_CA16_2525", "v_CA16_424", "v_CA16_424"
+)
+
+vectors <- vectors %>%
+  rows_update(lim_at_parents, by = "vector")
 
 usethis::use_data(vectors, overwrite = TRUE)
 
