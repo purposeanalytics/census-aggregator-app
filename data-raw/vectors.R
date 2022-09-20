@@ -143,8 +143,9 @@ couples_with_children <- tribble(
 vectors_and_children <- vectors_and_children %>%
   filter(vector != "v_CA16_491") %>%
   rows_update(couples_with_children, by = "vector")
+  rows_update(lim_at_parents, by = "vector")
 
-# Save vectors
+  # Add metadata to vectors
 vectors <- vectors_and_children %>%
   left_join(vectors, by = c("vector", "label" = "vector_label"))
 
@@ -154,8 +155,10 @@ lim_at_parents <- tribble(
   "v_CA16_2525", "v_CA16_424", "v_CA16_424"
 )
 
+# Add short label to all children
 vectors <- vectors %>%
-  rows_update(lim_at_parents, by = "vector")
+  group_by(highest_parent_vector) %>%
+  fill(vector_label_short, .direction = "downup")
 
 usethis::use_data(vectors, overwrite = TRUE)
 
