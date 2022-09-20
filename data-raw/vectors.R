@@ -28,7 +28,9 @@ vectors <- tibble::tribble(
   "v_CA16_3999", "Total - Ethnic origin for the population in private households - 25% sample data", "ethnic_origin",
   "v_CA16_4836", "Total - Private households by tenure - 25% sample data", "household_tenure",
   "v_CA16_4886", "Total -  Owner and tenant households with household total income greater than zero, in non-farm, non-reserve private dwellings by shelter-cost-to-income ratio - 25% sample data", "unaffordable_housing",
-  "v_CA16_5051", "Total - Highest certificate, diploma or degree for the population aged 15 years and over in private households - 25% sample data", "educational_attainment"
+  "v_CA16_5051", "Total - Highest certificate, diploma or degree for the population aged 15 years and over in private households - 25% sample data", "educational_attainment",
+  "v_CA16_4890", "Total - Owner households in non-farm, non-reserve private dwellings - 25% sample data", "shelter_cost_owner",
+  "v_CA16_4897", "Total - Tenant households in non-farm, non-reserve private dwellings - 25% sample data", "shelter_cost_renter"
 )
 
 # List census vectors and their children
@@ -101,7 +103,9 @@ breakdown_vectors <- list(
   "v_CA16_407" = NA,
   "v_CA16_1355" = v_CA16_1355_vectors,
   "v_CA16_2525" = NA,
-  "v_CA16_3999" = v_CA16_3999_vectors
+  "v_CA16_3999" = v_CA16_3999_vectors,
+  "v_CA16_4890" = "v_CA16_4894",
+  "v_CA16_4897" = "v_CA16_4901"
 )
 
 filter_breakdown_vectors <- function(data, vector) {
