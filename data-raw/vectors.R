@@ -140,20 +140,20 @@ couples_with_children <- tribble(
   "v_CA16_493", "v_CA16_484", "v_CA16_484"
 )
 
-vectors_and_children <- vectors_and_children %>%
-  filter(vector != "v_CA16_491") %>%
-  rows_update(couples_with_children, by = "vector")
-  rows_update(lim_at_parents, by = "vector")
-
-  # Add metadata to vectors
-vectors <- vectors_and_children %>%
-  left_join(vectors, by = c("vector", "label" = "vector_label"))
-
 # Change parent vector and highest parent vector of LIM-AT to be v_CA16_424 (Number of persons in private households)
 lim_at_parents <- tribble(
   ~vector, ~highest_parent_vector, ~parent_vector,
   "v_CA16_2525", "v_CA16_424", "v_CA16_424"
 )
+
+vectors_and_children <- vectors_and_children %>%
+  filter(vector != "v_CA16_491") %>%
+  rows_update(couples_with_children, by = "vector") %>%
+  rows_update(lim_at_parents, by = "vector")
+
+# Add metadata to vectors
+vectors <- vectors_and_children %>%
+  left_join(vectors, by = c("vector", "label" = "vector_label"))
 
 # Add short label to all children
 vectors <- vectors %>%
