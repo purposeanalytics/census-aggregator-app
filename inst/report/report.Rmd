@@ -140,47 +140,68 @@ vectors_data <- vectors_data %>%
   # tidyr::complete(vector, geo_uid, fill = list(value = 0)) %>%
   left_join(metadata, by = "geo_uid")
 
-# Collapse / fake metadata for age cohorts
+# Collapse / fake metadata for age cohorts  and couples with children
 
-age_cohorts_update <- tidyr::crossing(vector = c("0 to 14", "15 to 24", "25 to 44", "45 to 65", "65 to 84", "85+"), geo_uid = regions) %>%
+age_vector <- vectors %>%
+  filter(label_short == "age", vector == highest_parent_vector) %>%
+  pull(vector)
+
+couples_with_children_vectors <- "Couples with children"
+family_type_vector <- vectors %>%
+  filter(label_short == "family_type", vector == highest_parent_vector) %>%
+  pull(vector)
+
+vectors_update <- tidyr::crossing(vector = c("0 to 14", "15 to 24", "25 to 44", "45 to 65", "65 to 84", "85+"), geo_uid = regions) %>%
   mutate(
-    highest_parent_vector = "v_CA16_1",
+    highest_parent_vector = age_vector,
     units = "Number",
     aggregation = "Additive",
-    vector_label_short = "age_cohorts",
+    label_short = "age_cohorts",
     label = vector
+  ) %>%
+  bind_rows(
+    crossing(
+      vector = couples_with_children_vectors,
+      geo_uid = regions
+    ) %>%
+      mutate(
+        highest_parent_vector = family_type_vector,
+        units = "Number",
+        aggregation = "Additive",
+        label_short = "family_type",
+        label = vector
+      )
   ) %>%
   left_join(vectors_data %>% select(geo_uid, vector, value), by = c("vector", "geo_uid"))
 
 vectors_data <- vectors_data %>%
   left_join(censusaggregatorapp::vectors, by = "vector") %>%
-  anti_join(age_cohorts_update, by = c("vector", "geo_uid"))
+  anti_join(vectors_update, by = c("vector", "geo_uid"))
 
 vectors_data <- vectors_data %>%
-  bind_rows(age_cohorts_update)
+  bind_rows(vectors_update)
 
 vectors_data <- vectors_data %>%
   derive_aggregation_type()
 
 vectors_metadata <- censusaggregatorapp::vectors %>%
   bind_rows(
-    age_cohorts_update %>%
+    vectors_update %>%
       select(-geo_uid, -value) %>%
       distinct()
   )
 
-# Aggregate vectors - treat v_CA16_407 (land area) separately, since it will be used for population density, and v_CA16_402 (population 2011) separately, since it will be used for population change
-
+# Aggregate vectors - treat v_CA16_407 (land area) separately, since it will be used for population density, and v_CA16_402 (population 2016) separately, since it will be used for population change
 vectors_data_filtered <- vectors_data %>%
-  filter(!(vector %in% c("v_CA16_407", "v_CA16_402")))
+  filter(!(label %in% c("Population, 2016", "Land area in square kilometres")))
 
 data_breakdown <- vectors_data_filtered %>%
   aggregate_census_vectors() %>%
   distinct() %>%
   left_join(vectors_metadata, by = c("highest_parent_vector", "vector", "type", "label", "units", "parent_vector", "aggregation", "details")) %>%
-  select(highest_parent_vector, vector, label, vector_label_short, value, value_proportion) %>%
+  select(highest_parent_vector, vector, label, label_short, value, value_proportion) %>%
   group_by(highest_parent_vector) %>%
-  tidyr::fill(vector_label_short, .direction = "updown") %>%
+  tidyr::fill(label_short, .direction = "updown") %>%
   ungroup()
 ```
 
@@ -219,7 +240,7 @@ areas_selected <- glue::glue("{n} {geography}{s}",
 )
 
 population <- data_breakdown %>%
-  filter(vector_label_short == "population_2016") %>%
+  filter(label_short == "population_2021") %>%
   pull_and_format_value("comma")
 
 households <- metadata %>%
@@ -233,7 +254,7 @@ population_change <- vectors_data %>%
   pull_and_format_value()
 
 population_density <- vectors_data %>%
-  filter(label %in% c("Population, 2016", "Land area in square kilometres")) %>%
+  filter(label %in% c("Population, 2021", "Land area in square kilometres")) %>%
   aggregate_population_density() %>%
   pull_and_format_value("comma")
 ```
@@ -248,7 +269,7 @@ shiny::column(
 ```{r population_change}
 shiny::column(
   width = 3,
-  snapshot_card("Population change<br>(2011 to 2016)", population_change)
+  snapshot_card("Population change<br>(2016 to 2021)", population_change)
 )
 ```
 
@@ -273,7 +294,7 @@ shiny::column(
 ```{r age-cohorts, out.height = 1}
 age_cohorts <- data_breakdown %>%
   filter(
-    vector_label_short == "age_cohorts",
+    label_short == "age_cohorts",
     vector != highest_parent_vector
   ) %>%
   mutate(label = forcats::fct_reorder(label, label))
@@ -296,7 +317,7 @@ section_heading("Households, families, education, and language")
 ```{r household_size}
 household_size <- data_breakdown %>%
   filter(
-    vector_label_short == "household_size",
+    label_short == "household_size",
     vector != highest_parent_vector
   ) %>%
   mutate(label = ifelse(label == "5 or more persons", "5+ persons", label)) %>%
@@ -312,7 +333,7 @@ header_and_barchart(
 ```{r family_type}
 family_type <- data_breakdown %>%
   filter(
-    vector_label_short == "family_type",
+    label_short == "family_type",
     vector != highest_parent_vector
   ) %>%
   # mutate(label = recode("Total couple families" = "")
@@ -328,7 +349,7 @@ header_and_barchart(
 ```{r household_type}
 multiple_family_households <- data_breakdown %>%
   filter(
-    vector_label_short == "household_type",
+    label_short == "household_type",
     vector != highest_parent_vector
   ) %>%
   derive_census_vector_order()
@@ -343,7 +364,7 @@ header_and_barchart(
 ```{r educational_attainment}
 educational_attainment <- data_breakdown %>%
   filter(
-    vector_label_short == "educational_attainment",
+    label_short == "educational_attainment",
     vector != highest_parent_vector
   ) %>%
   derive_census_vector_order()
@@ -358,7 +379,7 @@ header_and_barchart(
 ```{r knowledge_of_english}
 knowledge_of_english <- data_breakdown %>%
   filter(
-    vector_label_short == "knowledge_of_english",
+    label_short == "knowledge_of_english",
     vector != highest_parent_vector
   ) %>%
   derive_census_vector_order()
@@ -372,7 +393,7 @@ header_and_barchart(
 
 ```{r language_at_home}
 language_at_home <- data_breakdown %>%
-  filter(vector_label_short == "top_10_languages") %>%
+  filter(label_short == "top_10_languages") %>%
   filter(vector != highest_parent_vector) %>%
   top_n(10, wt = value) %>%
   arrange(-value) %>%
@@ -402,7 +423,7 @@ shiny::column(
 
 ```{r lim_at}
 lim_at <- data_breakdown %>%
-  filter(vector_label_short == "lim_at") %>%
+  filter(label_short == "lim_at") %>%
   select(-value, value = value_proportion) %>%
   pull_and_format_value()
 
@@ -415,7 +436,7 @@ shiny::column(
 ```{r unaffordable_housing}
 unaffordable_housing <- data_breakdown %>%
   filter(
-    vector_label_short == "unaffordable_housing",
+    label_short == "unaffordable_housing",
     vector != highest_parent_vector
   ) %>%
   select(-value, value = value_proportion) %>%
@@ -434,7 +455,7 @@ shiny::column(
 ```{r shelter-cost}
 shelter_cost <- data_breakdown %>%
   filter(
-    str_starts(vector_label_short, "shelter_cost"),
+    str_starts(label_short, "shelter_cost"),
     vector != highest_parent_vector
   ) %>%
   derive_census_vector_order()
@@ -450,7 +471,7 @@ header_and_barchart(
 ```{r household-tenure}
 household_tenure <- data_breakdown %>%
   filter(
-    vector_label_short == "household_tenure",
+    label_short == "household_tenure",
     vector != highest_parent_vector
   ) %>%
   derive_census_vector_order()
@@ -464,16 +485,16 @@ header_and_barchart(
 
 :::
 
-```{r section-diversity-immigration}
+```{r section-diversity-immigration, eval = FALSE}
 section_heading("Diversity and immigration")
 ```
 
 ::: {.row .mb-2}
 
-```{r visible-minority-summary}
+```{r visible-minority-summary, eval = FALSE}
 visible_minority <- data_breakdown %>%
   filter(
-    vector_label_short == "visible_minority",
+    label_short == "visible_minority",
     vector != highest_parent_vector
   )
 
@@ -488,10 +509,10 @@ shiny::column(
 )
 ```
 
-```{r immigrant-status}
+```{r immigrant-status, eval = FALSE}
 immigrant_status <- data_breakdown %>%
   filter(
-    vector_label_short == "immigrant_status",
+    label_short == "immigrant_status",
     vector != highest_parent_vector
   ) %>%
   select(-value) %>%
@@ -516,10 +537,10 @@ shiny::column(
 )
 ```
 
-```{r aboriginal-identity}
+```{r aboriginal-identity, eval = FALSE}
 aboriginal_identity <- data_breakdown %>%
   filter(
-    vector_label_short == "aboriginal_identity",
+    label_short == "aboriginal_identity",
     vector != highest_parent_vector
   ) %>%
   select(-value, value = value_proportion) %>%
@@ -535,10 +556,10 @@ shiny::column(
 
 ::: {.row}
 
-```{r visible-minority-breakdown}
+```{r visible-minority-breakdown, eval = FALSE}
 visible_minority <- data_breakdown %>%
   filter(
-    vector_label_short == "visible_minority",
+    label_short == "visible_minority",
     vector != highest_parent_vector
   ) %>%
   filter(!label %in% c("Total visible minority population", "Not a visible minority")) %>%
@@ -551,9 +572,9 @@ header_and_barchart(
 )
 ```
 
-```{r ethnic_origin}
+```{r ethnic_origin, eval = FALSE}
 ethnic_origin <- data_breakdown %>%
-  filter(vector_label_short == "ethnic_origin") %>%
+  filter(label_short == "ethnic_origin") %>%
   filter(vector != highest_parent_vector) %>%
   top_n(10, wt = value) %>%
   arrange(-value) %>%
