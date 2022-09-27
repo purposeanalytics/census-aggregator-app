@@ -10,11 +10,13 @@ library(sfarrow)
 library(purrr)
 library(mapview)
 
-dataset <- "CA16"
+dataset <- "CA21"
 
 canada_region <- c(C = 01)
 
-area_vector <- "v_CA16_407"
+area_vector <- list_census_vectors(dataset) %>%
+  filter(label == "Land area in square kilometres") %>%
+  pull(vector)
 
 # CSD -----
 
@@ -140,7 +142,7 @@ ct <- get_census(
   labels = "short"
 ) %>%
   clean_names() %>%
-  select(geo_uid, pr_uid, region_name, population, households, area_sq_km = contains(tolower(area_vector)), geometry)
+  select(geo_uid, cd_uid, region_name, population, households, area_sq_km = contains(tolower(area_vector)), geometry)
 
 # Exclude CTs with >10% missing data (mainly 50-100% missing), since we will not be able to render reports for them anyways
 ct_remove <- readRDS(here::here("data-raw", "ct_remove.rds"))
@@ -148,9 +150,9 @@ ct_remove <- readRDS(here::here("data-raw", "ct_remove.rds"))
 ct <- ct %>%
   anti_join(ct_remove, by = "geo_uid")
 
-# Write arrow dataset, partitioned by province, for getting geometry / boundary export in app
+# Write arrow dataset, partitioned by cd, for getting geometry / boundary export in app
 ct_geometry <- ct %>%
-  select(geo_uid, pr_uid)
+  select(geo_uid, cd_uid)
 
 dir <- "inst/extdata/ct/"
 if (dir.exists(dir)) {
@@ -159,7 +161,7 @@ if (dir.exists(dir)) {
 fs::dir_create(dir)
 
 ct_geometry %>%
-  group_by(pr_uid) %>%
+  group_by(cd_uid) %>%
   write_sf_dataset(dir,
     format = "parquet",
     hive_style = FALSE
@@ -175,7 +177,7 @@ ct <- ct %>%
 # Now to upload to mapbox
 
 ct <- ct %>%
-  select(-pr_uid)
+  select(-cd_uid)
 
 upload_tiles(
   input = ct,

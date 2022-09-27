@@ -9,28 +9,34 @@ library(tidyr)
 library(arrow)
 
 vectors <- tibble::tribble(
-  ~vector, ~vector_label, ~vector_label_short,
-  "v_CA16_401", "Population, 2016", "population_2016",
-  "v_CA16_402", "Population, 2011", "population_2011",
-  "v_CA16_424", "Number of persons in private households", "population_in_private_households",
-  "v_CA16_407", "Land area in square kilometres", "area",
-  "v_CA16_1", "Total - Age", "age",
-  "v_CA16_418", "Private households by household size", "household_size",
-  "v_CA16_484", "Total number of census families in private households - 100% data", "family_type",
-  "v_CA16_491", "Total - Couple census families in private households - 100% data", "couples",
-  "v_CA16_504", "Total - Private households by household type - 100% data", "household_type",
-  "v_CA16_512", "Total - Knowledge of official languages for the total population excluding institutional residents - 100% data", "knowledge_of_english",
-  "v_CA16_1355", "Total - Language spoken most often at home for the total population excluding institutional residents - 100% data", "top_10_languages",
-  "v_CA16_2525", "In low income based on the Low-income measure, after tax (LIM-AT)", "lim_at",
-  "v_CA16_3405", "Total - Immigrant status and period of immigration for the population in private households - 25% sample data", "immigrant_status",
-  "v_CA16_3852", "Total - Aboriginal identity for the population in private households - 25% sample data", "aboriginal_identity",
-  "v_CA16_3954", "Total - Visible minority for the population in private households - 25% sample data", "visible_minority",
-  "v_CA16_3999", "Total - Ethnic origin for the population in private households - 25% sample data", "ethnic_origin",
-  "v_CA16_4836", "Total - Private households by tenure - 25% sample data", "household_tenure",
-  "v_CA16_4886", "Total -  Owner and tenant households with household total income greater than zero, in non-farm, non-reserve private dwellings by shelter-cost-to-income ratio - 25% sample data", "unaffordable_housing",
-  "v_CA16_5051", "Total - Highest certificate, diploma or degree for the population aged 15 years and over in private households - 25% sample data", "educational_attainment",
-  "v_CA16_4890", "Total - Owner households in non-farm, non-reserve private dwellings - 25% sample data", "shelter_cost_owner",
-  "v_CA16_4897", "Total - Tenant households in non-farm, non-reserve private dwellings - 25% sample data", "shelter_cost_renter"
+  ~vector, ~label, ~label_short,
+  "v_CA21_1", "Population, 2021", "population_2021",
+  "v_CA21_2", "Population, 2016", "population_2016",
+  "v_CA21_449", "Number of persons in private households", "population_in_private_households",
+  "v_CA21_7", "Land area in square kilometres", "area",
+  "v_CA21_8", "Total - Age", "age",
+  "v_CA21_443", "Private households by household size", "household_size",
+  "v_CA21_499", "Total number of census families in private households", "family_type",
+  "v_CA21_500", "Total couple families", "couples",
+  "v_CA21_543", "Household type", "household_type",
+  "v_CA21_1144", "Knowledge of official languages for the total population excluding institutional residents", "knowledge_of_english",
+  # TODO: contains footnote still, might get removed
+  "v_CA21_2200", "Total - Language spoken most often at home for the total population excluding institutional residents - 100% data (35)", "top_10_languages",
+  "v_CA21_1025", "In low income based on the Low-income measure, after tax (LIM-AT)", "lim_at",
+  # TODO
+  # "v_CA16_3405", "Total - Immigrant status and period of immigration for the population in private households - 25% sample data", "immigrant_status",
+  # "v_CA16_3852", "Total - Aboriginal identity for the population in private households - 25% sample data", "aboriginal_identity",
+  # "v_CA16_3954", "Total - Visible minority for the population in private households - 25% sample data", "visible_minority",
+  # "v_CA16_3999", "Total - Ethnic origin for the population in private households - 25% sample data", "ethnic_origin",
+  # End TODO
+  "v_CA21_4237", "Total - Private households by tenure", "household_tenure",
+  # TODO - what is v_CA21_4302?
+  "v_CA21_4288", "Total - Owner and tenant households with household total income greater than zero, in non-farm, non-reserve private dwellings by shelter-cost-to-income ratio", "unaffordable_housing",
+  # TODO
+  # "v_CA16_5051", "Total - Highest certificate, diploma or degree for the population aged 15 years and over in private households - 25% sample data", "educational_attainment",
+  # END TODO
+  "v_CA21_4305", "Total - Owner households in non-farm, non-reserve private dwellings", "shelter_cost_owner",
+  "v_CA21_4313", "Total - Tenant households in non-farm, non-reserve private dwellings", "shelter_cost_renter"
 )
 
 # List census vectors and their children
@@ -45,7 +51,10 @@ vectors_and_children <- vectors[["vector"]] %>%
 # NA means keep all children, otherwise just keep the ones in the list
 
 # Age cohort vectors
-age_cohort_vectors <- child_census_vectors("v_CA16_1", keep_parent = TRUE) %>%
+age_cohort_vectors <- vectors %>%
+  filter(label_short == "age") %>%
+  pull(vector) %>%
+  child_census_vectors(keep_parent = TRUE) %>%
   filter(str_detect(label, "to") | str_detect(label, "and over"), units == "Number") %>%
   mutate(label_derived = str_replace(label, "years and over", "to NA years")) %>%
   separate(label_derived, into = c("min", "max"), sep = " to ", convert = TRUE) %>%
@@ -62,103 +71,141 @@ age_cohort_vectors <- child_census_vectors("v_CA16_1", keep_parent = TRUE) %>%
     )
   ) %>%
   filter(!is.na(group)) %>%
-  select(vector, group)
+  select(vector, label, group)
 
 # Language spoken at home
-v_CA16_1355_vectors <- child_census_vectors("v_CA16_1355", leaves_only = TRUE) %>%
-  pull(vector)
+top_10_languages_vectors <- vectors %>%
+  filter(label_short == "top_10_languages") %>%
+  pull(vector) %>%
+  child_census_vectors(leaves_only = TRUE) %>%
+  pull(label)
 
 # Ethnic origin
-v_CA16_3999_vectors <- child_census_vectors("v_CA16_3999", leaves_only = TRUE) %>%
-  pull(vector)
+# ethnic_origin_vectors <- vectors %>%
+#   filter(label_short == "ethnic_origin") %>%
+#   pull(vector) %>%
+#   child_census_vectors(leaves_only = TRUE) %>%
+#   pull(vector)
 
-breakdown_vectors <- list(
-  "v_CA16_401" = NA,
-  "v_CA16_418" = c("v_CA16_419", "v_CA16_420", "v_CA16_421", "v_CA16_422", "v_CA16_423"),
-  "v_CA16_3954" = c(
-    "v_CA16_3957", "v_CA16_3960", "v_CA16_3963", "v_CA16_3966",
-    "v_CA16_3969", "v_CA16_3972", "v_CA16_3975", "v_CA16_3978", "v_CA16_3981",
-    "v_CA16_3984", "v_CA16_3987", "v_CA16_3990", "v_CA16_3993",
-    "v_CA16_3996"
-  ),
-  "v_CA16_4836" = c("v_CA16_4837", "v_CA16_4838", "v_CA16_4839"),
-  "v_CA16_4886" = "v_CA16_4888",
-  "v_CA16_1" = c(
+breakdown_labels <- list(
+  "population_2021" = NA,
+  "household_size" = c("1 person", "2 persons", "3 persons", "4 persons", "5 or more persons"),
+  # "visible_minority" = c(
+  #   "v_CA16_3957", "v_CA16_3960", "v_CA16_3963", "v_CA16_3966",
+  #   "v_CA16_3969", "v_CA16_3972", "v_CA16_3975", "v_CA16_3978", "v_CA16_3981",
+  #   "v_CA16_3984", "v_CA16_3987", "v_CA16_3990", "v_CA16_3993",
+  #   "v_CA16_3996"
+  # ),
+  "household_tenure" = c("Owner", "Renter", "Dwelling provided by the local government, First Nation or Indian band"),
+  "unaffordable_housing" = "Spending 30% or more of income on shelter costs",
+  "age" = c(
     # 5 year breakdown
-    "v_CA16_7", "v_CA16_25", "v_CA16_43", "v_CA16_64", "v_CA16_82",
-    "v_CA16_100", "v_CA16_118", "v_CA16_136", "v_CA16_154", "v_CA16_172",
-    "v_CA16_190", "v_CA16_208", "v_CA16_226", "v_CA16_247", "v_CA16_265",
-    "v_CA16_283", "v_CA16_301", "v_CA16_322", "v_CA16_340", "v_CA16_358", "v_CA16_376",
+    "0 to 4 years", "5 to 9 years", "10 to 14 years", "15 to 19 years", "20 to 24 years",
+    "25 to 29 years", "30 to 34 years", "35 to 39 years", "40 to 44 years", "45 to 49 years",
+    "50 to 54 years", "55 to 59 years", "60 to 64 years", "65 to 69 years", "70 to 74 years",
+    "75 to 79 years", "80 to 84 years", "85 to 89 years", "90 to 94 years", "95 to 99 years", "100 years and over",
     # Age cohorts
-    age_cohort_vectors[["vector"]]
+    age_cohort_vectors[["label"]]
   ),
-  "v_CA16_512" = c("v_CA16_515", "v_CA16_521"),
-  "v_CA16_3405" = c("v_CA16_3411", "v_CA16_3432"),
-  "v_CA16_3852" = c("v_CA16_3855"),
-  "v_CA16_5051" = c("v_CA16_5054", "v_CA16_5057", "v_CA16_5060"),
-  "v_CA16_484" = c("v_CA16_488", "v_CA16_489"),
-  "v_CA16_491" = "v_CA16_493", # Collapse into the one above - couples with children can just be part of family characteristics
-  "v_CA16_504" = c("v_CA16_505", "v_CA16_508", "v_CA16_509"),
-  "v_CA16_402" = NA,
-  "v_CA16_407" = NA,
-  "v_CA16_1355" = v_CA16_1355_vectors,
-  "v_CA16_2525" = NA,
-  "v_CA16_3999" = v_CA16_3999_vectors,
-  "v_CA16_4890" = "v_CA16_4894",
-  "v_CA16_4897" = "v_CA16_4901"
+  "knowledge_of_english" = c("English only", "English and French"),
+  # "immigrant_status" = c("Immigrants", "2016 to 2021"),
+  # "aboriginal_identity" = c("Aboriginal identity"),
+  # "educational_attainment" = c("No certificate, diploma or degree", "Secondary (high) school diploma or equivalency certificate", "Postsecondary certificate, diploma or degree"),
+  "family_type" = c("Total one-parent families", "in which the parent is a woman+"),
+  # TODO
+  "couples" = "With children", # Collapse into the one above - couples with children can just be part of family characteristics
+  "household_type" = c("One-census-family households without additional persons", "Multigenerational households", "Multiple-census-family households", "One-census-family households with additional persons", "Two-or-more-person non-census-family households", "One-person households"),
+  # "ethnic_origin" = NA,
+  "area" = NA,
+  "top_10_languages" = top_10_languages_vectors,
+  "lim_at" = NA,
+  # "ethnic_origin" = ethnic_origin_vectors,
+  "shelter_cost_owner" = "Average monthly shelter costs for owned dwellings ($)",
+  "shelter_cost_renter" = "Average monthly shelter costs for rented dwellings ($)"
 )
 
-filter_breakdown_vectors <- function(data, vector) {
-  vector_breakdown_vectors <- breakdown_vectors[[vector]]
+filter_breakdown_vectors <- function(data, vectors, label_short) {
+  original_vector_label <- vectors %>%
+    filter(label_short == !!label_short) %>%
+    pull(label)
 
-  if (!all(is.na(vector_breakdown_vectors))) {
+  breakdown_labels <- breakdown_labels[[label_short]]
+
+  if (!all(is.na(breakdown_labels))) {
     data <- data %>%
       filter(
-        vector %in% c(vector_breakdown_vectors, !!vector)
+        label %in% c(breakdown_labels, !!original_vector_label)
       )
   } else {
     data <- data %>%
       filter(
-        vector == !!vector
+        label == !!original_vector_label
       )
   }
 
-  data
+  original_vector <- vectors %>%
+    filter(label_short == !!label_short) %>%
+    pull(vector)
+
+    data %>%
+      filter(highest_parent_vector == original_vector) %>%
+      mutate(label_short = label_short)
 }
 
+vectors_and_children_original <- vectors_and_children
+
 vectors_and_children <- map_dfr(
-  vectors[["vector"]],
-  function(vector) {
-    vectors_and_children %>%
-      filter_breakdown_vectors(vector)
+  vectors[["label_short"]],
+  function(label_short) {
+    vectors_and_children_original %>%
+      filter_breakdown_vectors(vectors, label_short)
   }
 )
 
-# Remove "couples" parent vector, change "couples with children" to be child of "family_type"
-couples_with_children <- tribble(
-  ~vector, ~parent_vector, ~highest_parent_vector,
-  "v_CA16_493", "v_CA16_484", "v_CA16_484"
+# Check if any are missing / mislabelled etc
+breakdown_labels %>%
+  unlist() %>%
+  as_tibble() %>%
+  filter(!is.na(value)) %>%
+  anti_join(vectors_and_children, by = c("value" = "label"))
+
+# Remove "couples" parent vector, change "with children" to be children of "family_type"
+couples_with_children_vectors <- vectors_and_children %>%
+  filter(label_short == "couples") %>%
+  filter(vector != highest_parent_vector) %>%
+  pull(vector)
+
+family_type_vector <- vectors_and_children %>%
+  filter(label_short == "family_type") %>%
+  pull(highest_parent_vector) %>%
+  unique()
+
+couples_with_children <- tibble(
+  vector = couples_with_children_vectors,
+  parent_vector = family_type_vector,
+  highest_parent_vector = family_type_vector
 )
 
 # Change parent vector and highest parent vector of LIM-AT to be v_CA16_424 (Number of persons in private households)
-lim_at_parents <- tribble(
-  ~vector, ~highest_parent_vector, ~parent_vector,
-  "v_CA16_2525", "v_CA16_424", "v_CA16_424"
+lim_at_vector <- vectors_and_children %>%
+  filter(label_short == "lim_at") %>%
+  pull(vector)
+
+persons_in_private_households_vector <- vectors_and_children %>%
+  filter(label_short == "population_in_private_households") %>%
+  pull(vector)
+
+lim_at <- tibble(
+  vector = lim_at_vector,
+  parent_vector = persons_in_private_households_vector,
+  highest_parent_vector = persons_in_private_households_vector
 )
 
 vectors_and_children <- vectors_and_children %>%
-  filter(vector != "v_CA16_491") %>%
   rows_update(couples_with_children, by = "vector") %>%
-  rows_update(lim_at_parents, by = "vector")
+  rows_update(lim_at, by = "vector")
 
-# Add metadata to vectors
-vectors <- vectors_and_children %>%
-  left_join(vectors, by = c("vector", "label" = "vector_label"))
-
-# Add short label to all children
-vectors <- vectors %>%
-  group_by(highest_parent_vector) %>%
-  fill(vector_label_short, .direction = "downup")
+vectors <- vectors_and_children
 
 usethis::use_data(vectors, overwrite = TRUE)
 
@@ -179,15 +226,17 @@ vectors_and_children_many <- vectors_and_children %>%
 
 ## CSD ----
 
+dataset <- "CA21"
+
 csd_data_few <- get_census(
-  dataset = "CA16",
+  dataset = dataset,
   regions = list(C = 01),
   level = "CSD",
   vectors = unique(vectors_and_children_few[["vector"]]), labels = "short"
 )
 
 csd_data_many <- get_census(
-  dataset = "CA16",
+  dataset = dataset,
   regions = list(C = 01),
   level = "CSD",
   vectors = vectors_and_children_many[["vector"]], labels = "short"
@@ -196,7 +245,7 @@ csd_data_many <- get_census(
 # CT ----
 
 ct_data_few <- get_census(
-  dataset = "CA16",
+  dataset = dataset,
   regions = list(C = 01),
   level = "CT",
   vectors = unique(vectors_and_children_few[["vector"]]), labels = "short"
@@ -205,7 +254,7 @@ ct_data_few <- get_census(
 # Split into two here, because of further errors
 
 ct_data_many <- get_census(
-  dataset = "CA16",
+  dataset = dataset,
   regions = list(C = 01),
   level = "CT",
   vectors = head(vectors_and_children_many[["vector"]], 200), labels = "short"
@@ -214,7 +263,7 @@ ct_data_many <- get_census(
 n <- length(vectors_and_children_many[["vector"]])
 
 ct_data_many_2 <- get_census(
-  dataset = "CA16",
+  dataset = dataset,
   regions = list(C = 01),
   level = "CT",
   vectors = vectors_and_children_many[["vector"]][201:n], labels = "short"
@@ -225,14 +274,15 @@ pivot_census_data <- function(data) {
   data %>%
     dplyr::select(
       geo_uid = .data$GeoUID,
-      dplyr::starts_with("v_CA16_")
+      dplyr::starts_with("v_CA21_")
     ) %>%
-    tidyr::pivot_longer(dplyr::starts_with("v_CA16_"), names_to = "vector") %>%
-    # Remove 0s for children of v_CA16_3999 (ethnic origin) and v_CA16_1355 (visible minority)
+    tidyr::pivot_longer(dplyr::starts_with("v_CA21_"), names_to = "vector") #%>%
+    # Remove 0s for children of ethnic origin and visible minority
     # Keep 0s otherwise
-    mutate(remove = value == 0 & vector %in% c(v_CA16_3999_vectors, v_CA16_1355_vectors)) %>%
-    filter(!remove) %>%
-    select(-remove)
+    # TODO
+    # mutate(remove = value == 0 & vector %in% c(ethnic_origin_vectors,)) %>%
+    # filter(!remove) %>%
+    # select(-remove)
 }
 
 combine_age_cohort_vectors <- function(data) {
@@ -253,13 +303,37 @@ combine_age_cohort_vectors <- function(data) {
   )
 }
 
+combine_with_children_vectors <- function(data) {
+  couples_with_children_vectors <- vectors %>%
+    filter(label == "With children") %>%
+    select(vector, label) %>%
+    mutate(group = "Couples with children")
+
+  data_without <- data %>%
+    anti_join(couples_with_children_vectors, by = "vector")
+
+  couples_with_children_data <- data %>%
+    inner_join(couples_with_children_vectors, by = "vector") %>%
+    group_by(geo_uid, group) %>%
+    # No na.rm = TRUE, because if any are NA, they are all NA - suppressed or otherwise not available
+    summarise(across(value, sum), .groups = "drop") %>%
+    mutate(vector = group) %>%
+    select(-group)
+
+  bind_rows(
+    data_without,
+    couples_with_children_data
+  )
+}
+
 csd_values <- bind_rows(
   csd_data_few %>%
     pivot_census_data(),
   csd_data_many %>%
     pivot_census_data()
 ) %>%
-  combine_age_cohort_vectors()
+  combine_age_cohort_vectors() %>%
+  combine_with_children_vectors()
 
 ct_values <- bind_rows(
   ct_data_few %>%
@@ -269,19 +343,22 @@ ct_values <- bind_rows(
   ct_data_many_2 %>%
     pivot_census_data()
 ) %>%
-  combine_age_cohort_vectors()
+  combine_age_cohort_vectors() %>%
+  combine_with_children_vectors()
 
 # Explore missing data -----
+
+# TODO THIS SECTION
 
 # How many geos have almost all vectors NA?
 
 n_vectors <- csd_values %>%
-  filter(!vector %in% c(v_CA16_3999_vectors, v_CA16_1355_vectors)) %>%
+  # filter(!vector %in% c(v_CA16_3999_vectors, v_CA16_1355_vectors)) %>%
   distinct(vector) %>%
   nrow()
 
 csd_values %>%
-  filter(!vector %in% c(v_CA16_3999_vectors, v_CA16_1355_vectors)) %>%
+  # filter(!vector %in% c(v_CA16_3999_vectors, v_CA16_1355_vectors)) %>%
   filter(is.na(value)) %>%
   count(geo_uid) %>%
   mutate(prop = n / n_vectors) %>%
@@ -298,15 +375,16 @@ csd_values %>%
 # Only INCLUDE if < 10% missing values
 # What's missing then?
 csd_values %>%
-  filter(!vector %in% c(v_CA16_3999_vectors, v_CA16_1355_vectors)) %>%
+  # filter(!vector %in% c(v_CA16_3999_vectors, v_CA16_1355_vectors)) %>%
   filter(is.na(value)) %>%
   count(geo_uid) %>%
   mutate(prop = n / n_vectors) %>%
   filter(prop < 0.10) %>%
   distinct(geo_uid) %>%
   left_join(
-    csd_values %>%
-      filter(!vector %in% c(v_CA16_3999_vectors, v_CA16_1355_vectors)),
+    csd_values,
+    # csd_values %>%
+      # filter(!vector %in% c(v_CA16_3999_vectors, v_CA16_1355_vectors)),
     by = "geo_uid"
   ) %>%
   filter(is.na(value)) %>%
@@ -322,7 +400,7 @@ csd_values %>%
 # Remove any CSDs and CTs that have >10% missing data
 
 csd_remove <- csd_values %>%
-  filter(!vector %in% c(v_CA16_3999_vectors, v_CA16_1355_vectors)) %>%
+  # filter(!vector %in% c(v_CA16_3999_vectors, v_CA16_1355_vectors)) %>%
   mutate(n_vectors = n_distinct(vector)) %>%
   filter(is.na(value)) %>%
   count(geo_uid, n_vectors) %>%
@@ -334,7 +412,7 @@ csd_values <- csd_values %>%
   anti_join(csd_remove, by = "geo_uid")
 
 ct_remove <- ct_values %>%
-  filter(!vector %in% c(v_CA16_3999_vectors, v_CA16_1355_vectors)) %>%
+  # filter(!vector %in% c(v_CA16_3999_vectors, v_CA16_1355_vectors)) %>%
   mutate(n_vectors = n_distinct(vector)) %>%
   filter(is.na(value)) %>%
   count(geo_uid, n_vectors) %>%

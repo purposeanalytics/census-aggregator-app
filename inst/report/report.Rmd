@@ -560,7 +560,7 @@ ethnic_origin <- data_breakdown %>%
   derive_census_vector_order(by_value = TRUE)
 
 header_and_barchart(
-  subsection_heading("Country of origin"),
+  subsection_heading("Ethnic origin"),
   ethnic_origin %>%
     inline_barchart()
 )
