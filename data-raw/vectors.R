@@ -47,7 +47,7 @@ vectors_and_children <- vectors[["vector"]] %>%
   )
 
 # Filter for specific children/breakdowns
-# NA means keep all children, otherwise just keep the ones in the list
+# NA means keep only the parent vector, otherwise just keep the ones in the list
 
 # Age cohort vectors
 age_cohort_vectors <- vectors %>%
@@ -146,9 +146,9 @@ filter_breakdown_vectors <- function(data, vectors, label_short) {
     filter(label_short == !!label_short) %>%
     pull(vector)
 
-    data %>%
-      filter(highest_parent_vector == original_vector) %>%
-      mutate(label_short = label_short)
+  data %>%
+    filter(highest_parent_vector == original_vector) %>%
+    mutate(label_short = label_short)
 }
 
 vectors_and_children_original <- vectors_and_children
@@ -167,46 +167,6 @@ breakdown_labels %>%
   as_tibble() %>%
   filter(!is.na(value)) %>%
   anti_join(vectors_and_children, by = c("value" = "label"))
-
-# Remove "couples" parent vector, change "with children" to be children of "family_type"
-couples_with_children_vectors <- vectors_and_children %>%
-  filter(label_short == "couples") %>%
-  filter(vector != highest_parent_vector) %>%
-  pull(vector)
-
-family_type_vector <- vectors_and_children %>%
-  filter(label_short == "family_type") %>%
-  pull(highest_parent_vector) %>%
-  unique()
-
-couples_with_children <- tibble(
-  vector = couples_with_children_vectors,
-  parent_vector = family_type_vector,
-  highest_parent_vector = family_type_vector
-)
-
-# Change parent vector and highest parent vector of LIM-AT to be v_CA16_424 (Number of persons in private households)
-lim_at_vector <- vectors_and_children %>%
-  filter(label_short == "lim_at") %>%
-  pull(vector)
-
-persons_in_private_households_vector <- vectors_and_children %>%
-  filter(label_short == "population_in_private_households") %>%
-  pull(vector)
-
-lim_at <- tibble(
-  vector = lim_at_vector,
-  parent_vector = persons_in_private_households_vector,
-  highest_parent_vector = persons_in_private_households_vector
-)
-
-vectors_and_children <- vectors_and_children %>%
-  rows_update(couples_with_children, by = "vector") %>%
-  rows_update(lim_at, by = "vector")
-
-vectors <- vectors_and_children
-
-usethis::use_data(vectors, overwrite = TRUE)
 
 # Get data ----
 
@@ -275,54 +235,13 @@ pivot_census_data <- function(data) {
       geo_uid = .data$GeoUID,
       dplyr::starts_with("v_CA21_")
     ) %>%
-    tidyr::pivot_longer(dplyr::starts_with("v_CA21_"), names_to = "vector") #%>%
-    # Remove 0s for children of ethnic origin and visible minority
-    # Keep 0s otherwise
-    # TODO
-    # mutate(remove = value == 0 & vector %in% c(ethnic_origin_vectors,)) %>%
-    # filter(!remove) %>%
-    # select(-remove)
-}
-
-combine_age_cohort_vectors <- function(data) {
-  data_without <- data %>%
-    anti_join(age_cohort_vectors, by = "vector")
-
-  age_cohort_data <- data %>%
-    inner_join(age_cohort_vectors, by = "vector") %>%
-    group_by(geo_uid, group) %>%
-    # No na.rm = TRUE, because if any are NA, they are all NA - suppressed or otherwise not available
-    summarise(across(value, sum), .groups = "drop") %>%
-    mutate(vector = group) %>%
-    select(-group)
-
-  bind_rows(
-    data_without,
-    age_cohort_data
-  )
-}
-
-combine_with_children_vectors <- function(data) {
-  couples_with_children_vectors <- vectors %>%
-    filter(label == "With children") %>%
-    select(vector, label) %>%
-    mutate(group = "Couples with children")
-
-  data_without <- data %>%
-    anti_join(couples_with_children_vectors, by = "vector")
-
-  couples_with_children_data <- data %>%
-    inner_join(couples_with_children_vectors, by = "vector") %>%
-    group_by(geo_uid, group) %>%
-    # No na.rm = TRUE, because if any are NA, they are all NA - suppressed or otherwise not available
-    summarise(across(value, sum), .groups = "drop") %>%
-    mutate(vector = group) %>%
-    select(-group)
-
-  bind_rows(
-    data_without,
-    couples_with_children_data
-  )
+    tidyr::pivot_longer(dplyr::starts_with("v_CA21_"), names_to = "vector") # %>%
+  # Remove 0s for children of ethnic origin and visible minority
+  # Keep 0s otherwise
+  # TODO
+  # mutate(remove = value == 0 & vector %in% c(ethnic_origin_vectors,)) %>%
+  # filter(!remove) %>%
+  # select(-remove)
 }
 
 csd_values <- bind_rows(
@@ -330,9 +249,7 @@ csd_values <- bind_rows(
     pivot_census_data(),
   csd_data_many %>%
     pivot_census_data()
-) %>%
-  combine_age_cohort_vectors() %>%
-  combine_with_children_vectors()
+)
 
 ct_values <- bind_rows(
   ct_data_few %>%
@@ -341,91 +258,146 @@ ct_values <- bind_rows(
     pivot_census_data(),
   ct_data_many_2 %>%
     pivot_census_data()
-) %>%
-  combine_age_cohort_vectors() %>%
-  combine_with_children_vectors()
+)
 
 # Explore missing data -----
 
 # TODO THIS SECTION
+#
+# # How many geos have almost all vectors NA?
+#
+# n_vectors <- csd_values %>%
+#   # filter(!vector %in% c(v_CA16_3999_vectors, v_CA16_1355_vectors)) %>%
+#   distinct(vector) %>%
+#   nrow()
+#
+# csd_values %>%
+#   # filter(!vector %in% c(v_CA16_3999_vectors, v_CA16_1355_vectors)) %>%
+#   filter(is.na(value)) %>%
+#   count(geo_uid) %>%
+#   mutate(prop = n / n_vectors) %>%
+#   count(prop) %>%
+#   arrange(-prop)
+#
+# # 0.985, only thing available is land area
+# # 0.970, only thing is 2011 population and land area
+# # 0.955, everything except total population, area, and households is suppressed
+# # 0.522, data is unreliable, to be used with caution, or suppressed
+# # 0.493, a lot is unreliable
+# # 0.478, suppression
+#
+# # Only INCLUDE if < 10% missing values
+# # What's missing then?
+# csd_values %>%
+#   # filter(!vector %in% c(v_CA16_3999_vectors, v_CA16_1355_vectors)) %>%
+#   filter(is.na(value)) %>%
+#   count(geo_uid) %>%
+#   mutate(prop = n / n_vectors) %>%
+#   filter(prop < 0.10) %>%
+#   distinct(geo_uid) %>%
+#   left_join(
+#     csd_values,
+#     # csd_values %>%
+#     # filter(!vector %in% c(v_CA16_3999_vectors, v_CA16_1355_vectors)),
+#     by = "geo_uid"
+#   ) %>%
+#   filter(is.na(value)) %>%
+#   count(vector) %>%
+#   left_join(vectors, by = "vector") %>%
+#   select(highest_parent_vector, label)
+#
+# # Just LIM-AT, 2011 population, and unaffordable housing
+# # We can just say those are not available?
+#
+# # Similar for CT
+#
+# # Remove any CSDs and CTs that have >10% missing data
+#
+# csd_remove <- csd_values %>%
+#   # filter(!vector %in% c(v_CA16_3999_vectors, v_CA16_1355_vectors)) %>%
+#   mutate(n_vectors = n_distinct(vector)) %>%
+#   filter(is.na(value)) %>%
+#   count(geo_uid, n_vectors) %>%
+#   mutate(prop = n / n_vectors) %>%
+#   filter(prop >= 0.10) %>%
+#   distinct(geo_uid)
+#
+# csd_values <- csd_values %>%
+#   anti_join(csd_remove, by = "geo_uid")
+#
+# ct_remove <- ct_values %>%
+#   # filter(!vector %in% c(v_CA16_3999_vectors, v_CA16_1355_vectors)) %>%
+#   mutate(n_vectors = n_distinct(vector)) %>%
+#   filter(is.na(value)) %>%
+#   count(geo_uid, n_vectors) %>%
+#   mutate(prop = n / n_vectors) %>%
+#   filter(prop >= 0.10) %>%
+#   distinct(geo_uid)
+#
+# ct_values <- ct_values %>%
+#   anti_join(ct_remove, by = "geo_uid")
+#
+# # Write removal datasets so that they are removed in geographic data sets too
+#
+# saveRDS(csd_remove, here::here("data-raw", "csd_remove.rds"))
+# saveRDS(ct_remove, here::here("data-raw", "ct_remove.rds"))
 
-# How many geos have almost all vectors NA?
+# Collapse vectors ----
 
-n_vectors <- csd_values %>%
-  # filter(!vector %in% c(v_CA16_3999_vectors, v_CA16_1355_vectors)) %>%
-  distinct(vector) %>%
-  nrow()
+# Collapse age cohort vectors and "with children" vectors, in vectors dataset and CSD/CT data
+collapse_vectors <- bind_rows(
+  age_cohort_vectors %>%
+    select(-label) %>%
+    rename(new_vector = group),
+  vectors_and_children %>%
+    filter(label == "With children") %>%
+    select(vector) %>%
+    mutate(new_vector = "Couples with children")
+)
 
-csd_values %>%
-  # filter(!vector %in% c(v_CA16_3999_vectors, v_CA16_1355_vectors)) %>%
-  filter(is.na(value)) %>%
-  count(geo_uid) %>%
-  mutate(prop = n / n_vectors) %>%
-  count(prop) %>%
-  arrange(-prop)
-
-# 0.985, only thing available is land area
-# 0.970, only thing is 2011 population and land area
-# 0.955, everything except total population, area, and households is suppressed
-# 0.522, data is unreliable, to be used with caution, or suppressed
-# 0.493, a lot is unreliable
-# 0.478, suppression
-
-# Only INCLUDE if < 10% missing values
-# What's missing then?
-csd_values %>%
-  # filter(!vector %in% c(v_CA16_3999_vectors, v_CA16_1355_vectors)) %>%
-  filter(is.na(value)) %>%
-  count(geo_uid) %>%
-  mutate(prop = n / n_vectors) %>%
-  filter(prop < 0.10) %>%
-  distinct(geo_uid) %>%
-  left_join(
-    csd_values,
-    # csd_values %>%
-      # filter(!vector %in% c(v_CA16_3999_vectors, v_CA16_1355_vectors)),
-    by = "geo_uid"
-  ) %>%
-  filter(is.na(value)) %>%
-  count(vector) %>%
-  left_join(vectors, by = "vector") %>%
-  select(highest_parent_vector, label)
-
-# Just LIM-AT, 2011 population, and unaffordable housing
-# We can just say those are not available?
-
-# Similar for CT
-
-# Remove any CSDs and CTs that have >10% missing data
-
-csd_remove <- csd_values %>%
-  # filter(!vector %in% c(v_CA16_3999_vectors, v_CA16_1355_vectors)) %>%
-  mutate(n_vectors = n_distinct(vector)) %>%
-  filter(is.na(value)) %>%
-  count(geo_uid, n_vectors) %>%
-  mutate(prop = n / n_vectors) %>%
-  filter(prop >= 0.10) %>%
-  distinct(geo_uid)
+vectors <- vectors_and_children %>%
+  collapse_census_vectors(collapse_vectors)
 
 csd_values <- csd_values %>%
-  anti_join(csd_remove, by = "geo_uid")
-
-ct_remove <- ct_values %>%
-  # filter(!vector %in% c(v_CA16_3999_vectors, v_CA16_1355_vectors)) %>%
-  mutate(n_vectors = n_distinct(vector)) %>%
-  filter(is.na(value)) %>%
-  count(geo_uid, n_vectors) %>%
-  mutate(prop = n / n_vectors) %>%
-  filter(prop >= 0.10) %>%
-  distinct(geo_uid)
+  collapse_census_vectors(collapse_vectors)
 
 ct_values <- ct_values %>%
-  anti_join(ct_remove, by = "geo_uid")
+  collapse_census_vectors(collapse_vectors)
 
-# Write removal datasets so that they are removed in geographic data sets too
+# Change parent of "Couples with children" to be "family_type" vector
+# Change parent of "lim_at" to be "population_in_private_households" vector
+family_type_vector <- vectors %>%
+  filter(label_short == "family_type") %>%
+  pull(highest_parent_vector) %>%
+  unique()
 
-saveRDS(csd_remove, here::here("data-raw", "csd_remove.rds"))
-saveRDS(ct_remove, here::here("data-raw", "ct_remove.rds"))
+lim_at_vector <- vectors %>%
+  filter(label_short == "lim_at") %>%
+  pull(vector)
+
+persons_in_private_households_vector <- vectors %>%
+  filter(label_short == "population_in_private_households") %>%
+  pull(vector)
+
+replacement_parent_vectors <- bind_rows(
+  tibble(vector = "Couples with children", new_parent_vector = family_type_vector, new_label_short = "family_type"),
+  tibble(vector = lim_at_vector, new_parent_vector = persons_in_private_households_vector)
+)
+
+vectors <- vectors %>%
+  reassign_parent_vector(replacement_parent_vectors)
+
+# Remove "couples" vector
+couples_vector <- vectors %>% filter(label_short == "couples") %>% pull(vector)
+
+vectors <- vectors %>%
+  filter(vector != couples_vector)
+
+csd_values <- csd_values %>%
+  filter(vector != couples_vector)
+
+ct_values <- ct_values %>%
+  filter(vector != couples_vector)
 
 # Save via arrow, partitioned by first 2 characters of geo_uid
 csd_values %>%
@@ -438,3 +410,6 @@ ct_values %>%
   group_by(id) %>%
   write_dataset(here::here("inst", "extdata", "ct_values"))
 
+# Save vectors
+
+usethis::use_data(vectors, overwrite = TRUE)
