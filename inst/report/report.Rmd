@@ -140,56 +140,9 @@ vectors_data <- vectors_data %>%
   # tidyr::complete(vector, geo_uid, fill = list(value = 0)) %>%
   left_join(metadata, by = "geo_uid")
 
-# Collapse / fake metadata for age cohorts  and couples with children
-
-age_vector <- vectors %>%
-  filter(label_short == "age", vector == highest_parent_vector) %>%
-  pull(vector)
-
-couples_with_children_vectors <- "Couples with children"
-family_type_vector <- vectors %>%
-  filter(label_short == "family_type", vector == highest_parent_vector) %>%
-  pull(vector)
-
-vectors_update <- tidyr::crossing(vector = c("0 to 14", "15 to 24", "25 to 44", "45 to 65", "65 to 84", "85+"), geo_uid = regions) %>%
-  mutate(
-    highest_parent_vector = age_vector,
-    units = "Number",
-    aggregation = "Additive",
-    label_short = "age_cohorts",
-    label = vector
-  ) %>%
-  bind_rows(
-    crossing(
-      vector = couples_with_children_vectors,
-      geo_uid = regions
-    ) %>%
-      mutate(
-        highest_parent_vector = family_type_vector,
-        units = "Number",
-        aggregation = "Additive",
-        label_short = "family_type",
-        label = vector
-      )
-  ) %>%
-  left_join(vectors_data %>% select(geo_uid, vector, value), by = c("vector", "geo_uid"))
-
 vectors_data <- vectors_data %>%
   left_join(censusaggregatorapp::vectors, by = "vector") %>%
-  anti_join(vectors_update, by = c("vector", "geo_uid"))
-
-vectors_data <- vectors_data %>%
-  bind_rows(vectors_update)
-
-vectors_data <- vectors_data %>%
   derive_aggregation_type()
-
-vectors_metadata <- censusaggregatorapp::vectors %>%
-  bind_rows(
-    vectors_update %>%
-      select(-geo_uid, -value) %>%
-      distinct()
-  )
 
 # Aggregate vectors - treat v_CA16_407 (land area) separately, since it will be used for population density, and v_CA16_402 (population 2016) separately, since it will be used for population change
 vectors_data_filtered <- vectors_data %>%
@@ -198,7 +151,7 @@ vectors_data_filtered <- vectors_data %>%
 data_breakdown <- vectors_data_filtered %>%
   aggregate_census_vectors() %>%
   distinct() %>%
-  left_join(vectors_metadata, by = c("highest_parent_vector", "vector", "type", "label", "units", "parent_vector", "aggregation", "details")) %>%
+  left_join(censusaggregatorapp::vectors, by = c("highest_parent_vector", "vector", "type", "label", "units", "parent_vector", "aggregation", "details")) %>%
   select(highest_parent_vector, vector, label, label_short, value, value_proportion) %>%
   group_by(highest_parent_vector) %>%
   tidyr::fill(label_short, .direction = "updown") %>%
@@ -213,10 +166,12 @@ boundaries_data <- boundaries_data %>%
   filter(geo_uid %in% regions) %>%
   read_sf_dataset()
 
-boundaries_data %>%
-  st_union() %>%
-  ggplot() +
-  geom_sf(fill = NA) +
+combined_boundaries <- boundaries_data %>%
+  st_union()
+
+ggplot() +
+  geom_sf(data = boundaries_data, colour = "grey", fill = NA) +
+  geom_sf(data = combined_boundaries, colour = "black", fill = NA) +
   theme_void()
 ```
 

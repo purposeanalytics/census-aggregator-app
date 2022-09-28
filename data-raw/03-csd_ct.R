@@ -1,14 +1,13 @@
 # Pull CSD and CT data along with total population, number of households, area, and population density to be loaded into mapbox
 
+library(tidyverse)
 library(cancensus)
-library(dplyr)
-library(janitor)
-library(sf)
-library(mapboxapi)
-library(rmapshaper)
-library(sfarrow)
-library(purrr)
 library(mapview)
+library(janitor)
+library(rmapshaper)
+library(sf)
+library(sfarrow)
+library(mapboxapi)
 
 dataset <- "CA21"
 
@@ -44,7 +43,7 @@ csd <- csd %>%
   )
 
 # Exclude CSDs with >10% missing data (mainly 50-100% missing), since we will not be able to render reports for them anyways
-csd_remove <- readRDS(here::here("data-raw", "csd_remove.rds"))
+csd_remove <- readRDS(here::here("data-raw", "intermediary", "csd_remove.rds"))
 
 csd <- csd %>%
   anti_join(csd_remove, by = "geo_uid")
@@ -145,7 +144,7 @@ ct <- get_census(
   select(geo_uid, cd_uid, region_name, population, households, area_sq_km = contains(tolower(area_vector)), geometry)
 
 # Exclude CTs with >10% missing data (mainly 50-100% missing), since we will not be able to render reports for them anyways
-ct_remove <- readRDS(here::here("data-raw", "ct_remove.rds"))
+ct_remove <- readRDS(here::here("data-raw", "intermediary", "ct_remove.rds"))
 
 ct <- ct %>%
   anti_join(ct_remove, by = "geo_uid")
