@@ -47,8 +47,8 @@ add_census_fill_layer <- function(map, geography) {
         "source" = geography_to_source_id(geography),
         "source-layer" = geography_to_source_layer_id(geography),
         "paint" = list(
-          "fill-opacity" = 0.75,
-          "fill-color" = "black"
+          "fill-opacity" = 0.8,
+          "fill-color" = "white"
         ),
         layout = list(
           "visibility" = "none"
