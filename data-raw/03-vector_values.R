@@ -199,6 +199,8 @@ csd_values <- csd_values %>%
 ct_values <- ct_values %>%
   collapse_census_vectors(collapse_vectors, aggregate = TRUE)
 
+# Don't collapse income vectors yet, because we need them for the estimated median income calculation
+
 # Remove "couples" vector
 couples_vector <- vectors %>% filter(label_short == "couples", vector == highest_parent_vector) %>% pull(vector)
 

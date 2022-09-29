@@ -19,6 +19,8 @@ vectors <- tribble(
   "v_CA21_543", "Household type", "household_type",
   "v_CA21_1144", "Knowledge of official languages for the total population excluding institutional residents", "knowledge_of_english",
   "v_CA21_2200", "Total - Language spoken most often at home for the total population excluding institutional residents - 100% data", "top_10_languages",
+  "v_CA21_906", "Median total income of household in 2020 ($)", "median_income",
+  "v_CA21_923", "Household total income groups in 2020 for private households", "income",
   "v_CA21_1025", "In low income based on the Low-income measure, after tax (LIM-AT)", "lim_at",
   # TODO
   # "v_CA16_3405", "Total - Immigrant status and period of immigration for the population in private households - 25% sample data", "immigrant_status",
@@ -81,6 +83,12 @@ top_10_languages_vectors <- vectors %>%
   child_census_vectors(leaves_only = TRUE) %>%
   pull(label)
 
+income_vectors <- vectors %>%
+  filter(label_short == "income") %>%
+  pull(vector) %>%
+  child_census_vectors(keep_parent = TRUE, leaves_only = TRUE) %>%
+  pull(label)
+
 # Ethnic origin
 # ethnic_origin_vectors <- vectors %>%
 #   filter(label_short == "ethnic_origin") %>%
@@ -121,6 +129,8 @@ breakdown_labels <- list(
   # "ethnic_origin" = NA,
   "area" = NA,
   "top_10_languages" = top_10_languages_vectors,
+  "median_income" = NA,
+  "income" = income_vectors,
   "lim_at" = NA,
   # "ethnic_origin" = ethnic_origin_vectors,
   "shelter_cost_owner" = "Average monthly shelter costs for owned dwellings ($)",

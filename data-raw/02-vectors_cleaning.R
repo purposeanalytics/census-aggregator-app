@@ -6,22 +6,61 @@ library(censusaggregate)
 vectors <- readRDS(here::here("data-raw", "intermediary", "vectors.rds"))
 age_cohort_vectors <- readRDS(here::here("data-raw", "intermediary", "age_cohort_vectors.rds"))
 
-# Collapse age cohort vectors and "with children" vectors ----
+# Collapse age cohort, "with children", total income vectors ----
+
+age_cohort_vectors <- age_cohort_vectors %>%
+  select(-label) %>%
+  rename(new_vector = group)
+
+with_children_vectors <- vectors %>%
+  filter(label == "With children") %>%
+  select(vector) %>%
+  mutate(new_vector = "Couples with children")
+
+total_income_vectors <- tibble(
+  label = c(
+    "Under $5,000", "$5,000 to $9,999", "$10,000 to $14,999", "$15,000 to $19,999",
+    "$20,000 to $24,999", "$25,000 to $29,999", "$30,000 to $34,999",
+    "$35,000 to $39,999", "$40,000 to $44,999", "$45,000 to $49,999",
+    "$50,000 to $59,999", "$60,000 to $69,999", "$70,000 to $79,999",
+    "$80,000 to $89,999", "$90,000 to $99,999", "$100,000 to $124,999",
+    "$125,000 to $149,999", "$150,000 to $199,999", "$200,000 and over"
+  )
+) %>%
+  mutate(new_vector = case_when(
+    label %in% c("Under $5,000", "$5,000 to $9,999", "$10,000 to $14,999", "$15,000 to $19,999") ~ "Under $20,000",
+    label %in% c(
+      "$20,000 to $24,999", "$25,000 to $29,999", "$30,000 to $34,999",
+      "$35,000 to $39,999"
+    ) ~ "$20,000 to $40,000",
+    label %in% c(
+      "$40,000 to $44,999", "$45,000 to $49,999",
+      "$50,000 to $59,999"
+    ) ~ "$40,000 to $60,000",
+    label %in% c("$60,000 to $69,999", "$70,000 to $79,999") ~ "$60,000 to $80,000",
+    label %in% c("$80,000 to $89,999", "$90,000 to $99,999") ~ "$80,000 to $100,000",
+    label %in% c(
+      "$100,000 to $124,999",
+      "$125,000 to $149,999", "$150,000 to $199,999", "$200,000 and over"
+    ) ~ "$100,000 and over"
+  )) %>%
+  inner_join(vectors %>%
+    select(label, vector), by = "label") %>%
+  select(-label)
 
 collapse_vectors <- bind_rows(
-  age_cohort_vectors %>%
-    select(-label) %>%
-    rename(new_vector = group),
-  vectors %>%
-    filter(label == "With children") %>%
-    select(vector) %>%
-    mutate(new_vector = "Couples with children")
+  age_cohort_vectors,
+  with_children_vectors,
+  total_income_vectors
 )
 
 vectors <- vectors %>%
-  collapse_census_vectors(collapse_vectors)
+  mutate(label = str_replace_all(label, "\\$", "\\\\$")) %>%
+  collapse_census_vectors(collapse_vectors) %>%
+  distinct()
 
-vectors <- vectors %>% mutate(label_short = case_when(
+vectors <- vectors %>%
+  mutate(label_short = case_when(
   vector %in% age_cohort_vectors[["group"]] ~ "age_cohorts",
   TRUE ~ label_short
 ))
@@ -70,11 +109,12 @@ parent_vectors_recoding <- tibble::tribble(
   "Total - Private households by tenure", "Household tenure",
   "Total - Owner and tenant households with household total income greater than zero, in non-farm, non-reserve private dwellings by shelter-cost-to-income ratio", "Unaffordable housing",
   "Total - Owner households in non-farm, non-reserve private dwellings", "Average monthly shelter cost",
-  "Total - Tenant households in non-farm, non-reserve private dwellings", "Average monthly shelter cost"
+  "Total - Tenant households in non-farm, non-reserve private dwellings", "Average monthly shelter cost",
+  "Median total income of household in 2020 ($)", "Median total household income"
 )
 
 breakdown_vectors_recoding <- tribble(
-  ~label, ~ new_label,
+  ~label, ~new_label,
   "0 to 4 years", "0 to 4",
   "5 to 9 years", "5 to 9",
   "10 to 14 years", "10 to 14",
