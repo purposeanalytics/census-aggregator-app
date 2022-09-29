@@ -3,6 +3,7 @@
 library(tidyverse)
 library(cancensus)
 library(censusaggregate)
+library(arrow)
 
 dataset <- "CA21"
 
@@ -193,10 +194,10 @@ collapse_vectors <- bind_rows(
 )
 
 csd_values <- csd_values %>%
-  collapse_census_vectors(collapse_vectors)
+  collapse_census_vectors(collapse_vectors, aggregate = TRUE)
 
 ct_values <- ct_values %>%
-  collapse_census_vectors(collapse_vectors)
+  collapse_census_vectors(collapse_vectors, aggregate = TRUE)
 
 # Remove "couples" vector
 couples_vector <- vectors %>% filter(label_short == "couples", vector == highest_parent_vector) %>% pull(vector)

@@ -170,54 +170,8 @@ breakdown_labels %>%
   filter(!is.na(value)) %>%
   anti_join(vectors_and_children, by = c("value" = "label"))
 
-# Collapse age cohort vectors and "with children" vectors
-
 # Keep a copy of the original / full vectors for pulling data from
 
 original_vectors <- vectors_and_children
 
 saveRDS(original_vectors, here::here("data-raw", "intermediary", "vectors.rds"))
-
-collapse_vectors <- bind_rows(
-  age_cohort_vectors %>%
-    select(-label) %>%
-    rename(new_vector = group),
-  vectors_and_children %>%
-    filter(label == "With children") %>%
-    select(vector) %>%
-    mutate(new_vector = "Couples with children")
-)
-
-vectors <- vectors_and_children %>%
-  collapse_census_vectors(collapse_vectors)
-
-# Change parent of "Couples with children" to be "family_type" vector
-# Change parent of "lim_at" to be "population_in_private_households" vector
-family_type_vector <- vectors %>%
-  filter(label_short == "family_type") %>%
-  pull(highest_parent_vector) %>%
-  unique()
-
-lim_at_vector <- vectors %>%
-  filter(label_short == "lim_at") %>%
-  pull(vector)
-
-persons_in_private_households_vector <- vectors %>%
-  filter(label_short == "population_in_private_households") %>%
-  pull(vector)
-
-replacement_parent_vectors <- bind_rows(
-  tibble(vector = "Couples with children", new_parent_vector = family_type_vector, new_label_short = "family_type"),
-  tibble(vector = lim_at_vector, new_parent_vector = persons_in_private_households_vector)
-)
-
-vectors <- vectors %>%
-  reassign_parent_vector(replacement_parent_vectors)
-
-# Remove "couples" vector
-couples_vector <- vectors %>% filter(label_short == "couples") %>% pull(vector)
-
-vectors <- vectors %>%
-  filter(vector != couples_vector)
-
-usethis::use_data(vectors, overwrite = TRUE)

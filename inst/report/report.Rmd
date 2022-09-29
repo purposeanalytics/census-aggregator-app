@@ -3,12 +3,12 @@ output:
   html_document:
     theme:
       version: 4
-params:
-  geo_uid: !r c("3520005")
-  level: "csd"
 # params:
-#   geo_uid: !r c("6020500.02", "6020100.02")
-#   level: "ct"
+#   geo_uid: !r c("3520005")
+#   level: "csd"
+params:
+  geo_uid: !r c("6020500.02", "6020100.02")
+  level: "ct"
 ---
 
 ```{r setup, echo = FALSE}
@@ -155,7 +155,8 @@ data_breakdown <- vectors_data_filtered %>%
   select(highest_parent_vector, vector, label, label_short, value, value_proportion) %>%
   group_by(highest_parent_vector) %>%
   tidyr::fill(label_short, .direction = "updown") %>%
-  ungroup()
+  ungroup() %>%
+  distinct()
 ```
 
 ```{r map, fig.height = 5, dpi = 300}
@@ -274,9 +275,7 @@ household_size <- data_breakdown %>%
   filter(
     label_short == "household_size",
     vector != highest_parent_vector
-  ) %>%
-  mutate(label = ifelse(label == "5 or more persons", "5+ persons", label)) %>%
-  derive_census_vector_order()
+  )
 
 header_and_barchart(
   subsection_heading("Private households by size"),
@@ -543,3 +542,10 @@ header_and_barchart(
 ```
 
 :::
+
+#### IDs
+
+```{r, output = "asis"}
+dput(regions)
+```
+
