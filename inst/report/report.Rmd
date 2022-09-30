@@ -144,9 +144,11 @@ vectors_data <- vectors_data %>%
   left_join(censusaggregatorapp::vectors, by = "vector") %>%
   derive_aggregation_type()
 
-# Aggregate vectors - treat v_CA16_407 (land area) separately, since it will be used for population density, and v_CA16_402 (population 2016) separately, since it will be used for population change
+# Aggregate vectors - treat land area separately (used for population density), population 2016 separately ), median total income separately (used for median income if only 1 region selected)
 vectors_data_filtered <- vectors_data %>%
-  filter(!(label %in% c("Population, 2016", "Land area in square kilometres")))
+  filter(!(label %in% c("Population, 2016", "Land area in square kilometres", "Median total income of household in 2020 (\\$)")))
+
+# Also exclude income vectors, aggregate separately
 
 data_breakdown <- vectors_data_filtered %>%
   aggregate_census_vectors() %>%
@@ -315,7 +317,7 @@ header_and_barchart(
 )
 ```
 
-```{r educational_attainment}
+```{r educational_attainment, eval = FALSE}
 educational_attainment <- data_breakdown %>%
   filter(
     label_short == "educational_attainment",
@@ -403,8 +405,20 @@ shiny::column(
 ```
 
 :::
-
 ::: {.row}
+
+```{r total-income}
+total_income <- data_breakdown %>% 
+  filter(label_short == "income_buckets") %>%
+  mutate(label = forcats::fct_relevel(label, "Under $20,000", "$20,000 to $40,000", "$40,000 to $60,000", 
+"$60,000 to $80,000", "$80,000 to $100,000", "$100,000 and over"))
+
+header_and_barchart(
+  subsection_heading("Total household income"),
+  total_income %>%
+    inline_barchart()
+)
+```
 
 ```{r shelter-cost}
 shelter_cost <- data_breakdown %>%

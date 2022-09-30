@@ -5,6 +5,8 @@ library(censusaggregate)
 
 vectors <- readRDS(here::here("data-raw", "intermediary", "vectors.rds"))
 age_cohort_vectors <- readRDS(here::here("data-raw", "intermediary", "age_cohort_vectors.rds"))
+age_five_year_vectors <- readRDS(here::here("data-raw", "intermediary", "age_five_year_vectors.rds"))
+income_vectors <- readRDS(here::here("data-raw", "intermediary", "income_vectors.rds"))
 
 # Collapse age cohort, "with children", total income vectors ----
 
@@ -17,18 +19,12 @@ with_children_vectors <- vectors %>%
   select(vector) %>%
   mutate(new_vector = "Couples with children")
 
-total_income_vectors <- tibble(
-  label = c(
-    "Under $5,000", "$5,000 to $9,999", "$10,000 to $14,999", "$15,000 to $19,999",
-    "$20,000 to $24,999", "$25,000 to $29,999", "$30,000 to $34,999",
-    "$35,000 to $39,999", "$40,000 to $44,999", "$45,000 to $49,999",
-    "$50,000 to $59,999", "$60,000 to $69,999", "$70,000 to $79,999",
-    "$80,000 to $89,999", "$90,000 to $99,999", "$100,000 to $124,999",
-    "$125,000 to $149,999", "$150,000 to $199,999", "$200,000 and over"
-  )
-) %>%
+income_vectors <- income_vectors %>%
   mutate(new_vector = case_when(
-    label %in% c("Under $5,000", "$5,000 to $9,999", "$10,000 to $14,999", "$15,000 to $19,999") ~ "Under $20,000",
+    label %in% c(
+      "Under $5,000", "$5,000 to $9,999",
+      "$10,000 to $14,999", "$15,000 to $19,999"
+    ) ~ "Under $20,000",
     label %in% c(
       "$20,000 to $24,999", "$25,000 to $29,999", "$30,000 to $34,999",
       "$35,000 to $39,999"
@@ -44,14 +40,22 @@ total_income_vectors <- tibble(
       "$125,000 to $149,999", "$150,000 to $199,999", "$200,000 and over"
     ) ~ "$100,000 and over"
   )) %>%
-  inner_join(vectors %>%
-    select(label, vector), by = "label") %>%
-  select(-label)
+  select(-label) %>%
+  filter(!is.na(new_vector))
+
+saveRDS(income_vectors, here::here("data-raw", "intermediary", "income_vectors_grouped.rds"))
+
+# First, separately keep age (five year bucket) and income vectors, for data export and calculation of estimated median
+keep_vectors <- c(age_five_year_vectors[["vector"]], income_vectors[["vector"]])
+keep_vectors <- vectors %>%
+  filter(vector %in% keep_vectors)
+
+# Now collapse vectors
 
 collapse_vectors <- bind_rows(
   age_cohort_vectors,
   with_children_vectors,
-  total_income_vectors
+  income_vectors
 )
 
 vectors <- vectors %>%
@@ -61,9 +65,17 @@ vectors <- vectors %>%
 
 vectors <- vectors %>%
   mutate(label_short = case_when(
-  vector %in% age_cohort_vectors[["group"]] ~ "age_cohorts",
-  TRUE ~ label_short
-))
+    vector %in% age_cohort_vectors[["new_vector"]] ~ "age_cohorts",
+    vector %in% income_vectors[["new_vector"]] ~ "income_buckets",
+    TRUE ~ label_short
+  ))
+
+# Add kept vectors back in
+
+vectors <- vectors %>%
+  filter(!vector %in% keep_vectors)
+
+vectors <- bind_rows(vectors, keep_vectors)
 
 # Change parent of "Couples with children" to be "family_type" vector, change parent of "lim_at" to be "population_in_private_households" vector ----
 family_type_vector <- vectors %>%
@@ -115,12 +127,6 @@ parent_vectors_recoding <- tibble::tribble(
 
 breakdown_vectors_recoding <- tribble(
   ~label, ~new_label,
-  "0 to 4 years", "0 to 4",
-  "5 to 9 years", "5 to 9",
-  "10 to 14 years", "10 to 14",
-  "85 to 89 years", "85 to 89",
-  "90 to 94 years", "90 to 94",
-  "95 to 99 years", "95 to 99",
   "100 years and over", "100+",
   "5 or more persons", "5+ persons",
   "Total one-parent families", "Single parent families",
@@ -138,5 +144,11 @@ vectors <- vectors %>%
   left_join(breakdown_vectors_recoding, by = "label") %>%
   mutate(label = coalesce(new_label, label)) %>%
   select(-new_label)
+
+vectors <- vectors %>%
+  mutate(label = str_remove(label, " years"))
+
+vectors <- vectors %>%
+  distinct()
 
 usethis::use_data(vectors, overwrite = TRUE)

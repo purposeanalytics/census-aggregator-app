@@ -7,18 +7,19 @@ library(arrow)
 
 dataset <- "CA21"
 
-vectors <- readRDS(here::here("data-raw", "intermediary", "vectors.rds"))
+vectors_original <- readRDS(here::here("data-raw", "intermediary", "vectors.rds"))
 age_cohort_vectors <- readRDS(here::here("data-raw", "intermediary", "age_cohort_vectors.rds"))
+income_vectors <- readRDS(here::here("data-raw", "intermediary", "income_vectors_grouped.rds"))
 
 # cancensus errors out if trying to get too much data, so do this in a few goes
 # Less than 25 child vectors:
-vectors_few <- vectors %>%
+vectors_few <- vectors_original %>%
   add_count(highest_parent_vector) %>%
   filter(n <= 25) %>%
   select(-n)
 
 # More than 25 child vectors:
-vectors_many <- vectors %>%
+vectors_many <- vectors_original %>%
   add_count(highest_parent_vector) %>%
   filter(n > 25) %>%
   select(-n)
@@ -182,27 +183,42 @@ ct_values <- bind_rows(
 
 # Collapse / remove etc ----
 
-# Collapse age cohort vectors and "with children" vectors, in vectors dataset and CSD/CT data
+# Keep 5 year age buckets and original income buckets separately, for data export and estimated median calculation
+
+vectors_keep <- censusaggregatorapp::vectors %>%
+  filter(label_short %in% c("age", "income"))
+
+csd_keep <- csd_values %>%
+  semi_join(vectors_keep, by = "vector")
+
+ct_keep <- ct_values %>%
+  semi_join(vectors_keep, by = "vector")
+
+# Now collapse the grouped vectors
+
 collapse_vectors <- bind_rows(
+  vectors_original %>%
+    filter(label == "With children") %>%
+    select(vector) %>%
+    mutate(new_vector = "Couples with children"),
   age_cohort_vectors %>%
     select(-label) %>%
     rename(new_vector = group),
-  vectors %>%
-    filter(label == "With children") %>%
-    select(vector) %>%
-    mutate(new_vector = "Couples with children")
+  income_vectors
 )
 
 csd_values <- csd_values %>%
-  collapse_census_vectors(collapse_vectors, aggregate = TRUE)
+  collapse_census_vectors(collapse_vectors, aggregate = TRUE) %>%
+  anti_join(vectors_keep, by = "vector") %>%
+  bind_rows(csd_keep)
 
 ct_values <- ct_values %>%
-  collapse_census_vectors(collapse_vectors, aggregate = TRUE)
-
-# Don't collapse income vectors yet, because we need them for the estimated median income calculation
+  collapse_census_vectors(collapse_vectors, aggregate = TRUE) %>%
+  anti_join(vectors_keep, by = "vector") %>%
+  bind_rows(ct_keep)
 
 # Remove "couples" vector
-couples_vector <- vectors %>% filter(label_short == "couples", vector == highest_parent_vector) %>% pull(vector)
+couples_vector <- vectors_original %>% filter(label_short == "couples", vector == highest_parent_vector) %>% pull(vector)
 
 csd_values <- csd_values %>%
   filter(vector != couples_vector)

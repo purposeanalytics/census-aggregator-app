@@ -76,6 +76,20 @@ age_cohort_vectors <- vectors %>%
 
 saveRDS(age_cohort_vectors, here::here("data-raw", "intermediary", "age_cohort_vectors.rds"))
 
+age_five_year_vectors <- vectors %>%
+  filter(label_short == "age") %>%
+  pull(vector) %>%
+  child_census_vectors(keep_parent = TRUE) %>%
+  filter(label %in% c(
+    "0 to 4 years", "5 to 9 years", "10 to 14 years", "15 to 19 years", "20 to 24 years",
+    "25 to 29 years", "30 to 34 years", "35 to 39 years", "40 to 44 years", "45 to 49 years",
+    "50 to 54 years", "55 to 59 years", "60 to 64 years", "65 to 69 years", "70 to 74 years",
+    "75 to 79 years", "80 to 84 years", "85 to 89 years", "90 to 94 years", "95 to 99 years", "100 years and over"
+  )) %>%
+  select(vector, label)
+
+saveRDS(age_five_year_vectors, here::here("data-raw", "intermediary", "age_five_year_vectors.rds"))
+
 # Language spoken at home
 top_10_languages_vectors <- vectors %>%
   filter(label_short == "top_10_languages") %>%
@@ -87,7 +101,9 @@ income_vectors <- vectors %>%
   filter(label_short == "income") %>%
   pull(vector) %>%
   child_census_vectors(keep_parent = TRUE, leaves_only = TRUE) %>%
-  pull(label)
+  select(vector, label)
+
+saveRDS(income_vectors, here::here("data-raw", "intermediary", "income_vectors.rds"))
 
 # Ethnic origin
 # ethnic_origin_vectors <- vectors %>%
@@ -111,10 +127,7 @@ breakdown_labels <- list(
   "unaffordable_housing" = "Spending 30% or more of income on shelter costs",
   "age" = c(
     # 5 year breakdown
-    "0 to 4 years", "5 to 9 years", "10 to 14 years", "15 to 19 years", "20 to 24 years",
-    "25 to 29 years", "30 to 34 years", "35 to 39 years", "40 to 44 years", "45 to 49 years",
-    "50 to 54 years", "55 to 59 years", "60 to 64 years", "65 to 69 years", "70 to 74 years",
-    "75 to 79 years", "80 to 84 years", "85 to 89 years", "90 to 94 years", "95 to 99 years", "100 years and over",
+    age_five_year_vectors[["label"]],
     # Age cohorts
     age_cohort_vectors[["label"]]
   ),
@@ -130,7 +143,7 @@ breakdown_labels <- list(
   "area" = NA,
   "top_10_languages" = top_10_languages_vectors,
   "median_income" = NA,
-  "income" = income_vectors,
+  "income" = income_vectors[["label"]],
   "lim_at" = NA,
   # "ethnic_origin" = ethnic_origin_vectors,
   "shelter_cost_owner" = "Average monthly shelter costs for owned dwellings ($)",
