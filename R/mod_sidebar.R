@@ -226,31 +226,80 @@ mod_sidebar_server <- function(id, selected_geographies, map_rendered, boomarks_
     # Export data ----
     output$export_data <- shiny::downloadHandler(
       filename = function() {
-        "report.html"
+        "export.zip"
       },
       content = function(file) {
-        tempReport <- file.path(tempdir(), "report.Rmd")
-        file.copy(app_sys("report/report.Rmd"), tempReport, overwrite = TRUE)
+
+        # Move to tempdir to save files
+        original_wd <- setwd(tempdir())
+
+        # Go back to working directory after function
+        on.exit(setwd(original_wd))
+
+        temp_template <- "report.Rmd"
+        file.copy(app_sys("report/report.Rmd"), temp_template, overwrite = TRUE)
+
+        report_html <- "report.html"
+        report_pdf <- "report.pdf"
+        data_export <- "data.csv"
 
         # Set up parameters to pass to Rmd document
         params <- list(
           geo_uid = selected_geographies()$geo_uid,
-          level = input$aggregate_area
+          level = input$aggregate_area,
+          csv_location = data_export
         )
 
         # Knit the document, passing in the `params` list, and eval it in a
         # child of the global environment (this isolates the code in the document
         # from the code in this app).
-        rmarkdown::render(tempReport,
-          output_file = file,
+        rmarkdown::render(temp_template,
+          output_file = report_html,
           params = params,
           envir = new.env(parent = globalenv())
         )
+
+        # Print to PDF
+        pagedown::chrome_print(
+          report_html,
+          output = report_pdf,
+          extra_args = chrome_extra_args(),
+          verbose = 1,
+          async = TRUE # returns a promise
+        )
+
+        # Zip HTML, PDF, and data export
+        zip(file, c(report_html, report_pdf, data_export))
+
       }
     )
 
     return(inputs)
   })
+}
+
+# Via: https://github.com/RLesur/chrome_print_shiny
+#' Return Chrome CLI arguments
+#'
+#' This is a helper function which returns arguments to be passed to Chrome.
+#' This function tests whether the code is running on shinyapps and returns the
+#' appropriate Chrome extra arguments.
+#'
+#' @param default_args Arguments to be used in any circumstances.
+#'
+#' @return A character vector with CLI arguments to be passed to Chrome.
+#' @noRd
+chrome_extra_args <- function(default_args = c("--disable-gpu")) {
+  args <- default_args
+  # Test whether we are in a shinyapps container
+  if (identical(Sys.getenv("R_CONFIG_ACTIVE"), "shinyapps")) {
+    args <- c(
+      args,
+      "--no-sandbox", # required because we are in a container
+      "--disable-dev-shm-usage"
+    ) # in case of low available memory
+  }
+  args
 }
 
 ## To be copied in the UI
