@@ -9,6 +9,7 @@ output:
 params:
   geo_uid: !r c("6020500.02", "6020100.02")
   level: "ct"
+  csv_location: "data_export.csv"
 ---
 
 ```{r setup, echo = FALSE}
@@ -146,7 +147,7 @@ vectors_data <- vectors_data %>%
 
 # Aggregate vectors - treat land area separately (used for population density), population 2016 separately ), median total income separately (used for median income if only 1 region selected)
 vectors_data_filtered <- vectors_data %>%
-  filter(!(label %in% c("Population, 2016", "Land area in square kilometres", "Median total income of household in 2020 (\\$)")))
+  filter(!(label %in% c("Population, 2016", "Land area in square kilometres", "Median total household income")))
 
 # Also exclude income vectors, aggregate separately
 
@@ -224,6 +225,13 @@ shiny::column(
 )
 ```
 
+```{r households}
+shiny::column(
+  width = 3,
+  snapshot_card("Households", households)
+)
+```
+
 ```{r population_change}
 shiny::column(
   width = 3,
@@ -235,13 +243,6 @@ shiny::column(
 shiny::column(
   width = 3,
   snapshot_card("Population density<br>(people per square km)", population_density)
-)
-```
-
-```{r households}
-shiny::column(
-  width = 3,
-  snapshot_card("Households", households)
 )
 ```
 
@@ -371,9 +372,26 @@ section_heading("Income and housing")
 ::: {.row .mb-2}
 
 ```{r median_income}
+# If there is only one region, just report the actual median
+# Otherwise, estimate the median
+
+if (length(regions) == 1) {
+  median_income <- vectors_data %>%
+    filter(vector == "v_CA21_906")
+  median_income_label <- "Median household income"
+} else {
+  median_income <- data_breakdown %>%
+    filter(label_short == "income") %>%
+    aggregate_estimated_median_income()
+  median_income_label <- "Estimated median household income"
+}
+
+median_income <- median_income %>%
+    pull_and_format_value("dollar")
+
 shiny::column(
   width = 4,
-  snapshot_card("Estimated median income", "---")
+  snapshot_card(median_income_label, median_income)
 )
 ```
 
@@ -408,10 +426,12 @@ shiny::column(
 ::: {.row}
 
 ```{r total-income}
-total_income <- data_breakdown %>% 
+total_income <- data_breakdown %>%
   filter(label_short == "income_buckets") %>%
-  mutate(label = forcats::fct_relevel(label, "Under $20,000", "$20,000 to $40,000", "$40,000 to $60,000", 
-"$60,000 to $80,000", "$80,000 to $100,000", "$100,000 and over"))
+  mutate(label = forcats::fct_relevel(
+    label, "Under $20,000", "$20,000 to $40,000", "$40,000 to $60,000",
+    "$60,000 to $80,000", "$80,000 to $100,000", "$100,000 and over"
+  ))
 
 header_and_barchart(
   subsection_heading("Total household income"),
@@ -563,3 +583,82 @@ header_and_barchart(
 dput(regions)
 ```
 
+```{r data-export}
+# Start prepping data for export
+# Add highest parent vector label to each, and relabel breakdowns to "breakdown"
+highest_parent_vector_label <- data_breakdown %>%
+  filter(vector == highest_parent_vector) %>%
+  select(highest_parent_vector, vector = label)
+
+breakdowns <- data_breakdown %>%
+  filter(vector != highest_parent_vector) %>%
+  select(highest_parent_vector, breakdown = label, value, value_proportion, label_short)
+
+data_export <- breakdowns %>%
+  left_join(highest_parent_vector_label, by = "highest_parent_vector") %>%
+  select(vector, breakdown, value, value_proportion, label_short)
+
+data_export <- bind_rows(
+  tribble(
+    ~vector, ~value,
+    "Population, 2021", population,
+    "Households", households,
+    "Population change (2016 to 2021)", population_change,
+    "Population density", population_density
+  ) %>%
+    mutate(value = readr::parse_number(value),
+           breakdown = vector),
+# Household size
+data_export %>% filter(label_short == "household_size"),
+# (Estimated) median household income
+tibble(vector = median_income_label, value = median_income) %>%
+    mutate(value = readr::parse_number(value),
+           breakdown = vector),
+# Buckets
+
+data_export %>% filter(label_short == "income_buckets"),
+
+# Original breakdowns
+
+data_export %>% filter(label_short == "income"),
+
+# Unaffordable housing
+
+data_export %>% filter(label_short == "unaffordable_housing"),
+
+# Low-income measure after tax (LIM-AT)
+data_export %>% filter(label_short == "lim_at"),
+# Visible minority population
+# Total visible minority population (and all breakdowns within)
+# Household tenure
+data_export %>% filter(label_short == "household_tenure"),
+# Average shelter cost
+data_export %>% filter(label_short %in% c("shelter_cost_owner", "shelter_cost_renter")),
+# Age (5 year buckets)
+# TODO - ordering
+data_export %>% filter(label_short == "age"),
+# Age (cohorts)
+data_export %>% filter(label_short == "age_cohorts"),
+# Language spoken at home
+# TODO
+# Knowledge of English
+data_export %>% filter(label_short == "knowledge_of_english"),
+# Immigrant Status
+# Immigrants, Recent Immigrants (since 2016)
+# Aboriginal identity
+# Country of origin
+# Educational attainment
+# Family type
+data_export %>% filter(label_short == "family_type"),
+# Multiple family households
+data_export %>% filter(label_short == "household_type")
+) %>%
+  select(vector, breakdown, value, value_proportion)
+
+# TODO
+# Round value proportion
+# Fix Household total income groups in 2020 for private households
+# Fix Average monthly shelter cost having prop
+
+readr::write_csv(data_export, params$csv_location)
+```
