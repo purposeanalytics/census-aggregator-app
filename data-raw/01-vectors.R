@@ -17,7 +17,7 @@ vectors <- tribble(
   "v_CA21_499", "Total number of census families in private households", "family_type",
   "v_CA21_500", "Total couple families", "couples",
   "v_CA21_543", "Household type", "household_type",
-  "v_CA21_1144", "Knowledge of official languages for the total population excluding institutional residents", "knowledge_of_english",
+  "v_CA21_1144", "Knowledge of official languages for the total population excluding institutional residents", "knowledge_of_english_french",
   "v_CA21_2200", "Total - Language spoken most often at home for the total population excluding institutional residents - 100% data", "top_10_languages",
   "v_CA21_906", "Median total income of household in 2020 ($)", "median_income",
   "v_CA21_923", "Household total income groups in 2020 for private households", "income",
@@ -131,7 +131,7 @@ breakdown_labels <- list(
     # Age cohorts
     age_cohort_vectors[["label"]]
   ),
-  "knowledge_of_english" = c("English only", "English and French"),
+  "knowledge_of_english_french" = c("English only", "English and French", "French only"),
   # "immigrant_status" = c("Immigrants", "2016 to 2021"),
   # "aboriginal_identity" = c("Aboriginal identity"),
   # "educational_attainment" = c("No certificate, diploma or degree", "Secondary (high) school diploma or equivalency certificate", "Postsecondary certificate, diploma or degree"),

@@ -8,6 +8,7 @@ output:
 #   level: "csd"
 params:
   geo_uid: !r c("4704045", "4704019", "4704050", "4704024", "4704011", "4704003", "4704006", "4704034", "4704058", "4704054", "4704038")
+  # geo_uid: !r c("3520005")
   level: "csd"
   csv_location: "data_export.csv"
 ---
@@ -333,32 +334,101 @@ header_and_barchart(
 )
 ```
 
-```{r knowledge_of_english}
-knowledge_of_english <- data_breakdown %>%
-  filter(
-    label_short == "knowledge_of_english",
-    vector != highest_parent_vector
-  ) %>%
-  derive_census_vector_order()
+:::
 
-header_and_barchart(
-  subsection_heading("Knowledge of English"),
-  knowledge_of_english %>%
-    inline_barchart()
+::: {.row .mb-2}
+
+```{r knowledge_of_english}
+knowledge_of_official_languages <- data_breakdown %>%
+  filter(
+    label_short == "knowledge_of_english_french",
+    vector != highest_parent_vector
+  )
+
+knowledge_of_english <- knowledge_of_official_languages %>%
+  filter(
+    label %in% c("English only", "English and French")
+  ) %>%
+  pull(value_proportion) %>%
+  sum() %>%
+  percent()
+
+shiny::column(
+  width = 3,
+  snapshot_card("Knowledge of English", knowledge_of_english)
+)
+```
+
+```{r knowledge_of_french}
+knowledge_of_french <- knowledge_of_official_languages %>%
+  filter(
+    label %in% c("French only", "English and French")
+  ) %>%
+  pull(value_proportion) %>%
+  sum() %>%
+  percent()
+
+shiny::column(
+  width = 3,
+  snapshot_card("Knowledge of French", knowledge_of_french)
+)
+```
+
+```{r english-at-home}
+english_at_home <- data_breakdown %>%
+  filter(
+    label_short == "top_10_languages",
+    label %in% c(
+      "English", "English and French",
+      "English and non-official language(s)", "English, French and non-official language(s)"
+    )
+  ) %>%
+  pull(value_proportion) %>%
+  sum() %>%
+  percent()
+
+shiny::column(
+  width = 3,
+  snapshot_card("English spoken at home", english_at_home)
+)
+```
+
+```{r french-at-home}
+french_at_home <- data_breakdown %>%
+  filter(
+    label_short == "top_10_languages",
+    label %in% c(
+      "French", "English and French", "French and non-official language(s)",
+      "English, French and non-official language(s)"
+    )
+  ) %>%
+  pull(value_proportion) %>%
+  sum() %>%
+  percent()
+
+shiny::column(
+  width = 3,
+  snapshot_card("French spoken at home", french_at_home)
 )
 ```
 
 ```{r language_at_home}
 language_at_home <- data_breakdown %>%
-  filter(label_short == "top_10_languages") %>%
-  filter(vector != highest_parent_vector) %>%
+  filter(
+    label_short == "top_10_languages",
+    vector != highest_parent_vector
+  ) %>%
+  inner_join(vectors %>%
+    filter(label_short == "top_10_languages", str_detect(details, "Single")) %>%
+    select(vector), by = "vector") %>%
+  filter(!label %in% c("English", "French")) %>%
   top_n(10, wt = value) %>%
   filter(value > 0) %>%
   arrange(-value) %>%
   derive_census_vector_order(by_value = TRUE)
 
 header_and_barchart(
-  subsection_heading("Language spoken at home"),
+  subsection_heading("Non-official language spoken at home"),
   language_at_home %>%
     inline_barchart()
 )
@@ -388,7 +458,7 @@ if (length(regions) == 1) {
 }
 
 median_income <- median_income %>%
-    pull_and_format_value("dollar")
+  pull_and_format_value("dollar")
 
 shiny::column(
   width = 4,
@@ -607,52 +677,56 @@ data_export <- bind_rows(
     "Population change (2016 to 2021)", population_change,
     "Population density", population_density
   ) %>%
-    mutate(value = readr::parse_number(value),
-           breakdown = vector),
-# Household size
-data_export %>% filter(label_short == "household_size"),
-# (Estimated) median household income
-tibble(vector = median_income_label, value = median_income) %>%
-    mutate(value = readr::parse_number(value),
-           breakdown = vector),
-# Buckets
+    mutate(
+      value = readr::parse_number(value),
+      breakdown = vector
+    ),
+  # Household size
+  data_export %>% filter(label_short == "household_size"),
+  # (Estimated) median household income
+  tibble(vector = median_income_label, value = median_income) %>%
+    mutate(
+      value = readr::parse_number(value),
+      breakdown = vector
+    ),
+  # Buckets
 
-data_export %>% filter(label_short == "income_buckets"),
+  data_export %>% filter(label_short == "income_buckets"),
 
-# Original breakdowns
+  # Original breakdowns
 
-data_export %>% filter(label_short == "income"),
+  data_export %>% filter(label_short == "income"),
 
-# Unaffordable housing
+  # Unaffordable housing
 
-data_export %>% filter(label_short == "unaffordable_housing"),
+  data_export %>% filter(label_short == "unaffordable_housing"),
 
-# Low-income measure after tax (LIM-AT)
-data_export %>% filter(label_short == "lim_at"),
-# Visible minority population
-# Total visible minority population (and all breakdowns within)
-# Household tenure
-data_export %>% filter(label_short == "household_tenure"),
-# Average shelter cost
-data_export %>% filter(label_short %in% c("shelter_cost_owner", "shelter_cost_renter")),
-# Age (5 year buckets)
-# TODO - ordering
-data_export %>% filter(label_short == "age"),
-# Age (cohorts)
-data_export %>% filter(label_short == "age_cohorts"),
-# Language spoken at home
-# TODO
-# Knowledge of English
-data_export %>% filter(label_short == "knowledge_of_english"),
-# Immigrant Status
-# Immigrants, Recent Immigrants (since 2016)
-# Aboriginal identity
-# Country of origin
-# Educational attainment
-# Family type
-data_export %>% filter(label_short == "family_type"),
-# Multiple family households
-data_export %>% filter(label_short == "household_type")
+  # Low-income measure after tax (LIM-AT)
+  data_export %>% filter(label_short == "lim_at"),
+  # Visible minority population
+  # Total visible minority population (and all breakdowns within)
+  # Household tenure
+  data_export %>% filter(label_short == "household_tenure"),
+  # Average shelter cost
+  data_export %>% filter(label_short %in% c("shelter_cost_owner", "shelter_cost_renter")),
+  # Age (5 year buckets)
+  # TODO - ordering
+  data_export %>% filter(label_short == "age"),
+  # Age (cohorts)
+  data_export %>% filter(label_short == "age_cohorts"),
+  # Language spoken at home
+  # TODO
+  # Knowledge of English
+  data_export %>% filter(label_short == "knowledge_of_english"),
+  # Immigrant Status
+  # Immigrants, Recent Immigrants (since 2016)
+  # Aboriginal identity
+  # Country of origin
+  # Educational attainment
+  # Family type
+  data_export %>% filter(label_short == "family_type"),
+  # Multiple family households
+  data_export %>% filter(label_short == "household_type")
 ) %>%
   select(vector, breakdown, value, value_proportion)
 
