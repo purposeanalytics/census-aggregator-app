@@ -18,7 +18,7 @@ mod_map_ui <- function(id) {
 #' map Server Functions
 #'
 #' @noRd
-mod_map_server <- function(id, inputs, selected_geographies, map_rendered, csd_polygon_filter, ct_polygon_filter) {
+mod_map_server <- function(id, inputs, selected_geographies, map_rendered, bookmark_bounds) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
@@ -96,6 +96,15 @@ mod_map_server <- function(id, inputs, selected_geographies, map_rendered, csd_p
 
 }
 ")
+    )
+
+    # Use bounds from any bookmarking to fit the bounds of the map ----
+    shiny::observeEvent(
+      bookmark_bounds(), {
+        mapboxer::mapboxer_proxy(ns("map")) %>%
+          mapboxer::fit_bounds(bookmark_bounds()) %>%
+          mapboxer::update_mapboxer()
+      }
     )
 
     # Update map based on inputs (CSD/CT) and geographies to be shown ----

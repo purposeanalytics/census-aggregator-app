@@ -19,8 +19,9 @@ app_server <- function(input, output, session) {
 
   # Initialize that the bookmarks need to be parsed - will set to FALSE once they have been, so don't repeat it
   boomarks_to_be_parsed <- shiny::reactiveVal(TRUE)
+  bookmark_bounds <- shiny::reactiveVal() # Initializing empty bookmark bounds to be set
 
-  inputs <- mod_sidebar_server("sidebar", selected_geographies, map_rendered, boomarks_to_be_parsed)
+  inputs <- mod_sidebar_server("sidebar", selected_geographies, map_rendered, boomarks_to_be_parsed, bookmark_bounds)
 
   # Observe geographies selected via polygon ----
 
@@ -60,6 +61,6 @@ app_server <- function(input, output, session) {
   )
 
   mod_map_server(
-    "map", inputs, selected_geographies, map_rendered
+    "map", inputs, selected_geographies, map_rendered, bookmark_bounds
   )
 }

@@ -71,7 +71,7 @@ mod_sidebar_ui <- function(id) {
 #' sidebar Server Functions
 #'
 #' @noRd
-mod_sidebar_server <- function(id, selected_geographies, map_rendered, boomarks_to_be_parsed) {
+mod_sidebar_server <- function(id, selected_geographies, map_rendered, boomarks_to_be_parsed, bookmark_bounds) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
@@ -111,11 +111,17 @@ mod_sidebar_server <- function(id, selected_geographies, map_rendered, boomarks_
               selected_geographies(
                 dplyr::tibble(geo_uid = query$geo_uid)
               )
+
+              # Get bounds of selected area to fly map to
+              dataset <- arrow::open_dataset(app_sys(glue::glue("extdata/{input$aggregate_area}")))
+              query <- dplyr::filter(dataset, .data$geo_uid %in% selected_geographies()[["geo_uid"]])
+              bookmark_bounds(
+                sfarrow::read_sf_dataset(query) %>%
+                sf::st_bbox()
+              )
             }
           }
         )
-
-
 
         boomarks_to_be_parsed(FALSE)
       }
@@ -137,7 +143,7 @@ mod_sidebar_server <- function(id, selected_geographies, map_rendered, boomarks_
         "boundary.geojson"
       },
       content = function(con) {
-        dataset <- arrow::open_dataset(glue::glue("inst/extdata/{input$aggregate_area}"))
+        dataset <- arrow::open_dataset(app_sys(glue::glue("extdata/{input$aggregate_area}")))
 
         query <- dplyr::filter(dataset, .data$geo_uid %in% selected_geographies()[["geo_uid"]])
 
