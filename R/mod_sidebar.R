@@ -82,41 +82,52 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
     })
 
     # Observe any bookmarking to update inputs with ----
+    bookmark_aggregate_area <- shiny::reactiveVal()
+    bookmark_geo_uid <- shiny::reactiveVal()
+
+    # Parse bookmark
+    shiny::observe({
+      # browser()
+      query <- shiny::parseQueryString(session$clientData$url_search)
+      # Additional parsing of query to split by ,
+      query <- split_query(query)
+
+      bookmark_aggregate_area(query$aggregate_area)
+      input_aggregate_area(query$aggregate_area)
+      bookmark_geo_uid(query$geo_uid)
+    })
+
     shiny::observe(
       # Priority of 1 - happens AFTER tibble of geo_uid is reset, to ensure any bookmarked geo_uids are kept
       priority = 1,
       {
+        # browser()
         shiny::req(boomarks_to_be_parsed())
         shiny::req(map_rendered())
+        shiny::req(bookmark_aggregate_area())
+        shiny::req(bookmark_geo_uid())
 
-        query <- shiny::parseQueryString(session$clientData$url_search)
-        # Additional parsing of query to split by ,
-        query <- split_query(query)
-
-        # Only update inputs that are also in the query string
-        query_inputs <- intersect(names(input), names(query))
-
-        # Iterate over them and update
         shinyjs::delay(
           # Add an additional delay, to allow for map to be rendered
           # TODO not great
           ms = 1000,
           {
-            purrr::walk(query_inputs, function(x) {
-              shinyWidgets::updatePickerInput(session, inputId = x, selected = query[[x]])
-            })
+
+            # Update aggregate area
+            shinyWidgets::updatePickerInput(session, inputId = "aggregate_area", selected = bookmark_aggregate_area())
 
             # Update selected_geographies() to have geo_uid
-            if (!is.null(query$geo_uid)) {
+            if (!is.null(bookmark_geo_uid())) {
               selected_geographies(
-                dplyr::tibble(geo_uid = query$geo_uid)
+                dplyr::tibble(geo_uid = bookmark_geo_uid())
               )
 
               # Update input aggregate area
-              input_aggregate_area(query$aggregate_area)
+              input_aggregate_area(bookmark_aggregate_area())
 
               # Get bounds of selected area to fly map to
-              dataset <- arrow::open_dataset(app_sys(glue::glue("extdata/{input$aggregate_area}")))
+              dataset <- arrow::open_dataset(app_sys(glue::glue("extdata/{bookmark_aggregate_area()}")))
+              # browser()
               query <- dplyr::filter(dataset, .data$geo_uid %in% selected_geographies()[["geo_uid"]])
               bookmark_bounds(
                 sfarrow::read_sf_dataset(query) %>%
@@ -131,10 +142,17 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
     )
 
     # Update inputs with aggregate_area and selection_tool -----
-    shiny::observe({
-      input_aggregate_area(input$aggregate_area)
-      input_selection_tool(input$selection_tool)
-    })
+    shiny::observe(
+      priority = 300, # Set lower priority so aggregate_area input is set to whatever is in bookmark first
+      {
+        # browser()
+        input_aggregate_area(input$aggregate_area)
+      })
+
+    shiny::observe(
+      {
+        input_selection_tool(input$selection_tool)
+      })
 
     # Export boundary ----
 
@@ -154,7 +172,7 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
     )
 
     # Summary statistics table ----
-    shiny::observeEvent(selected_geographies(), ignoreInit = FALSE, {
+    shiny::observeEvent(selected_geographies(), ignoreInit = FALSE, priority = 30, {
       if (nrow(selected_geographies()) == 0) {
 
         # Disable buttons
@@ -176,10 +194,14 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
         shinyjs::enable("export_boundary")
         shinyjs::enable("export_data")
 
+        # browser()
+
         summary_statistics_source <- switch(input_aggregate_area(),
           "csd" = censusaggregatorapp::csd,
           "ct" = censusaggregatorapp::ct
         )
+
+        # browser()
 
         summary_statistics <- summary_statistics_source %>%
           dplyr::inner_join(selected_geographies(), by = "geo_uid") %>%
