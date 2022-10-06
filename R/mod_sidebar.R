@@ -71,7 +71,7 @@ mod_sidebar_ui <- function(id) {
 #' sidebar Server Functions
 #'
 #' @noRd
-mod_sidebar_server <- function(id, selected_geographies, map_rendered, boomarks_to_be_parsed, bookmark_bounds) {
+mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, selected_geographies, map_rendered, boomarks_to_be_parsed, bookmark_bounds) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
@@ -112,6 +112,9 @@ mod_sidebar_server <- function(id, selected_geographies, map_rendered, boomarks_
                 dplyr::tibble(geo_uid = query$geo_uid)
               )
 
+              # Update input aggregate area
+              input_aggregate_area(query$aggregate_area)
+
               # Get bounds of selected area to fly map to
               dataset <- arrow::open_dataset(app_sys(glue::glue("extdata/{input$aggregate_area}")))
               query <- dplyr::filter(dataset, .data$geo_uid %in% selected_geographies()[["geo_uid"]])
@@ -127,13 +130,10 @@ mod_sidebar_server <- function(id, selected_geographies, map_rendered, boomarks_
       }
     )
 
-
     # Update inputs with aggregate_area and selection_tool -----
-    inputs <- shiny::reactive({
-      list(
-        aggregate_area = input$aggregate_area,
-        selection_tool = input$selection_tool
-      )
+    shiny::observe({
+      input_aggregate_area(input$aggregate_area)
+      input_selection_tool(input$selection_tool)
     })
 
     # Export boundary ----
@@ -176,7 +176,7 @@ mod_sidebar_server <- function(id, selected_geographies, map_rendered, boomarks_
         shinyjs::enable("export_boundary")
         shinyjs::enable("export_data")
 
-        summary_statistics_source <- switch(input$aggregate_area,
+        summary_statistics_source <- switch(input_aggregate_area(),
           "csd" = censusaggregatorapp::csd,
           "ct" = censusaggregatorapp::ct
         )
@@ -196,7 +196,7 @@ mod_sidebar_server <- function(id, selected_geographies, map_rendered, boomarks_
             name == "n" ~ as.character(value)
           ))
 
-        n_units <- switch(inputs()[["aggregate_area"]],
+        n_units <- switch(input_aggregate_area(),
           csd = "Census Subdivision",
           ct = "Census Tract"
         )
@@ -279,8 +279,6 @@ mod_sidebar_server <- function(id, selected_geographies, map_rendered, boomarks_
 
       }
     )
-
-    return(inputs)
   })
 }
 

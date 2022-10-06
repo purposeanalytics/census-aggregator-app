@@ -18,7 +18,7 @@ mod_map_ui <- function(id) {
 #' map Server Functions
 #'
 #' @noRd
-mod_map_server <- function(id, inputs, selected_geographies, map_rendered, bookmark_bounds) {
+mod_map_server <- function(id, input_aggregate_area, input_selection_tool, selected_geographies, map_rendered, bookmark_bounds) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
@@ -111,20 +111,20 @@ mod_map_server <- function(id, inputs, selected_geographies, map_rendered, bookm
     # Geographies to be shown determined via click or bookmark
     shiny::observeEvent(
       {
-        inputs()[["aggregate_area"]]
+        input_aggregate_area()
         selected_geographies()
       },
       {
         # Only run these once the map has been rendered for the first time
         shiny::req(map_rendered())
-        shiny::req(inputs()$aggregate_area)
+        shiny::req(input_aggregate_area())
 
         filter_list <- append(
           list("in", "geo_uid"),
           as.list(selected_geographies()[["geo_uid"]])
         )
 
-        switch(inputs()$aggregate_area,
+        switch(input_aggregate_area(),
           csd = mapboxer::mapboxer_proxy(ns("map")) %>%
             mapboxer::set_filter(
               layer_id = "csd_fill_show",
@@ -154,7 +154,7 @@ mod_map_server <- function(id, inputs, selected_geographies, map_rendered, bookm
 
     # Reset geographies clicked when aggregate_area input changes ----
     shiny::observeEvent(
-      inputs()[["aggregate_area"]],
+      input_aggregate_area(),
       # Priority = 2 ensures this happens before the bookmark query parsing, which parses out the geography etc - we want that to happen AFTER, so that any geo_uids are retained and not reset
       # priority = 2,
       {
@@ -167,10 +167,11 @@ mod_map_server <- function(id, inputs, selected_geographies, map_rendered, bookm
     shiny::observeEvent(
       input$map_onclick,
       {
+        req(input_selection_tool())
 
         # Only do this if the selection tool is click (not polygon)
 
-        if (inputs()[["selection_tool"]] == "click") {
+        if (input_selection_tool() == "click") {
 
           # Check if clicked area is already in selected geographies
           # If it is, clicking again should *deselect* it - remove from the existing tibble
@@ -194,19 +195,19 @@ mod_map_server <- function(id, inputs, selected_geographies, map_rendered, bookm
 
     # Send polygon selection to javascript (to turn on drawing) ---
     shiny::observeEvent(
-      inputs()[["selection_tool"]],
+      input_selection_tool,
       ignoreNULL = FALSE,
       ignoreInit = FALSE,
       {
-        session$sendCustomMessage("selection_tool", inputs()[["selection_tool"]])
+        session$sendCustomMessage("selection_tool", input_selection_tool)
       }
     )
 
     # Send aggregate area event to javascript (to clear drawn polygon when area changes) ---
     shiny::observeEvent(
-      inputs()[["aggregate_area"]],
+      input_aggregate_area(),
       {
-        session$sendCustomMessage("aggregate_area", inputs()[["aggregate_area"]])
+        session$sendCustomMessage("aggregate_area", input_aggregate_area())
       }
     )
   })

@@ -21,13 +21,15 @@ app_server <- function(input, output, session) {
   boomarks_to_be_parsed <- shiny::reactiveVal(TRUE)
   bookmark_bounds <- shiny::reactiveVal() # Initializing empty bookmark bounds to be set
 
-  inputs <- mod_sidebar_server("sidebar", selected_geographies, map_rendered, boomarks_to_be_parsed, bookmark_bounds)
+  input_aggregate_area <- shiny::reactiveVal()
+  input_selection_tool <- shiny::reactiveVal()
+  mod_sidebar_server("sidebar", input_aggregate_area, input_selection_tool, selected_geographies, map_rendered, boomarks_to_be_parsed, bookmark_bounds)
 
   # Observe geographies selected via polygon ----
 
   # Keep track of geographies that are selected via polygon ----
   shiny::observeEvent(
-    input$ct_polygon_filter,
+    input$ct_polygon_filter, # Set in JS
     {
       if (inputs()[["aggregate_area"]] == "ct") {
         if (all(input$ct_polygon_filter == "")) {
@@ -44,7 +46,7 @@ app_server <- function(input, output, session) {
   )
 
   shiny::observeEvent(
-    input$csd_polygon_filter,
+    input$csd_polygon_filter, # Set in JS
     {
       if (inputs()[["aggregate_area"]] == "csd") {
         if (all(input$csd_polygon_filter == "")) {
@@ -61,6 +63,6 @@ app_server <- function(input, output, session) {
   )
 
   mod_map_server(
-    "map", inputs, selected_geographies, map_rendered, bookmark_bounds
+    "map", input_aggregate_area, input_selection_tool, selected_geographies, map_rendered, bookmark_bounds
   )
 }
