@@ -11,6 +11,7 @@ License: MIT + file LICENSE
 Imports: 
     arrow,
     bslib,
+    censusaggregate,
     config (>= 0.3.1),
     curl,
     dplyr,
@@ -40,4 +41,5 @@ RoxygenNote: 7.2.0
 Depends: 
     R (>= 2.10)
 Remotes:
-    sharlagelfand/mapboxer
+    sharlagelfand/mapboxer,
+    purposeanalytics/census-aggregate-package
