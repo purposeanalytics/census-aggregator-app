@@ -93,7 +93,9 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
       query <- split_query(query)
 
       bookmark_aggregate_area(query$aggregate_area)
-      input_aggregate_area(query$aggregate_area)
+      if ("aggregate_area" %in% names(query)) {
+        input_aggregate_area(query$aggregate_area)
+      }
       bookmark_geo_uid(query$geo_uid)
     })
 
@@ -123,6 +125,7 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
               )
 
               # Update input aggregate area
+              # browser()
               input_aggregate_area(bookmark_aggregate_area())
 
               # Get bounds of selected area to fly map to
@@ -142,15 +145,20 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
     )
 
     # Update inputs with aggregate_area and selection_tool -----
-    shiny::observe(
+    shiny::observeEvent(
+      input$aggregate_area,
+      ignoreInit = FALSE,
       priority = 300, # Set lower priority so aggregate_area input is set to whatever is in bookmark first
       {
         # browser()
         input_aggregate_area(input$aggregate_area)
       })
 
-    shiny::observe(
+    shiny::observeEvent(
+      input$selection_tool,
+      ignoreInit = FALSE,
       {
+        # browser()
         input_selection_tool(input$selection_tool)
       })
 
@@ -173,6 +181,8 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
 
     # Summary statistics table ----
     shiny::observeEvent(selected_geographies(), ignoreInit = FALSE, priority = 30, {
+      req(input_aggregate_area())
+
       if (nrow(selected_geographies()) == 0) {
 
         # Disable buttons
@@ -218,6 +228,8 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
             name == "n" ~ as.character(value)
           ))
 
+        # browser()
+
         n_units <- switch(input_aggregate_area(),
           csd = "Census Subdivision",
           ct = "Census Tract"
@@ -257,6 +269,8 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
         "export.zip"
       },
       content = function(file) {
+
+        cat("download attempted at least?")
 
         # Move to tempdir to save files
         original_wd <- setwd(tempdir())

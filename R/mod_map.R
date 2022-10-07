@@ -114,7 +114,9 @@ mod_map_server <- function(id, input_aggregate_area, input_selection_tool, selec
         input_aggregate_area()
         selected_geographies()
       },
+      priority = 100,
       {
+        # browser()
         # Only run these once the map has been rendered for the first time
         shiny::req(map_rendered())
         shiny::req(input_aggregate_area())
@@ -167,6 +169,7 @@ mod_map_server <- function(id, input_aggregate_area, input_selection_tool, selec
     shiny::observeEvent(
       input$map_onclick,
       {
+        # browser()
         req(input_selection_tool())
 
         # Only do this if the selection tool is click (not polygon)
@@ -195,11 +198,11 @@ mod_map_server <- function(id, input_aggregate_area, input_selection_tool, selec
 
     # Send polygon selection to javascript (to turn on drawing) ---
     shiny::observeEvent(
-      input_selection_tool,
+      input_selection_tool(),
       ignoreNULL = FALSE,
       ignoreInit = FALSE,
       {
-        session$sendCustomMessage("selection_tool", input_selection_tool)
+        session$sendCustomMessage("selection_tool", input_selection_tool())
       }
     )
 

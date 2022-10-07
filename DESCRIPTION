@@ -21,6 +21,7 @@ Imports:
     knitr,
     magrittr,
     mapboxer,
+    pkgload,
     purrr,
     rlang,
     rmarkdown,
