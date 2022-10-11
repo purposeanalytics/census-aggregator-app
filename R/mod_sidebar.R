@@ -176,6 +176,9 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
     shiny::observeEvent(
       input$reset, {
         selected_geographies(dplyr::tibble())
+
+        # Send to JS to reset polygon
+        session$sendCustomMessage("reset", TRUE)
     })
 
     # Export boundary ----
@@ -287,8 +290,6 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
         "export.zip"
       },
       content = function(file) {
-
-        cat("download attempted at least?")
 
         # Move to tempdir to save files
         original_wd <- setwd(tempdir())

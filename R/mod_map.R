@@ -74,6 +74,13 @@ mod_map_server <- function(id, input_aggregate_area, input_selection_tool, selec
         map.addControl(draw);
     })
 
+    // Also just do this when 'reset' button is clicked - easiest way to reset everything
+    Shiny.addCustomMessageHandler('reset', function(message) {
+        map.removeControl(draw);
+        map.addControl(draw);
+    })
+
+
       map.on('draw.create', (e) => getFeaturesFromPolygon(e, map, 'csd'));
       map.on('draw.update', (e) => getFeaturesFromPolygon(e, map, 'csd'));
       map.on('draw.delete', (e) => clearFeatures(e, 'csd'));
