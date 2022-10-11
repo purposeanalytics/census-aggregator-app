@@ -31,6 +31,16 @@ mod_sidebar_ui <- function(id) {
       shiny::div(
         shinyjs::disabled(
           shiny::actionButton(
+            ns("reset"),
+            "Reset selected geographies",
+            class = "btn-link"
+          )
+        )
+      ),
+      breathe(),
+      shiny::div(
+        shinyjs::disabled(
+          shiny::actionButton(
             ns("bookmark_selections"),
             "Bookmark selections",
             class = "btn-link"
@@ -162,6 +172,12 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
         input_selection_tool(input$selection_tool)
       })
 
+    # Reset geography
+    shiny::observeEvent(
+      input$reset, {
+        selected_geographies(dplyr::tibble())
+    })
+
     # Export boundary ----
 
     output$export_boundary <- shiny::downloadHandler(
@@ -186,6 +202,7 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
       if (nrow(selected_geographies()) == 0) {
 
         # Disable buttons
+        shinyjs::disable("reset")
         shinyjs::disable("bookmark_selections")
         shinyjs::disable("export_boundary")
         shinyjs::disable("export_data")
@@ -200,6 +217,7 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
           dplyr::mutate(value = "\u2014")
       } else {
         # Enable buttons
+        shinyjs::enable("reset")
         shinyjs::enable("bookmark_selections")
         shinyjs::enable("export_boundary")
         shinyjs::enable("export_data")
