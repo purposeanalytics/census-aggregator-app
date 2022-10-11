@@ -306,8 +306,7 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
           report_html,
           output = report_pdf,
           extra_args = chrome_extra_args(),
-          verbose = 1,
-          async = TRUE # returns a promise
+          verbose = FALSE
         )
 
         # Zip HTML, PDF, and data export
