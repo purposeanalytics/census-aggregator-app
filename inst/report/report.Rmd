@@ -7,9 +7,10 @@ output:
 #   geo_uid: !r c("3520005")
 #   level: "csd"
 params:
-  geo_uid: !r c("4704045", "4704019", "4704050", "4704024", "4704011", "4704003", "4704006", "4704034", "4704058", "4704054", "4704038")
+  geo_uid: !r c("5350612.10")
   # geo_uid: !r c("3520005")
-  level: "csd"
+  # level: "csd"
+  level: "ct"
   csv_location: "data_export.csv"
 ---
 
@@ -224,7 +225,9 @@ households <- metadata %>%
   pull_and_format_value("comma")
 
 population_change <- vectors_data %>%
-  aggregate_population_change() %>%
+  aggregate_population_change()
+
+population_change_formatted <- population_change %>%
   pull_and_format_value()
 
 population_density <- vectors_data %>%
@@ -250,7 +253,7 @@ shiny::column(
 ```{r population_change}
 shiny::column(
   width = 3,
-  snapshot_card("Population change<br>(2016 to 2021)", population_change)
+  snapshot_card("Population change<br>(2016 to 2021)", population_change_formatted)
 )
 ```
 
@@ -688,7 +691,7 @@ data_export <- bind_rows(
     ~vector, ~value,
     "Population, 2021", population,
     "Households", households,
-    "Population change (2016 to 2021)", population_change,
+    "Population change (2016 to 2021)", as.character(population_change[["value"]]),
     "Population density", population_density
   ) %>%
     mutate(
@@ -724,10 +727,25 @@ data_export <- bind_rows(
   # Average shelter cost
   data_export %>% filter(label_short %in% c("shelter_cost_owner", "shelter_cost_renter")),
   # Age (5 year buckets)
-  # TODO - ordering
-  data_export %>% filter(label_short == "age"),
+  data_export %>%
+    filter(label_short == "age") %>%
+    separate(breakdown,
+      into = c("min", "max"),
+      sep = " to ", remove = FALSE, convert = TRUE, fill = "right"
+    ) %>%
+    arrange(max) %>%
+    select(-min, -max) %>%
+    mutate(vector = "Age (5 year groups)"),
   # Age (cohorts)
-  data_export %>% filter(label_short == "age_cohorts"),
+  data_export %>%
+    filter(label_short == "age_cohorts") %>%
+    separate(breakdown,
+      into = c("min", "max"),
+      sep = " to ", remove = FALSE, convert = TRUE, fill = "right"
+    ) %>%
+    arrange(max) %>%
+    select(-min, -max) %>%
+    mutate(vector = "Age (cohorts)"),
   # Language spoken at home
   # TODO
   # Knowledge of English
@@ -742,7 +760,8 @@ data_export <- bind_rows(
   # Multiple family households
   data_export %>% filter(label_short == "household_type")
 ) %>%
-  select(vector, breakdown, value, value_proportion)
+  select(vector, breakdown, value, value_proportion) %>%
+  mutate(value_proportion = round(value_proportion, 3))
 
 # TODO
 # Round value proportion
