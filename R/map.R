@@ -154,6 +154,7 @@ add_census_tooltips <- function(map, geography) {
   tooltip_text <-
     "
   <b>Region</b>: {{region_name}}<br>
+  <b>Census ID</b>: {{geo_uid}}<br>
   <b>Population</b>: {{population}}<br>
   <b>Households</b>: {{households}}<br>
   <b>Area</b>: {{area_sq_km}} km<sup>2</sup><br>
