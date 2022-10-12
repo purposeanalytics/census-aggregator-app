@@ -24,7 +24,7 @@ area_vector <- list_census_vectors(dataset) %>%
 # from the polygons, and might include water areas (which StatCan removes) - we want to be consistent
 # with how StatCan calculates and displays these.
 
-csd <- get_census(
+csd_raw <- get_census(
   dataset = dataset,
   regions = canada_region,
   level = "CSD",
@@ -36,7 +36,7 @@ csd <- get_census(
   select(geo_uid, pr_uid, region_name = name, population, households, area_sq_km = contains(tolower(area_vector)), geometry)
 
 # Derive population density for tooltips
-csd <- csd %>%
+csd <- csd_raw %>%
   mutate(
     population_density = population / area_sq_km,
     population_density = scales::comma(population_density, accuracy = 1)
@@ -132,7 +132,7 @@ usethis::use_data(csd, overwrite = TRUE)
 
 # CT ----
 
-ct <- get_census(
+ct_raw <- get_census(
   dataset = dataset,
   regions = canada_region,
   level = "CT",
@@ -141,7 +141,16 @@ ct <- get_census(
   labels = "short"
 ) %>%
   clean_names() %>%
-  select(geo_uid, cd_uid, region_name, population, households, area_sq_km = contains(tolower(area_vector)), geometry)
+  select(geo_uid, cd_uid, csd_uid, population, households, area_sq_km = contains(tolower(area_vector)), geometry)
+
+# Add region_name on, via csd
+csd_name <- csd_raw %>%
+  st_set_geometry(NULL) %>%
+  distinct(csd_uid = geo_uid, region_name)
+
+ct <- ct_raw %>%
+  left_join(csd_name, by = "csd_uid") %>%
+  select(-csd_uid)
 
 # Exclude CTs with >10% missing data (mainly 50-100% missing), since we will not be able to render reports for them anyways
 ct_remove <- readRDS(here::here("data-raw", "intermediary", "ct_remove.rds"))
