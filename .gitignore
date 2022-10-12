@@ -5,3 +5,6 @@
 .DS_Store
 dev/
 .Renviron
+rsconnect/
+scratch/
+temp/
