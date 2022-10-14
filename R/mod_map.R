@@ -41,6 +41,83 @@ mod_map_server <- function(id, input_aggregate_area, input_selection_tool, selec
     // Send an indicator to shiny that the widget has been rendered, so other reactives don't run until it's rendered
     Shiny.setInputValue('map_rendered', true);
 
+    // Add popup to map that says to zoom in when CSDs/CTs aren't shown
+    const CSDpopup = new mapboxgl.Popup({ closeOnClick: false, closeButton: false, maxWidth: 'none'})
+      .setLngLat([-96, 37.8]) // Doesn't matter where this is since with CSS it is in top left corner
+      .setHTML('Please zoom in to see Census Subdivisions.')
+      .addTo(map)
+
+    CSDpopup.addClassName('csd-popup')
+
+    const CTpopup = new mapboxgl.Popup({ closeOnClick: false, closeButton: false, maxWidth: 'none' })
+      .setLngLat([-96, 37.8])
+      .setHTML('Please zoom in to see Census Tracts.')
+      .addTo(map)
+
+    CTpopup.addClassName('ct-popup')
+
+    // Initialize as not visible
+    document.getElementsByClassName('csd-popup')[0].style.display = 'none';
+    document.getElementsByClassName('ct-popup')[0].style.display = 'none';
+
+    // When the area changes, check the zoom
+    Shiny.addCustomMessageHandler('aggregate_area', function(message) {
+      var mapZoom = map.getZoom();
+      var csdPopup = document.getElementsByClassName('csd-popup')[0];
+      var ctPopup = document.getElementsByClassName('ct-popup')[0];
+
+    console.log(mapZoom);
+
+      if (message == 'csd') {
+      // Hide CT's
+      ctPopup.style.display = 'none';
+
+      zoomLevel = 5;
+
+        if (mapZoom < zoomLevel) {
+          csdPopup.style.display = ''; // Default, shown
+        } else {
+          csdPopup.style.display = 'none';
+        }
+
+      // Change based on zooming in/out too
+      map.on('zoomend', function () {
+        var mapZoom = map.getZoom();
+
+         if (mapZoom < zoomLevel) {
+          csdPopup.style.display = '';
+         } else {
+          csdPopup.style.display = 'none';
+         }
+      })
+      }
+
+      if (message == 'ct') {
+      // Hide CSD's
+      csdPopup.style.display = 'none';
+
+      zoomLevel = 6;
+
+        if (mapZoom < zoomLevel) {
+          ctPopup.style.display = ''; // Default, shown
+        } else {
+          ctPopup.style.display = 'none';
+        }
+
+      // Change based on zooming in/out too
+      map.on('zoomend', function () {
+        var mapZoom = map.getZoom();
+
+         if (mapZoom < zoomLevel) {
+          ctPopup.style.display = '';
+         } else {
+          ctPopup.style.display = 'none';
+         }
+      })
+    }
+
+    })
+
     // Highlight / fill geography on hover
     highlightGeographyOnHover(map);
 
@@ -79,7 +156,6 @@ mod_map_server <- function(id, input_aggregate_area, input_selection_tool, selec
         map.removeControl(draw);
         map.addControl(draw);
     })
-
 
       map.on('draw.create', (e) => getFeaturesFromPolygon(e, map, 'csd'));
       map.on('draw.update', (e) => getFeaturesFromPolygon(e, map, 'csd'));
