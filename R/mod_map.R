@@ -56,66 +56,67 @@ mod_map_server <- function(id, input_aggregate_area, input_selection_tool, selec
 
     CTpopup.addClassName('ct-popup')
 
+    var csdPopup = document.getElementsByClassName('csd-popup')[0];
+    var ctPopup = document.getElementsByClassName('ct-popup')[0];
+
     // Initialize as not visible
-    document.getElementsByClassName('csd-popup')[0].style.display = 'none';
-    document.getElementsByClassName('ct-popup')[0].style.display = 'none';
+    csdPopup.style.display = 'none';
+    ctPopup.style.display = 'none';
 
-    // When the area changes, check the zoom
-    Shiny.addCustomMessageHandler('aggregate_area', function(message) {
-      var mapZoom = map.getZoom();
-      var csdPopup = document.getElementsByClassName('csd-popup')[0];
-      var ctPopup = document.getElementsByClassName('ct-popup')[0];
+    // Set parameters
+    var csdZoom = 5;
+    var ctZoom = 6;
 
-    console.log(mapZoom);
+    // Listen to area changing to control zoom popup visibility
+    Shiny.addCustomMessageHandler('aggregate_area', function(aggregateArea) {
 
-      if (message == 'csd') {
-      // Hide CT's
-      ctPopup.style.display = 'none';
+    console.log(aggregateArea);
+// Hide both popups when area changes
+csdPopup.style.display = 'none';
+ctPopup.style.display = 'none';
 
-      zoomLevel = 5;
+// Get current zoom
+var curZoom = map.getZoom();
 
-        if (mapZoom < zoomLevel) {
-          csdPopup.style.display = ''; // Default, shown
-        } else {
-          csdPopup.style.display = 'none';
-        }
+// If zoom < csdZoom, area == csd, show popup
+if (curZoom < csdZoom && aggregateArea == 'csd') {
+console.log('current zoom too small, show csd');
+  csdPopup.style.display = '';
+}
 
-      // Change based on zooming in/out too
-      map.on('zoomend', function () {
-        var mapZoom = map.getZoom();
+// If zoom < ctZoom, area == ct, show popup
+if (curZoom < ctZoom && aggregateArea == 'ct') {
+console.log('current zoom too small, show ct');
+  ctPopup.style.display = '';
+}
 
-         if (mapZoom < zoomLevel) {
-          csdPopup.style.display = '';
-         } else {
-          csdPopup.style.display = 'none';
-         }
-      })
-      }
+// Get zoom on zoomEnd
+map.on('zoomend', function () {
+  var newZoom = map.getZoom();
 
-      if (message == 'ct') {
-      // Hide CSD's
-      csdPopup.style.display = 'none';
+if (newZoom < csdZoom && aggregateArea == 'csd') {
+console.log('aggregateArea according to here is');
+console.log(aggregateArea);
+console.log(aggregateArea == 'csd');
+// If zoom < csdZoom, area == csd, show popup
+console.log('new zoom too small, show csd');
+  csdPopup.style.display = '';
+} else if (newZoom >= csdZoom && aggregateArea == 'csd') {
+console.log('new zoom large, hide csd');
+// If zoom >= csdZoom, area == csd, hide popup
+  csdPopup.style.display = 'none';
+}
 
-      zoomLevel = 6;
-
-        if (mapZoom < zoomLevel) {
-          ctPopup.style.display = ''; // Default, shown
-        } else {
-          ctPopup.style.display = 'none';
-        }
-
-      // Change based on zooming in/out too
-      map.on('zoomend', function () {
-        var mapZoom = map.getZoom();
-
-         if (mapZoom < zoomLevel) {
-          ctPopup.style.display = '';
-         } else {
-          ctPopup.style.display = 'none';
-         }
-      })
-    }
-
+if (newZoom < ctZoom && aggregateArea == 'ct') {
+// If zoom < ctZoom, area == ct, show popup
+console.log('new zoom too small, show ct');
+  ctPopup.style.display = '';
+} else if (newZoom >= ctZoom && aggregateArea == 'ct') {
+console.log('new zoom large, hide ct');
+// If zoom >= ctZoom, area == ct, hide popup
+  ctPopup.style.display = 'none';
+}
+});
     })
 
     // Highlight / fill geography on hover
@@ -289,9 +290,10 @@ mod_map_server <- function(id, input_aggregate_area, input_selection_tool, selec
       }
     )
 
-    # Send aggregate area event to javascript (to clear drawn polygon when area changes) ---
+    # Send aggregate area event to javascript (to clear drawn polygon when area changes, to show/hide Zoom message) ---
     shiny::observeEvent(
       input_aggregate_area(),
+      ignoreInit = FALSE,
       {
         session$sendCustomMessage("aggregate_area", input_aggregate_area())
       }
