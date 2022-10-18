@@ -75,14 +75,6 @@
       "Hash": "dab19adae4440ae55aa8a9d238b246bb",
       "Requirements": []
     },
-    "Rttf2pt1": {
-      "Package": "Rttf2pt1",
-      "Version": "1.3.9",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "da6ab407fa2e5e498ac980f92798cfed",
-      "Requirements": []
-    },
     "V8": {
       "Package": "V8",
       "Version": "4.1.0",
@@ -200,6 +192,14 @@
         "bit"
       ]
     },
+    "bitops": {
+      "Package": "bitops",
+      "Version": "1.0-7",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "b7d8d8ee39869c18d8846a184dd8a1af",
+      "Requirements": []
+    },
     "blob": {
       "Package": "blob",
       "Version": "1.2.2",
@@ -232,14 +232,6 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "92a5f887f9ae3035ac7afde22ba73ee9",
-      "Requirements": []
-    },
-    "brio": {
-      "Package": "brio",
-      "Version": "1.1.2",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "2f01e16ff9571fe70381c7b9ae560dc4",
       "Requirements": []
     },
     "broom": {
@@ -281,23 +273,6 @@
         "memoise",
         "rlang",
         "sass"
-      ]
-    },
-    "bsplus": {
-      "Package": "bsplus",
-      "Version": "0.1.3",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "76d14fb160c333fae3ee83350e2a915b",
-      "Requirements": [
-        "glue",
-        "htmltools",
-        "jsonlite",
-        "lubridate",
-        "magrittr",
-        "purrr",
-        "rmarkdown",
-        "stringr"
       ]
     },
     "cachem": {
@@ -356,14 +331,13 @@
       "Package": "censusaggregate",
       "Version": "0.0.0.9000",
       "Source": "GitHub",
-      "Remotes": "purposeanalytics/lemr",
       "RemoteType": "github",
       "RemoteHost": "api.github.com",
       "RemoteRepo": "census-aggregator-package",
       "RemoteUsername": "purposeanalytics",
       "RemoteRef": "HEAD",
-      "RemoteSha": "8f86d178ac1fa87575bbf15c74679cb78d333fd9",
-      "Hash": "43b5dbd0df2b2910eb362a0b8937a0f8",
+      "RemoteSha": "32443212e174015506b43f6a7665baf9973f3bf6",
+      "Hash": "7981082e40999d244523c18e12874be7",
       "Requirements": [
         "cancensus",
         "curl",
@@ -371,13 +345,13 @@
         "forcats",
         "ggplot2",
         "glue",
+        "gt",
+        "gtExtras",
         "htmltools",
-        "kableExtra",
-        "knitr",
-        "lemr",
         "magrittr",
         "plotly",
         "purrr",
+        "readr",
         "rlang",
         "scales",
         "stringr",
@@ -389,11 +363,12 @@
       "Package": "censusaggregatorapp",
       "Version": "0.0.0.9000",
       "Source": "unknown",
-      "Remotes": "sharlagelfand/mapboxer",
-      "Hash": "ee7d27c6eac83f047006d89d7ce3e08c",
+      "Remotes": "sharlagelfand/mapboxer,\n        purposeanalytics/census-aggregate-package",
+      "Hash": "3f7ad260e08fe30c112951a4744a255b",
       "Requirements": [
         "arrow",
         "bslib",
+        "censusaggregate",
         "config",
         "curl",
         "dplyr",
@@ -417,18 +392,6 @@
         "shinyjs",
         "tibble",
         "tidyr"
-      ]
-    },
-    "cicerone": {
-      "Package": "cicerone",
-      "Version": "1.0.4",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "b8f2ca302978e3e16a68d3ec8ab0c44d",
-      "Requirements": [
-        "R6",
-        "assertthat",
-        "shiny"
       ]
     },
     "class": {
@@ -607,16 +570,6 @@
         "rprojroot"
       ]
     },
-    "diffobj": {
-      "Package": "diffobj",
-      "Version": "0.3.4",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "feb5b7455eba422a2c110bb89852e6a3",
-      "Requirements": [
-        "crayon"
-      ]
-    },
     "digest": {
       "Package": "digest",
       "Version": "0.6.29",
@@ -692,25 +645,6 @@
       "Hash": "ec8ca05cffcc70569eaaad8469d2a3a7",
       "Requirements": []
     },
-    "extrafont": {
-      "Package": "extrafont",
-      "Version": "0.17",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "7f2f50e8f998a4bea4b04650fc4f2ca8",
-      "Requirements": [
-        "Rttf2pt1",
-        "extrafontdb"
-      ]
-    },
-    "extrafontdb": {
-      "Package": "extrafontdb",
-      "Version": "1.0",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "a861555ddec7451c653b40e713166c6f",
-      "Requirements": []
-    },
     "fansi": {
       "Package": "fansi",
       "Version": "0.5.0",
@@ -734,6 +668,17 @@
       "Repository": "CRAN",
       "Hash": "77bd60a6157420d4ffa93b27cf6a58b8",
       "Requirements": []
+    },
+    "fontawesome": {
+      "Package": "fontawesome",
+      "Version": "0.3.0",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "a36c4a3eade472039a3ec8cb824e6dc4",
+      "Requirements": [
+        "htmltools",
+        "rlang"
+      ]
     },
     "forcats": {
       "Package": "forcats",
@@ -919,21 +864,6 @@
       "Hash": "f3aefccc1cc50de6338146b62f115de8",
       "Requirements": []
     },
-    "glouton": {
-      "Package": "glouton",
-      "Version": "0.0.0.9000",
-      "Source": "GitHub",
-      "RemoteType": "github",
-      "RemoteHost": "api.github.com",
-      "RemoteRepo": "glouton",
-      "RemoteUsername": "ColinFay",
-      "RemoteRef": "HEAD",
-      "RemoteSha": "1c49d32466816fa12f5052f49090cea6bb56c990",
-      "Hash": "163396f869c7cc6d3d1a7f2aa88f391c",
-      "Requirements": [
-        "shiny"
-      ]
-    },
     "glue": {
       "Package": "glue",
       "Version": "1.6.2",
@@ -1019,6 +949,50 @@
       "Hash": "7d7f283939f563670a697165b2cf5560",
       "Requirements": [
         "gtable"
+      ]
+    },
+    "gt": {
+      "Package": "gt",
+      "Version": "0.7.0",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "b6f71436ae6088b9a773a5253217ade1",
+      "Requirements": [
+        "base64enc",
+        "bitops",
+        "cli",
+        "commonmark",
+        "dplyr",
+        "fs",
+        "ggplot2",
+        "glue",
+        "htmltools",
+        "magrittr",
+        "rlang",
+        "sass",
+        "scales",
+        "stringr",
+        "tibble",
+        "tidyselect"
+      ]
+    },
+    "gtExtras": {
+      "Package": "gtExtras",
+      "Version": "0.4.2",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "ae56911fedfc8f8f52a571f8ddd0ce70",
+      "Requirements": [
+        "commonmark",
+        "dplyr",
+        "fontawesome",
+        "ggplot2",
+        "glue",
+        "gt",
+        "htmltools",
+        "paletteer",
+        "rlang",
+        "scales"
       ]
     },
     "gtable": {
@@ -1381,60 +1355,6 @@
         "uuid"
       ]
     },
-    "lemr": {
-      "Package": "lemr",
-      "Version": "0.1.0",
-      "Source": "GitHub",
-      "Remotes": "benmarwick/words2number, rstudio/shinyvalidate,\n        ColinFay/glouton",
-      "RemoteType": "github",
-      "RemoteHost": "api.github.com",
-      "RemoteRepo": "lemr",
-      "RemoteUsername": "purposeanalytics",
-      "RemoteRef": "HEAD",
-      "RemoteSha": "954aa7301a7b88bb5011f4cd480f7a03a7085314",
-      "Hash": "beffdb66f14c9f6d10c20302108cd691",
-      "Requirements": [
-        "bsplus",
-        "cicerone",
-        "config",
-        "dplyr",
-        "extrafont",
-        "forcats",
-        "fs",
-        "ggplot2",
-        "glouton",
-        "glue",
-        "golem",
-        "htmlwidgets",
-        "httr",
-        "janitor",
-        "jsonlite",
-        "kableExtra",
-        "knitr",
-        "magrittr",
-        "mapboxer",
-        "pagedown",
-        "pkgload",
-        "plotly",
-        "purrr",
-        "readr",
-        "rlang",
-        "rmarkdown",
-        "scales",
-        "sf",
-        "shiny",
-        "shinyWidgets",
-        "shinybusy",
-        "shinyvalidate",
-        "stringr",
-        "tibble",
-        "tidyr",
-        "tidyselect",
-        "toOrdinal",
-        "usethis",
-        "words2number"
-      ]
-    },
     "lifecycle": {
       "Package": "lifecycle",
       "Version": "1.0.1",
@@ -1681,6 +1601,19 @@
         "xfun"
       ]
     },
+    "paletteer": {
+      "Package": "paletteer",
+      "Version": "1.4.1",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "6af183722792ce50f1decab2d7878fd3",
+      "Requirements": [
+        "prismatic",
+        "rematch2",
+        "rlang",
+        "rstudioapi"
+      ]
+    },
     "pillar": {
       "Package": "pillar",
       "Version": "1.6.4",
@@ -1771,14 +1704,6 @@
       "Hash": "03b7076c234cb3331288919983326c55",
       "Requirements": []
     },
-    "praise": {
-      "Package": "praise",
-      "Version": "1.0.0",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "a555924add98c99d2f411e37e7d25e9f",
-      "Requirements": []
-    },
     "prettyunits": {
       "Package": "prettyunits",
       "Version": "1.1.1",
@@ -1786,6 +1711,16 @@
       "Repository": "CRAN",
       "Hash": "95ef9167b75dde9d2ccc3c7528393e7e",
       "Requirements": []
+    },
+    "prismatic": {
+      "Package": "prismatic",
+      "Version": "1.0.0",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "ff0fd99eeae6a4ec43be2be881588681",
+      "Requirements": [
+        "farver"
+      ]
     },
     "processx": {
       "Package": "processx",
@@ -2294,24 +2229,6 @@
         "shiny"
       ]
     },
-    "shinyvalidate": {
-      "Package": "shinyvalidate",
-      "Version": "0.1.1.9000",
-      "Source": "GitHub",
-      "RemoteType": "github",
-      "RemoteHost": "api.github.com",
-      "RemoteRepo": "shinyvalidate",
-      "RemoteUsername": "rstudio",
-      "RemoteRef": "HEAD",
-      "RemoteSha": "5549a5454bc253608b95d80b41b0b5a9adc03631",
-      "Hash": "6216de28f1214020a0fd8525a2de965d",
-      "Requirements": [
-        "glue",
-        "htmltools",
-        "rlang",
-        "shiny"
-      ]
-    },
     "slippymath": {
       "Package": "slippymath",
       "Version": "0.3.1",
@@ -2412,34 +2329,6 @@
         "Rcpp"
       ]
     },
-    "testthat": {
-      "Package": "testthat",
-      "Version": "3.0.4",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "575216c9946ca70016c3ffb9c31709ba",
-      "Requirements": [
-        "R6",
-        "brio",
-        "callr",
-        "cli",
-        "crayon",
-        "desc",
-        "digest",
-        "ellipsis",
-        "evaluate",
-        "jsonlite",
-        "lifecycle",
-        "magrittr",
-        "pkgload",
-        "praise",
-        "processx",
-        "ps",
-        "rlang",
-        "waldo",
-        "withr"
-      ]
-    },
     "tibble": {
       "Package": "tibble",
       "Version": "3.1.6",
@@ -2537,17 +2426,6 @@
       "Hash": "db9a6f2cf147751322d22c9f6647c7bd",
       "Requirements": [
         "xfun"
-      ]
-    },
-    "toOrdinal": {
-      "Package": "toOrdinal",
-      "Version": "1.1-0.0",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "986b3f99e96a096469dcd4e04af8d794",
-      "Requirements": [
-        "crayon",
-        "testthat"
       ]
     },
     "triebeard": {
@@ -2690,22 +2568,6 @@
         "withr"
       ]
     },
-    "waldo": {
-      "Package": "waldo",
-      "Version": "0.2.5",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "20c45f1d511a3f730b7b469f4d11e104",
-      "Requirements": [
-        "cli",
-        "diffobj",
-        "fansi",
-        "glue",
-        "rematch2",
-        "rlang",
-        "tibble"
-      ]
-    },
     "webshot": {
       "Package": "webshot",
       "Version": "0.5.2",
@@ -2755,21 +2617,6 @@
       "Hash": "60e191a866c5649a8f58a458f5e60edf",
       "Requirements": [
         "cpp11"
-      ]
-    },
-    "words2number": {
-      "Package": "words2number",
-      "Version": "0.2.0",
-      "Source": "GitHub",
-      "RemoteType": "github",
-      "RemoteHost": "api.github.com",
-      "RemoteRepo": "words2number",
-      "RemoteUsername": "benmarwick",
-      "RemoteRef": "HEAD",
-      "RemoteSha": "e0589c5da1907e26e7a76e13fa2ee18925f1bfa2",
-      "Hash": "23b493a87489cda1a9f807cbfd8ac0a1",
-      "Requirements": [
-        "magrittr"
       ]
     },
     "xfun": {
