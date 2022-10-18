@@ -144,7 +144,7 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
               query <- dplyr::filter(dataset, .data$geo_uid %in% selected_geographies()[["geo_uid"]])
               bookmark_bounds(
                 sfarrow::read_sf_dataset(query) %>%
-                sf::st_bbox()
+                  sf::st_bbox()
               )
             }
           }
@@ -162,7 +162,8 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
       {
         # browser()
         input_aggregate_area(input$aggregate_area)
-      })
+      }
+    )
 
     shiny::observeEvent(
       input$selection_tool,
@@ -170,16 +171,19 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
       {
         # browser()
         input_selection_tool(input$selection_tool)
-      })
+      }
+    )
 
     # Reset geography
     shiny::observeEvent(
-      input$reset, {
+      input$reset,
+      {
         selected_geographies(dplyr::tibble())
 
         # Send to JS to reset polygon
         session$sendCustomMessage("reset", TRUE)
-    })
+      }
+    )
 
     # Export boundary ----
 
@@ -200,7 +204,7 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
 
     # Summary statistics table ----
     shiny::observeEvent(selected_geographies(), ignoreInit = FALSE, priority = 30, {
-      req(input_aggregate_area())
+      shiny::req(input_aggregate_area())
 
       if (nrow(selected_geographies()) == 0) {
 
@@ -266,20 +270,22 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
           "n", "Areas selected", n_units,
           "population", "Population", NA_character_,
           "households", "Households", NA_character_,
-          "area_sq_km", "Area", "km^2",
-          "population_density", "Population density", "people / km^2"
+          "area_sq_km", "Area", "km<sup>2</sup>",
+          "population_density", "Population density", "people/km<sup>2</sup>"
         )
 
         summary_statistics <- summary_statistics %>%
           dplyr::left_join(summary_statistics_labels_and_units, by = "name") %>%
-          dplyr::mutate(value = glue::glue("{value} {units}", .na = "")) %>%
+          dplyr::mutate(
+            value = glue::glue("{value} {units}", .na = "")
+          ) %>%
           dplyr::select(.data$label, .data$value)
       }
 
       output$summary_statistics <- shiny::renderText({
         summary_statistics %>%
           knitr::kable("html", col.names = NULL, escape = FALSE, align = "lr") %>%
-          kableExtra::kable_styling(full_width = FALSE, position = "left", bootstrap_options = "none") %>%
+          kableExtra::kable_styling(full_width = FALSE, position = "left", bootstrap_options = "basic") %>%
           kableExtra::column_spec(column = 1, bold = TRUE)
       })
     })
@@ -329,8 +335,7 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
         )
 
         # Zip HTML, PDF, and data export
-        zip(file, c(report_html, report_pdf, data_export))
-
+        utils::zip(file, c(report_html, report_pdf, data_export))
       }
     )
   })

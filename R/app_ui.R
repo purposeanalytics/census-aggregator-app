@@ -47,7 +47,7 @@ golem_add_external_resources <- function() {
     golem::favicon(),
     golem::bundle_resources(
       path = app_sys("app/www"),
-      app_title = "censusaggregatorapp"
+      app_title = "Census Aggregator"
     ),
     shinyjs::useShinyjs()
     # Add here other external resources

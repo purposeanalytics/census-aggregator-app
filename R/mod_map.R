@@ -254,7 +254,7 @@ console.log('new zoom large, hide ct');
       input$map_onclick,
       {
         # browser()
-        req(input_selection_tool())
+        shiny::req(input_selection_tool())
 
         # Only do this if the selection tool is click (not polygon)
 
