@@ -7,8 +7,8 @@ output:
 #   geo_uid: !r c("3520005")
 #   level: "csd"
 params:
-  geo_uid: !r c("5350612.10")
-  # geo_uid: !r c("3520005")
+  # geo_uid: !r c("5350612.10")
+  geo_uid: !r c("5050110.00", "5050120.01")
   # level: "csd"
   level: "ct"
   csv_location: "data_export.csv"
@@ -80,11 +80,10 @@ snapshot_card <- function(title, value, ..., class = NULL) {
   )
 }
 
-header_and_barchart <- function(header, plot) {
+header_and_barchart <- function(...) {
   shiny::column(
     width = 6,
-    header,
-    plot
+    ...
   )
 }
 
@@ -266,7 +265,11 @@ shiny::column(
 
 :::
 
-::: {.row}
+```{r section-age-households-families}
+section_heading("Age, households, and families")
+```
+
+::: {.row .mb-2}
 
 ```{r age-cohorts, out.height = 1}
 age_cohorts <- data_breakdown %>%
@@ -282,14 +285,6 @@ header_and_barchart(
     inline_barchart()
 )
 ```
-
-:::
-
-```{r section-households-families-education-language}
-section_heading("Households, families, education, and language")
-```
-
-::: {.row}
 
 ```{r household_size}
 household_size <- data_breakdown %>%
@@ -311,7 +306,6 @@ family_type <- data_breakdown %>%
     label_short == "family_type",
     vector != highest_parent_vector
   ) %>%
-  # mutate(label = recode("Total couple families" = "")
   derive_census_vector_order()
 
 header_and_barchart(
@@ -352,6 +346,10 @@ header_and_barchart(
 ```
 
 :::
+
+```{r section-language}
+section_heading("Language")
+```
 
 ::: {.row .mb-2}
 
@@ -429,6 +427,10 @@ shiny::column(
 )
 ```
 
+:::
+
+::: {.row}
+
 ```{r language_at_home}
 language_at_home <- data_breakdown %>%
   filter(
@@ -442,6 +444,7 @@ language_at_home <- data_breakdown %>%
   top_n(10, wt = value) %>%
   filter(value > 0) %>%
   arrange(-value) %>%
+  head(10) %>%
   derive_census_vector_order(by_value = TRUE)
 
 header_and_barchart(
@@ -511,6 +514,7 @@ shiny::column(
 ```
 
 :::
+
 ::: {.row}
 
 ```{r total-income}
@@ -536,15 +540,7 @@ shelter_cost <- data_breakdown %>%
   ) %>%
   derive_census_vector_order()
 
-header_and_barchart(
-  subsection_heading("Average shelter cost"),
-  shelter_cost %>%
-    inline_barchart("dollar")
-)
-```
 
-
-```{r household-tenure}
 household_tenure <- data_breakdown %>%
   filter(
     label_short == "household_tenure",
@@ -553,10 +549,17 @@ household_tenure <- data_breakdown %>%
   derive_census_vector_order()
 
 header_and_barchart(
+  subsection_heading("Average shelter cost"),
+  shelter_cost %>%
+    inline_barchart("dollar"),
   subsection_heading("Household tenure"),
   household_tenure %>%
     inline_barchart()
 )
+```
+
+
+```{r household-tenure}
 ```
 
 :::
