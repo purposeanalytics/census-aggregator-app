@@ -57,7 +57,6 @@ csd_size <- object.size(csd)
 csd <- csd %>%
   split(.$geo_uid) %>%
   map_dfr(function(feature) {
-
     pts <- npts(feature)
 
     if (pts > 10000) {

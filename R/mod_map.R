@@ -149,7 +149,8 @@ if (curZoom < 6 & message == 'ct') {
 
     # Use bounds from any bookmarking to fit the bounds of the map ----
     shiny::observeEvent(
-      bookmark_bounds(), {
+      bookmark_bounds(),
+      {
         mapboxer::mapboxer_proxy(ns("map")) %>%
           mapboxer::fit_bounds(bookmark_bounds()) %>%
           mapboxer::update_mapboxer()
@@ -165,7 +166,6 @@ if (curZoom < 6 & message == 'ct') {
       },
       priority = 100,
       {
-        # browser()
         # Only run these once the map has been rendered for the first time
         shiny::req(map_rendered())
         shiny::req(input_aggregate_area())
@@ -218,7 +218,6 @@ if (curZoom < 6 & message == 'ct') {
     shiny::observeEvent(
       input$map_onclick,
       {
-        # browser()
         shiny::req(input_selection_tool())
 
         # Only do this if the selection tool is click (not polygon)

@@ -97,7 +97,6 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
 
     # Parse bookmark
     shiny::observe({
-      # browser()
       query <- shiny::parseQueryString(session$clientData$url_search)
       # Additional parsing of query to split by ,
       query <- split_query(query)
@@ -113,7 +112,6 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
       # Priority of 1 - happens AFTER tibble of geo_uid is reset, to ensure any bookmarked geo_uids are kept
       priority = 1,
       {
-        # browser()
         shiny::req(boomarks_to_be_parsed())
         shiny::req(map_rendered())
         shiny::req(bookmark_aggregate_area())
@@ -135,12 +133,12 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
               )
 
               # Update input aggregate area
-              # browser()
+
               input_aggregate_area(bookmark_aggregate_area())
 
               # Get bounds of selected area to fly map to
               dataset <- arrow::open_dataset(app_sys(glue::glue("extdata/{bookmark_aggregate_area()}")))
-              # browser()
+
               query <- dplyr::filter(dataset, .data$geo_uid %in% selected_geographies()[["geo_uid"]])
               bookmark_bounds(
                 sfarrow::read_sf_dataset(query) %>%
@@ -160,7 +158,6 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
       ignoreInit = FALSE,
       priority = 300, # Set lower priority so aggregate_area input is set to whatever is in bookmark first
       {
-        # browser()
         input_aggregate_area(input$aggregate_area)
       }
     )
@@ -231,14 +228,14 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
         shinyjs::enable("export_boundary")
         shinyjs::enable("export_data")
 
-        # browser()
+
 
         summary_statistics_source <- switch(input_aggregate_area(),
           "csd" = censusaggregatorapp::csd,
           "ct" = censusaggregatorapp::ct
         )
 
-        # browser()
+
 
         summary_statistics <- summary_statistics_source %>%
           dplyr::inner_join(selected_geographies(), by = "geo_uid") %>%
@@ -255,7 +252,7 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
             name == "n" ~ as.character(value)
           ))
 
-        # browser()
+
 
         n_units <- switch(input_aggregate_area(),
           csd = "Census Subdivision",

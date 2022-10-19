@@ -218,7 +218,9 @@ ct_values <- ct_values %>%
   bind_rows(ct_keep)
 
 # Remove "couples" vector
-couples_vector <- vectors_original %>% filter(label_short == "couples", vector == highest_parent_vector) %>% pull(vector)
+couples_vector <- vectors_original %>%
+  filter(label_short == "couples", vector == highest_parent_vector) %>%
+  pull(vector)
 
 csd_values <- csd_values %>%
   filter(vector != couples_vector)
