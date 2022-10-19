@@ -107,6 +107,15 @@ couples_vector <- vectors %>%
 vectors <- vectors %>%
   filter(vector != couples_vector)
 
+# Change shelter_cost_ units to be "Currency", aggregation to be "Average" ----
+
+shelter_cost_update <- vectors %>%
+  filter(str_starts(label_short, "shelter_cost_")) %>%
+  mutate(units = "Currency", aggregation = "Average")
+
+vectors <- vectors %>%
+  rows_update(shelter_cost_update, by = "vector")
+
 # Recode vectors and breakdowns ----
 
 parent_vectors_recoding <- tibble::tribble(
