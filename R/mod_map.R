@@ -193,10 +193,6 @@ if (curZoom < 6 & message == 'ct') {
               layer_id = "ct_fill_show",
               filter = filter_list
             ) %>%
-            # mapboxer::set_filter(
-            #   layer_id = "csd_fill_show",
-            #   filter = list("in", "geo_uid", "")
-            # ) %>%
             hide_census_layers("csd"),
         ) %>%
           mapboxer::update_mapboxer()

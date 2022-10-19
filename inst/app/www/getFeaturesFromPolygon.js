@@ -19,5 +19,4 @@ function getFeaturesFromPolygon(e, map, geography) {
 
   Shiny.setInputValue(geography + '_polygon_filter', filter);
 
-
 };

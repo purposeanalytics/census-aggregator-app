@@ -30,9 +30,10 @@ app_server <- function(input, output, session) {
   # Keep track of geographies that are selected via polygon ----
   shiny::observeEvent(
     input$ct_polygon_filter, # Set in JS
+    ignoreNULL = FALSE
     {
       if (input_aggregate_area() == "ct") {
-        if (all(input$ct_polygon_filter == "")) {
+        if (all(input$ct_polygon_filter == "") | is.null(input$ct_polygon_filter)) {
           selected_geographies(
             tibble::tibble()
           )
@@ -47,9 +48,10 @@ app_server <- function(input, output, session) {
 
   shiny::observeEvent(
     input$csd_polygon_filter, # Set in JS
+    ignoreNULL = FALSE
     {
       if (input_aggregate_area() == "csd") {
-        if (all(input$csd_polygon_filter == "")) {
+        if (all(input$csd_polygon_filter == ""| is.null(input$csd_polygon_filter))) {
           selected_geographies(
             tibble::tibble()
           )
