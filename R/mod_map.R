@@ -31,7 +31,9 @@ mod_map_server <- function(id, input_aggregate_area, input_selection_tool, selec
         htmlwidgets::onRender("
     function() {
 
-    var map = mapboxer._widget['map-map'].map;
+    console.log('render function');
+
+      var map = mapboxer._widget['map-map'].map;
     // disable map rotation using right click + drag
     map.dragRotate.disable();
 
@@ -42,82 +44,47 @@ mod_map_server <- function(id, input_aggregate_area, input_selection_tool, selec
     Shiny.setInputValue('map_rendered', true);
 
     // Add popup to map that says to zoom in when CSDs/CTs aren't shown
-    const CSDpopup = new mapboxgl.Popup({ closeOnClick: false, closeButton: false, maxWidth: 'none'})
-      .setLngLat([-96, 37.8]) // Doesn't matter where this is since with CSS it is in top left corner
-      .setHTML('Please zoom in to see Census Subdivisions.')
-      .addTo(map)
+const constZoomPopup = new mapboxgl.Popup({ closeOnClick: false, closeButton: false, maxWidth: 'none'})
+  .setLngLat([-96, 37.8]) // Doesn't matter where this is since with CSS it is in top left corner
+  .setHTML('Please zoom in to see geographies.')
+  .addTo(map)
 
-    CSDpopup.addClassName('csd-popup')
+constZoomPopup.addClassName('zoom-popup')
 
-    const CTpopup = new mapboxgl.Popup({ closeOnClick: false, closeButton: false, maxWidth: 'none' })
-      .setLngLat([-96, 37.8])
-      .setHTML('Please zoom in to see Census Tracts.')
-      .addTo(map)
+var zoomPopup = document.getElementsByClassName('zoom-popup')[0];
 
-    CTpopup.addClassName('ct-popup')
+// Initialize as not visible
+zoomPopup.style.display = 'none';
 
-    var csdPopup = document.getElementsByClassName('csd-popup')[0];
-    var ctPopup = document.getElementsByClassName('ct-popup')[0];
+// Listen to zoom end and check for rendered features
 
-    // Initialize as not visible
-    csdPopup.style.display = 'none';
-    ctPopup.style.display = 'none';
+ map.on('zoomend', function () {
+    var newZoom = map.getZoom();
 
-    // Set parameters
-    var csdZoom = 5;
-    var ctZoom = 6;
+ctFeatures = map.queryRenderedFeatures( { layers: ['ct_fill_click'] });
+csdFeatures = map.queryRenderedFeatures( { layers: ['csd_fill_click'] });
 
-    // Listen to area changing to control zoom popup visibility
-    Shiny.addCustomMessageHandler('aggregate_area', function(aggregateArea) {
+    if (ctFeatures.length == 0 & csdFeatures.length == 0) {
+      zoomPopup.style.display = '';
+    } else {
+      zoomPopup.style.display = 'none';
+    }
+  });
 
-    console.log(aggregateArea);
-// Hide both popups when area changes
-csdPopup.style.display = 'none';
-ctPopup.style.display = 'none';
+// Listen to area changing, hide popup when it does and check based on zoom again
+Shiny.addCustomMessageHandler('aggregate_area', function(message) {
+    zoomPopup.style.display = 'none';
 
-// Get current zoom
 var curZoom = map.getZoom();
 
-// If zoom < csdZoom, area == csd, show popup
-if (curZoom < csdZoom && aggregateArea == 'csd') {
-console.log('current zoom too small, show csd');
-  csdPopup.style.display = '';
-}
-
-// If zoom < ctZoom, area == ct, show popup
-if (curZoom < ctZoom && aggregateArea == 'ct') {
-console.log('current zoom too small, show ct');
-  ctPopup.style.display = '';
-}
-
-// Get zoom on zoomEnd
-map.on('zoomend', function () {
-  var newZoom = map.getZoom();
-
-if (newZoom < csdZoom && aggregateArea == 'csd') {
-console.log('aggregateArea according to here is');
-console.log(aggregateArea);
-console.log(aggregateArea == 'csd');
-// If zoom < csdZoom, area == csd, show popup
-console.log('new zoom too small, show csd');
-  csdPopup.style.display = '';
-} else if (newZoom >= csdZoom && aggregateArea == 'csd') {
-console.log('new zoom large, hide csd');
-// If zoom >= csdZoom, area == csd, hide popup
-  csdPopup.style.display = 'none';
-}
-
-if (newZoom < ctZoom && aggregateArea == 'ct') {
-// If zoom < ctZoom, area == ct, show popup
-console.log('new zoom too small, show ct');
-  ctPopup.style.display = '';
-} else if (newZoom >= ctZoom && aggregateArea == 'ct') {
-console.log('new zoom large, hide ct');
-// If zoom >= ctZoom, area == ct, hide popup
-  ctPopup.style.display = 'none';
-}
+if (curZoom < 6 & message == 'ct') {
+      zoomPopup.style.display = '';
+    } else if (curZoom < 5 & message == 'csd') {
+      zoomPopup.style.display = '';
+    } else {
+      zoomPopup.style.display = 'none';
+    }
 });
-    })
 
     // Highlight / fill geography on hover
     highlightGeographyOnHover(map);
@@ -295,6 +262,8 @@ console.log('new zoom large, hide ct');
       input_aggregate_area(),
       ignoreInit = FALSE,
       {
+
+        shiny::req(map_rendered())
         session$sendCustomMessage("aggregate_area", input_aggregate_area())
       }
     )
