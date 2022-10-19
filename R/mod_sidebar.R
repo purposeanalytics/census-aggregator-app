@@ -169,7 +169,9 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
       input$selection_tool,
       ignoreInit = FALSE,
       {
-        # browser()
+        # Clear selected geographies
+        selected_geographies(dplyr::tibble())
+
         input_selection_tool(input$selection_tool)
       }
     )

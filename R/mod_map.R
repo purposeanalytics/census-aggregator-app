@@ -31,8 +31,6 @@ mod_map_server <- function(id, input_aggregate_area, input_selection_tool, selec
         htmlwidgets::onRender("
     function() {
 
-    console.log('render function');
-
       var map = mapboxer._widget['map-map'].map;
     // disable map rotation using right click + drag
     map.dragRotate.disable();
@@ -262,7 +260,6 @@ if (curZoom < 6 & message == 'ct') {
       input_aggregate_area(),
       ignoreInit = FALSE,
       {
-
         shiny::req(map_rendered())
         session$sendCustomMessage("aggregate_area", input_aggregate_area())
       }
