@@ -115,6 +115,7 @@ library(censusaggregatorapp)
 library(sfarrow)
 library(ggplot2)
 library(sf)
+library(forcats)
 ```
 
 ```{r data}
@@ -130,7 +131,7 @@ vectors_data <- data %>%
   collect()
 
 vectors_data <- vectors_data %>%
-  mutate(geo_uid = forcats::fct_expand(geo_uid, regions))
+  mutate(geo_uid = fct_expand(geo_uid, regions))
 
 metadata <- switch(level,
   "csd" = csd,
@@ -277,7 +278,7 @@ age_cohorts <- data_breakdown %>%
     label_short == "age_cohorts",
     vector != highest_parent_vector
   ) %>%
-  mutate(label = forcats::fct_reorder(label, label))
+  mutate(label = fct_reorder(label, label))
 
 household_size <- data_breakdown %>%
   filter(
@@ -312,7 +313,7 @@ multiple_family_households <- data_breakdown %>%
     label_short == "household_type",
     vector != highest_parent_vector
   ) %>%
-  mutate(label = forcats::fct_relevel(
+  mutate(label = fct_relevel(
     label, "1 person",
     "2+ persons non census family",
     "1 census family, no additional persons",
@@ -519,7 +520,7 @@ shiny::column(
 ```{r total-income}
 total_income <- data_breakdown %>%
   filter(label_short == "income_buckets") %>%
-  mutate(label = forcats::fct_relevel(
+  mutate(label = fct_relevel(
     label, "Under $20,000", "$20,000 to $40,000", "$40,000 to $60,000",
     "$60,000 to $80,000", "$80,000 to $100,000", "$100,000 and over"
   ))
@@ -555,10 +556,6 @@ header_and_barchart(
   household_tenure %>%
     inline_barchart()
 )
-```
-
-
-```{r household-tenure}
 ```
 
 :::
@@ -698,6 +695,7 @@ data_export <- bind_rows(
   ) %>%
     mutate(
       value = readr::parse_number(value),
+      value = round(value, 3),
       breakdown = vector
     ),
   # Household size
@@ -710,7 +708,8 @@ data_export <- bind_rows(
     ),
   # Buckets
 
-  data_export %>% filter(label_short == "income_buckets"),
+  data_export %>% filter(label_short == "income_buckets") %>% mutate(vector = paste(vector, "($20,000 buckets)")) %>%
+    mutate(breakdown = fct_relevel(breakdown, levels(total_income[["label"]]))) %>% arrange(breakdown),
 
   # Original breakdowns
 
@@ -727,7 +726,7 @@ data_export <- bind_rows(
   # Household tenure
   data_export %>% filter(label_short == "household_tenure"),
   # Average shelter cost
-  data_export %>% filter(label_short %in% c("shelter_cost_owner", "shelter_cost_renter")),
+  data_export %>% filter(label_short %in% c("shelter_cost_owner", "shelter_cost_renter")) %>% mutate(vector = "Average monthly shelter cost") %>% mutate(value = round(value, 2)),
   # Age (5 year buckets)
   data_export %>%
     filter(label_short == "age") %>%
@@ -760,15 +759,14 @@ data_export <- bind_rows(
   # Family type
   data_export %>% filter(label_short == "family_type"),
   # Multiple family households
-  data_export %>% filter(label_short == "household_type")
+  data_export %>% filter(label_short == "household_type") %>%
+    mutate(breakdown = fct_relevel(breakdown, levels(multiple_family_households[["label"]]))) %>% arrange(breakdown)
 ) %>%
-  select(vector, breakdown, value, value_proportion) %>%
-  mutate(value_proportion = round(value_proportion, 3))
+  select(Vector = vector, Breakdown = breakdown, Value = value, Proportion = value_proportion) %>%
+  mutate(Proportion = round(Proportion, 3))
 
 # TODO
-# Round value proportion
-# Fix Household total income groups in 2020 for private households
 # Fix Average monthly shelter cost having prop
 
-readr::write_csv(data_export, params$csv_location)
+readr::write_csv(data_export, params$csv_location, na = "")
 ```

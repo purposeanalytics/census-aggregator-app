@@ -131,7 +131,8 @@ parent_vectors_recoding <- tibble::tribble(
   "Total - Owner and tenant households with household total income greater than zero, in non-farm, non-reserve private dwellings by shelter-cost-to-income ratio", "Unaffordable housing",
   "Total - Owner households in non-farm, non-reserve private dwellings", "Average monthly shelter cost",
   "Total - Tenant households in non-farm, non-reserve private dwellings", "Average monthly shelter cost",
-  "Median total income of household in 2020 (\\$)", "Median total household income"
+  "Median total income of household in 2020 (\\$)", "Median total household income",
+  "Household total income groups in 2020 for private households", "Total household income"
 )
 
 breakdown_vectors_recoding <- tribble(
