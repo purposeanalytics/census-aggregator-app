@@ -271,7 +271,7 @@ section_heading("Age, households, and families")
 
 ::: {.row .mb-2}
 
-```{r age-cohorts, out.height = 1}
+```{r age-cohorts-household-size-family-type}
 age_cohorts <- data_breakdown %>%
   filter(
     label_short == "age_cohorts",
@@ -279,28 +279,12 @@ age_cohorts <- data_breakdown %>%
   ) %>%
   mutate(label = forcats::fct_reorder(label, label))
 
-header_and_barchart(
-  subsection_heading("Population by age cohorts"),
-  age_cohorts %>%
-    inline_barchart()
-)
-```
-
-```{r household_size}
 household_size <- data_breakdown %>%
   filter(
     label_short == "household_size",
     vector != highest_parent_vector
   )
 
-header_and_barchart(
-  subsection_heading("Private households by size"),
-  household_size %>%
-    inline_barchart()
-)
-```
-
-```{r family_type}
 family_type <- data_breakdown %>%
   filter(
     label_short == "family_type",
@@ -308,7 +292,14 @@ family_type <- data_breakdown %>%
   ) %>%
   derive_census_vector_order()
 
+
 header_and_barchart(
+  subsection_heading("Population by age cohorts"),
+  age_cohorts %>%
+    inline_barchart(),
+  subsection_heading("Private households by size"),
+  household_size %>%
+    inline_barchart(),
   subsection_heading("Family type"),
   family_type %>%
     inline_barchart()
@@ -321,7 +312,15 @@ multiple_family_households <- data_breakdown %>%
     label_short == "household_type",
     vector != highest_parent_vector
   ) %>%
-  derive_census_vector_order()
+  mutate(label = forcats::fct_relevel(
+    label, "1 person",
+    "2+ persons non census family",
+    "1 census family, no additional persons",
+    "1 census family, + additional persons",
+    "Multiple census families",
+    "Multigen. households"
+  )) %>%
+  arrange(label)
 
 header_and_barchart(
   subsection_heading("Multiple family households"),

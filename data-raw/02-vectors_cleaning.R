@@ -138,12 +138,19 @@ breakdown_vectors_recoding <- tribble(
   ~label, ~new_label,
   "100 years and over", "100+",
   "5 or more persons", "5+ persons",
-  "Total one-parent families", "Single parent families",
-  "in which the parent is a woman+", "Single woman+ parent families",
+  "Total one-parent families", "Single parent",
+  "in which the parent is a woman+", "Single woman+ parent",
   "In low income based on the Low-income measure, after tax (LIM-AT)", "Low income (LIM-AT)",
   "Spending 30% or more of income on shelter costs", "Spending 30% or more of income on shelter",
   "Average monthly shelter costs for owned dwellings (\\$)", "Owned dwellings",
-  "Average monthly shelter costs for rented dwellings (\\$)", "Rented dwellings"
+  "Average monthly shelter costs for rented dwellings (\\$)", "Rented dwellings",
+  "One-census-family households without additional persons", "1 census family, no additional persons",
+  "Multigenerational households", "Multigen. households",
+  "Multiple-census-family households", "Multiple census families",
+  "One-census-family households with additional persons", "1 census family, + additional persons",
+  "Two-or-more-person non-census-family households", "2+ persons non census family",
+  "One-person households", "1 person"
+
 )
 
 vectors <- vectors %>%
