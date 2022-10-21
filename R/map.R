@@ -10,7 +10,7 @@ add_census_layer <- function(map, geography) {
   map %>%
     mapboxer::add_source(mapboxer::mapbox_source(
       type = "vector",
-      url = glue::glue("mapbox://purposeanalytics.2016_{geography}"),
+      url = glue::glue("mapbox://purposeanalytics.2021_{geography}"),
       promoteId = "geo_uid"
     ),
     id = geography_to_source_id(geography)
@@ -111,11 +111,11 @@ geography_to_layer_id <- function(geography, type) {
 }
 
 geography_to_source_id <- function(geography) {
-  glue::glue("2016_{geography}")
+  glue::glue("2021_{geography}")
 }
 
 geography_to_source_layer_id <- function(geography) {
-  glue::glue("2016_census_{geography}")
+  glue::glue("2021_census_{geography}")
 }
 
 show_census_layers <- function(map, geography) {

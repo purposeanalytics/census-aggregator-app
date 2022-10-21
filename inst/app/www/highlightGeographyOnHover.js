@@ -16,13 +16,13 @@ function highlightSpecificGeographyOnHover(map, hoveredGeoUid, geography) {
     if (e.features.length > 0) {
       if (hoveredGeoUid !== null) {
         map.setFeatureState(
-          { source: '2016_' + geography, sourceLayer: '2016_census_' + geography, id: hoveredGeoUid },
+          { source: '2021_' + geography, sourceLayer: '2021_census_' + geography, id: hoveredGeoUid },
           { hover: false }
         );
       }
       hoveredGeoUid = e.features[0].id;
       map.setFeatureState(
-        { source: '2016_' + geography, sourceLayer: '2016_census_' + geography, id: hoveredGeoUid },
+        { source: '2021_' + geography, sourceLayer: '2021_census_' + geography, id: hoveredGeoUid },
         { hover: true }
       );
     }
@@ -32,7 +32,7 @@ function highlightSpecificGeographyOnHover(map, hoveredGeoUid, geography) {
   map.on('mouseleave', geography + '_fill_click', () => {
     if (hoveredGeoUid !== null) {
       map.setFeatureState(
-        { source: '2016_' + geography, sourceLayer: '2016_census_' + geography, id: hoveredGeoUid },
+        { source: '2021_' + geography, sourceLayer: '2021_census_' + geography, id: hoveredGeoUid },
         { hover: false }
       );
     }

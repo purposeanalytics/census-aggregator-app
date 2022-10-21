@@ -116,8 +116,8 @@ csd <- csd %>%
 upload_tiles(
   input = csd,
   username = "purposeanalytics",
-  tileset_id = "2016_csd",
-  tileset_name = "2016_census_csd",
+  tileset_id = "2021_csd",
+  tileset_name = "2021_census_csd",
   multipart = TRUE
 )
 
@@ -189,8 +189,8 @@ ct <- ct %>%
 upload_tiles(
   input = ct,
   username = "purposeanalytics",
-  tileset_id = "2016_ct",
-  tileset_name = "2016_census_ct",
+  tileset_id = "2021_ct",
+  tileset_name = "2021_census_ct",
   multipart = TRUE
 )
 
