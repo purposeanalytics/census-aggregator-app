@@ -43,12 +43,22 @@ add_census_fill_layer <- function(map, geography) {
     mapboxer::add_layer(
       list(
         "id" = show_layer_id,
-        "type" = "fill",
+        # "type" = "fill",
+        type = "line",
+        "source" = geography_to_source_id(geography),
+        "source-layer" = geography_to_source_layer_id(geography),
+        # "paint" = list(
+        #   "fill-opacity" = 0.8,
+        #   "fill-color" = "white"
+        # ),
+        "type" = "line",
         "source" = geography_to_source_id(geography),
         "source-layer" = geography_to_source_layer_id(geography),
         "paint" = list(
-          "fill-opacity" = 0.8,
-          "fill-color" = "white"
+          "line-color" = "#0745a8",
+          "line-opacity" = 1,
+          "line-width" = 2
+
         ),
         layout = list(
           "visibility" = "none"
@@ -90,7 +100,7 @@ add_census_line_layer <- function(map, geography) {
         "source" = geography_to_source_id(geography),
         "source-layer" = geography_to_source_layer_id(geography),
         "paint" = list(
-          "line-color" = "#0745a8",
+          "line-color" = "grey",
           "line-opacity" = list(
             "case",
             list("boolean", c("feature-state", "hover"), FALSE), 1,
