@@ -1,12 +1,15 @@
 Package: censusaggregatorapp
-Title: An Amazing Shiny App
+Title: Census Aggregator App
 Version: 0.0.0.9000
 Authors@R: 
-    person(given = "firstname",
-           family = "lastname",
-           role = c("aut", "cre"),
-           email = "your@email.com")
-Description: What the package does (one paragraph).
+    c(person(given = "Sharla",
+             family = "Gelfand",
+             role = c("aut", "cre"),
+             email = "sharla.gelfand@gmail.com"),
+      person(given = "Purpose Analytics",
+             role = "cph"))
+Description: censusaggregatorapp is a Shiny app designed to easily retrieve and
+    aggregate Canadian census data.
 License: MIT + file LICENSE
 Imports: 
     arrow,
@@ -42,5 +45,4 @@ RoxygenNote: 7.2.0
 Depends: 
     R (>= 2.10)
 Remotes:
-    sharlagelfand/mapboxer,
-    purposeanalytics/census-aggregate-package
+    purposeanalytics/census-aggregator-package

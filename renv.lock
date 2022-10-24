@@ -362,9 +362,15 @@
     "censusaggregatorapp": {
       "Package": "censusaggregatorapp",
       "Version": "0.0.0.9000",
-      "Source": "unknown",
-      "Remotes": "sharlagelfand/mapboxer,\n        purposeanalytics/census-aggregate-package",
-      "Hash": "3f7ad260e08fe30c112951a4744a255b",
+      "Source": "GitHub",
+      "Remotes": "purposeanalytics/census-aggregator-package",
+      "RemoteType": "github",
+      "RemoteHost": "api.github.com",
+      "RemoteRepo": "census-aggregator-app",
+      "RemoteUsername": "purposeanalytics",
+      "RemoteRef": "HEAD",
+      "RemoteSha": "b40c40226b47388f40debfdaf3dd3e1b925d85be",
+      "Hash": "a1071a35f83713d7e8f0e3e994c2b3a2",
       "Requirements": [
         "arrow",
         "bslib",
@@ -379,6 +385,7 @@
         "knitr",
         "magrittr",
         "mapboxer",
+        "pagedown",
         "pkgload",
         "purrr",
         "rlang",
@@ -1884,14 +1891,6 @@
         "tibble"
       ]
     },
-    "remotes": {
-      "Package": "remotes",
-      "Version": "2.4.0",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "a85ebb35721573b196317b49ddd2dfe4",
-      "Requirements": []
-    },
     "renv": {
       "Package": "renv",
       "Version": "0.15.4",
@@ -1955,13 +1954,15 @@
     },
     "rmarkdown": {
       "Package": "rmarkdown",
-      "Version": "2.9",
+      "Version": "2.17",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "912c09266d5470516df4df7a303cde92",
+      "Hash": "e97c8be593e010f93520e8215c0f9189",
       "Requirements": [
+        "bslib",
         "evaluate",
         "htmltools",
+        "jquerylib",
         "jsonlite",
         "knitr",
         "stringr",
@@ -2110,10 +2111,10 @@
     },
     "servr": {
       "Package": "servr",
-      "Version": "0.22",
+      "Version": "0.24",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "8cfe5c1d3a8c8304496ba3034e080405",
+      "Hash": "e2c3e268d654becf0d78a1ec13a05b46",
       "Requirements": [
         "httpuv",
         "jsonlite",
@@ -2621,10 +2622,10 @@
     },
     "xfun": {
       "Package": "xfun",
-      "Version": "0.24",
+      "Version": "0.34",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "88cdb9779a657ad80ad942245fffba31",
+      "Hash": "9eba2411b0b1f879797141bd24df7407",
       "Requirements": []
     },
     "xml2": {
