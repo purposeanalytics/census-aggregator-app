@@ -24,7 +24,7 @@ vectors <- tribble(
   "v_CA21_1025", "In low income based on the Low-income measure, after tax (LIM-AT)", "lim_at",
   # TODO
   # "v_CA16_3405", "Total - Immigrant status and period of immigration for the population in private households - 25% sample data", "immigrant_status",
-  # "v_CA16_3852", "Total - Aboriginal identity for the population in private households - 25% sample data", "aboriginal_identity",
+  "v_CA21_4201", "Total - Indigenous identity for the population in private households", "indigenous_identity",
   # "v_CA16_3954", "Total - Visible minority for the population in private households - 25% sample data", "visible_minority",
   # "v_CA16_3999", "Total - Ethnic origin for the population in private households - 25% sample data", "ethnic_origin",
   # End TODO
@@ -133,7 +133,7 @@ breakdown_labels <- list(
   ),
   "knowledge_of_english_french" = c("English only", "English and French", "French only"),
   # "immigrant_status" = c("Immigrants", "2016 to 2021"),
-  # "aboriginal_identity" = c("Aboriginal identity"),
+  "indigenous_identity" = c("Indigenous identity"),
   # "educational_attainment" = c("No certificate, diploma or degree", "Secondary (high) school diploma or equivalency certificate", "Postsecondary certificate, diploma or degree"),
   "family_type" = c("Total one-parent families", "in which the parent is a woman+"),
   # TODO

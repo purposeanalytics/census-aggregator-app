@@ -560,7 +560,7 @@ header_and_barchart(
 
 :::
 
-```{r section-diversity-immigration, eval = FALSE}
+```{r section-diversity-immigration}
 section_heading("Diversity and immigration")
 ```
 
@@ -608,14 +608,14 @@ shiny::column(
 
 shiny::column(
   width = 3,
-  snapshot_card("Recent immigrants<br>(2011 to 2016)", immigrant_status_recent)
+  snapshot_card("Recent immigrants<br>(2016 to 2021)", immigrant_status_recent)
 )
 ```
 
-```{r aboriginal-identity, eval = FALSE}
-aboriginal_identity <- data_breakdown %>%
+```{r indigenous-identity}
+indigenous_identity <- data_breakdown %>%
   filter(
-    label_short == "aboriginal_identity",
+    label_short == "indigenous_identity",
     vector != highest_parent_vector
   ) %>%
   select(-value, value = value_proportion) %>%
@@ -623,7 +623,7 @@ aboriginal_identity <- data_breakdown %>%
 
 shiny::column(
   width = 3,
-  snapshot_card("Aboriginal identity", aboriginal_identity)
+  snapshot_card("Indigenous identity", indigenous_identity)
 )
 ```
 
@@ -753,7 +753,7 @@ data_export <- bind_rows(
   data_export %>% filter(label_short == "knowledge_of_english"),
   # Immigrant Status
   # Immigrants, Recent Immigrants (since 2016)
-  # Aboriginal identity
+  # indigenous identity
   # Country of origin
   # Educational attainment
   # Family type
