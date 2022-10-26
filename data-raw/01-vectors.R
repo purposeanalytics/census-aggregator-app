@@ -18,18 +18,15 @@ vectors <- tribble(
   "v_CA21_500", "Total couple families", "couples",
   "v_CA21_543", "Household type", "household_type",
   "v_CA21_1144", "Knowledge of official languages for the total population excluding institutional residents", "knowledge_of_english_french",
-  "v_CA21_2200", "Total - Language spoken most often at home for the total population excluding institutional residents - 100% data", "top_10_languages",
+  "v_CA21_2200", "Total - Language spoken most often at home for the total population excluding institutional residents - 100% data", "language_at_home",
   "v_CA21_906", "Median total income of household in 2020 ($)", "median_income",
   "v_CA21_923", "Household total income groups in 2020 for private households", "income",
   "v_CA21_1025", "In low income based on the Low-income measure, after tax (LIM-AT)", "lim_at",
-  # TODO
-  # "v_CA16_3405", "Total - Immigrant status and period of immigration for the population in private households - 25% sample data", "immigrant_status",
+  "v_CA21_4404", "Total - Immigrant status and period of immigration for the population in private households", "immigrant_status",
   "v_CA21_4201", "Total - Indigenous identity for the population in private households", "indigenous_identity",
-  # "v_CA16_3954", "Total - Visible minority for the population in private households - 25% sample data", "visible_minority",
-  # "v_CA16_3999", "Total - Ethnic origin for the population in private households - 25% sample data", "ethnic_origin",
-  # End TODO
+  "v_CA21_4872", "Total - Visible minority for the population in private households", "visible_minority",
+  "v_CA21_4917", "Total - Ethnic or cultural origin for the population in private households", "ethnic_cultural_origin",
   "v_CA21_4237", "Total - Private households by tenure", "household_tenure",
-  # TODO - what is v_CA21_4302?
   "v_CA21_4288", "Total - Owner and tenant households with household total income greater than zero, in non-farm, non-reserve private dwellings by shelter-cost-to-income ratio", "unaffordable_housing",
   # TODO
   # "v_CA16_5051", "Total - Highest certificate, diploma or degree for the population aged 15 years and over in private households - 25% sample data", "educational_attainment",
@@ -91,8 +88,8 @@ age_five_year_vectors <- vectors %>%
 saveRDS(age_five_year_vectors, here::here("data-raw", "intermediary", "age_five_year_vectors.rds"))
 
 # Language spoken at home
-top_10_languages_vectors <- vectors %>%
-  filter(label_short == "top_10_languages") %>%
+language_at_home_vectors <- vectors %>%
+  filter(label_short == "language_at_home") %>%
   pull(vector) %>%
   child_census_vectors(leaves_only = TRUE) %>%
   pull(label)
@@ -106,23 +103,22 @@ income_vectors <- vectors %>%
 saveRDS(income_vectors, here::here("data-raw", "intermediary", "income_vectors.rds"))
 
 # Ethnic origin
-# ethnic_origin_vectors <- vectors %>%
-#   filter(label_short == "ethnic_origin") %>%
-#   pull(vector) %>%
-#   child_census_vectors(leaves_only = TRUE) %>%
-#   pull(vector)
+ethnic_cultural_origin_vectors <- vectors %>%
+  filter(label_short == "ethnic_cultural_origin") %>%
+  pull(vector) %>%
+  child_census_vectors(leaves_only = TRUE) %>%
+  select(vector, label)
 
 # Breakdowns to keep
 
 breakdown_labels <- list(
   "population_2021" = NA,
   "household_size" = c("1 person", "2 persons", "3 persons", "4 persons", "5 or more persons"),
-  # "visible_minority" = c(
-  #   "v_CA16_3957", "v_CA16_3960", "v_CA16_3963", "v_CA16_3966",
-  #   "v_CA16_3969", "v_CA16_3972", "v_CA16_3975", "v_CA16_3978", "v_CA16_3981",
-  #   "v_CA16_3984", "v_CA16_3987", "v_CA16_3990", "v_CA16_3993",
-  #   "v_CA16_3996"
-  # ),
+  "visible_minority" = c(
+    "Total visible minority population", "South Asian", "Chinese", "Black", "Filipino", "Arab", "Latin American",
+    "Southeast Asian", "West Asian", "Korean", "Japanese", "Visible minority, n.i.e.",
+    "Multiple visible minorities"
+  ),
   "household_tenure" = c("Owner", "Renter", "Dwelling provided by the local government, First Nation or Indian band"),
   "unaffordable_housing" = "Spending 30% or more of income on shelter costs",
   "age" = c(
@@ -132,20 +128,18 @@ breakdown_labels <- list(
     age_cohort_vectors[["label"]]
   ),
   "knowledge_of_english_french" = c("English only", "English and French", "French only"),
-  # "immigrant_status" = c("Immigrants", "2016 to 2021"),
+  "immigrant_status" = c("Immigrants", "2016 to 2021"),
   "indigenous_identity" = c("Indigenous identity"),
   # "educational_attainment" = c("No certificate, diploma or degree", "Secondary (high) school diploma or equivalency certificate", "Postsecondary certificate, diploma or degree"),
   "family_type" = c("Total one-parent families", "in which the parent is a woman+"),
-  # TODO
   "couples" = "With children", # Collapse into the one above - couples with children can just be part of family characteristics
   "household_type" = c("One-census-family households without additional persons", "Multigenerational households", "Multiple-census-family households", "One-census-family households with additional persons", "Two-or-more-person non-census-family households", "One-person households"),
-  # "ethnic_origin" = NA,
   "area" = NA,
-  "top_10_languages" = top_10_languages_vectors,
+  "language_at_home" = language_at_home_vectors,
   "median_income" = NA,
   "income" = income_vectors[["label"]],
   "lim_at" = NA,
-  # "ethnic_origin" = ethnic_origin_vectors,
+  "ethnic_cultural_origin" = ethnic_cultural_origin_vectors[["label"]],
   "shelter_cost_owner" = "Average monthly shelter costs for owned dwellings ($)",
   "shelter_cost_renter" = "Average monthly shelter costs for rented dwellings ($)"
 )

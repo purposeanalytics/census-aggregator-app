@@ -11,6 +11,21 @@ vectors_original <- readRDS(here::here("data-raw", "intermediary", "vectors.rds"
 age_cohort_vectors <- readRDS(here::here("data-raw", "intermediary", "age_cohort_vectors.rds"))
 income_vectors <- readRDS(here::here("data-raw", "intermediary", "income_vectors_grouped.rds"))
 
+ethnic_cultural_origin_vectors <- vectors_original %>%
+  filter(
+    label_short == "ethnic_cultural_origin",
+    !is.na(parent_vector)
+  ) %>%
+  pull(vector)
+
+language_at_home_vectors <- vectors_original %>%
+  filter(
+    label_short == "language_at_home",
+    !is.na(parent_vector)
+  ) %>%
+  filter(!label %in% c("English and French", "English and non-official language(s)", "French and non-official language(s)", "English, French and non-official language(s)", "English", "French")) %>%
+  pull(vector)
+
 # cancensus errors out if trying to get too much data, so do this in a few goes
 # Less than 25 child vectors:
 vectors_few <- vectors_original %>%
@@ -33,11 +48,22 @@ csd_data_few <- get_census(
   vectors = unique(vectors_few[["vector"]]), labels = "short"
 )
 
+# Split into two here, because of further errors
+
 csd_data_many <- get_census(
   dataset = dataset,
   regions = list(C = 01),
   level = "CSD",
-  vectors = vectors_many[["vector"]], labels = "short"
+  vectors = head(vectors_many[["vector"]], 200), labels = "short"
+)
+
+n <- length(vectors_many[["vector"]])
+
+csd_data_many_2 <- get_census(
+  dataset = dataset,
+  regions = list(C = 01),
+  level = "CSD",
+  vectors = vectors_many[["vector"]][201:n], labels = "short"
 )
 
 # CT ----
@@ -58,8 +84,6 @@ ct_data_many <- get_census(
   vectors = head(vectors_many[["vector"]], 200), labels = "short"
 )
 
-n <- length(vectors_many[["vector"]])
-
 ct_data_many_2 <- get_census(
   dataset = dataset,
   regions = list(C = 01),
@@ -74,19 +98,20 @@ pivot_census_data <- function(data) {
       geo_uid = .data$GeoUID,
       dplyr::starts_with("v_CA21_")
     ) %>%
-    tidyr::pivot_longer(dplyr::starts_with("v_CA21_"), names_to = "vector") # %>%
-  # Remove 0s for children of ethnic origin and visible minority
-  # Keep 0s otherwise
-  # TODO
-  # mutate(remove = value == 0 & vector %in% c(ethnic_origin_vectors,)) %>%
-  # filter(!remove) %>%
-  # select(-remove)
+    tidyr::pivot_longer(dplyr::starts_with("v_CA21_"), names_to = "vector") %>%
+    # Remove 0s for children of ethnic origin, language at home
+    # Keep 0s otherwise
+    mutate(remove = value == 0 & vector %in% c(ethnic_cultural_origin_vectors, language_at_home_vectors)) %>%
+    filter(!remove) %>%
+    select(-remove)
 }
 
 csd_values <- bind_rows(
   csd_data_few %>%
     pivot_census_data(),
   csd_data_many %>%
+    pivot_census_data(),
+  csd_data_many_2 %>%
     pivot_census_data()
 )
 

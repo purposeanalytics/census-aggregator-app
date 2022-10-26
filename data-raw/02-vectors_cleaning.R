@@ -132,7 +132,11 @@ parent_vectors_recoding <- tibble::tribble(
   "Total - Owner households in non-farm, non-reserve private dwellings", "Average monthly shelter cost",
   "Total - Tenant households in non-farm, non-reserve private dwellings", "Average monthly shelter cost",
   "Median total income of household in 2020 (\\$)", "Median total household income",
-  "Household total income groups in 2020 for private households", "Total household income"
+  "Household total income groups in 2020 for private households", "Total household income",
+  "Total - Visible minority for the population in private households", "Visible minority population",
+  "Total - Immigrant status and period of immigration for the population in private households", "Immigrant status",
+  "Total - Ethnic or cultural origin for the population in private households", "Top 10 ethnic or cultural origins",
+  "Total - Indigenous identity for the population in private households", "Indigenous identity"
 )
 
 breakdown_vectors_recoding <- tribble(
@@ -150,8 +154,8 @@ breakdown_vectors_recoding <- tribble(
   "Multiple-census-family households", "Multiple census families",
   "One-census-family households with additional persons", "1 census family, + additional persons",
   "Two-or-more-person non-census-family households", "2+ persons non census family",
-  "One-person households", "1 person"
-
+  "One-person households", "1 person",
+  "2016 to 2021", "Recent immigrants (2016 to 2021)"
 )
 
 vectors <- vectors %>%
