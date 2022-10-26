@@ -151,7 +151,7 @@ ct <- ct_raw %>%
   left_join(csd_name, by = "csd_uid") %>%
   select(-csd_uid)
 
-# Exclude CTs with >10% missing data (mainly 50-100% missing), since we will not be able to render reports for them anyways
+# Exclude CTs with >5% missing data (mainly 50-100% missing), since we will not be able to render reports for them anyways
 ct_remove <- readRDS(here::here("data-raw", "intermediary", "ct_remove.rds"))
 
 ct <- ct %>%

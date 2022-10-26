@@ -126,85 +126,75 @@ ct_values <- bind_rows(
 
 # Explore missing data -----
 
-# TODO THIS SECTION
-#
-# # How many geos have almost all vectors NA?
-#
-# n_vectors <- csd_values %>%
-#   # filter(!vector %in% c(v_CA16_3999_vectors, v_CA16_1355_vectors)) %>%
-#   distinct(vector) %>%
-#   nrow()
-#
-# csd_values %>%
-#   # filter(!vector %in% c(v_CA16_3999_vectors, v_CA16_1355_vectors)) %>%
-#   filter(is.na(value)) %>%
-#   count(geo_uid) %>%
-#   mutate(prop = n / n_vectors) %>%
-#   count(prop) %>%
-#   arrange(-prop)
-#
-# # 0.985, only thing available is land area
-# # 0.970, only thing is 2011 population and land area
-# # 0.955, everything except total population, area, and households is suppressed
-# # 0.522, data is unreliable, to be used with caution, or suppressed
-# # 0.493, a lot is unreliable
-# # 0.478, suppression
-#
-# # Only INCLUDE if < 10% missing values
-# # What's missing then?
-# csd_values %>%
-#   # filter(!vector %in% c(v_CA16_3999_vectors, v_CA16_1355_vectors)) %>%
-#   filter(is.na(value)) %>%
-#   count(geo_uid) %>%
-#   mutate(prop = n / n_vectors) %>%
-#   filter(prop < 0.10) %>%
-#   distinct(geo_uid) %>%
-#   left_join(
-#     csd_values,
-#     # csd_values %>%
-#     # filter(!vector %in% c(v_CA16_3999_vectors, v_CA16_1355_vectors)),
-#     by = "geo_uid"
-#   ) %>%
-#   filter(is.na(value)) %>%
-#   count(vector) %>%
-#   left_join(vectors, by = "vector") %>%
-#   select(highest_parent_vector, label)
-#
-# # Just LIM-AT, 2011 population, and unaffordable housing
-# # We can just say those are not available?
-#
-# # Similar for CT
-#
-# # Remove any CSDs and CTs that have >10% missing data
-#
-# csd_remove <- csd_values %>%
-#   # filter(!vector %in% c(v_CA16_3999_vectors, v_CA16_1355_vectors)) %>%
-#   mutate(n_vectors = n_distinct(vector)) %>%
-#   filter(is.na(value)) %>%
-#   count(geo_uid, n_vectors) %>%
-#   mutate(prop = n / n_vectors) %>%
-#   filter(prop >= 0.10) %>%
-#   distinct(geo_uid)
-#
-# csd_values <- csd_values %>%
-#   anti_join(csd_remove, by = "geo_uid")
-#
-# ct_remove <- ct_values %>%
-#   # filter(!vector %in% c(v_CA16_3999_vectors, v_CA16_1355_vectors)) %>%
-#   mutate(n_vectors = n_distinct(vector)) %>%
-#   filter(is.na(value)) %>%
-#   count(geo_uid, n_vectors) %>%
-#   mutate(prop = n / n_vectors) %>%
-#   filter(prop >= 0.10) %>%
-#   distinct(geo_uid)
-#
-# ct_values <- ct_values %>%
-#   anti_join(ct_remove, by = "geo_uid")
-#
-# # Write removal datasets so that they are removed in geographic data sets too
-#
-# saveRDS(csd_remove, here::here("data-raw", "csd_remove.rds"))
-# saveRDS(ct_remove, here::here("data-raw", "ct_remove.rds"))
+# How many geos have almost all vectors NA?
+
+n_vectors <- csd_values %>%
+  filter(!vector %in% c(ethnic_cultural_origin_vectors, language_at_home_vectors)) %>%
+  distinct(vector) %>%
+  nrow()
+
+csd_values %>%
+  filter(!vector %in% c(ethnic_cultural_origin_vectors, language_at_home_vectors)) %>%
+  filter(is.na(value)) %>%
+  count(geo_uid) %>%
+  mutate(prop = n / n_vectors) %>%
+  count(prop) %>%
+  arrange(-prop)
+
+# Only INCLUDE if < 5% missing values
+# What's missing then?
+csd_values %>%
+  filter(!vector %in% c(ethnic_cultural_origin_vectors, language_at_home_vectors)) %>%
+  filter(is.na(value)) %>%
+  count(geo_uid) %>%
+  mutate(prop = n / n_vectors) %>%
+  filter(prop < 0.05) %>%
+  distinct(geo_uid) %>%
+  left_join(
+    csd_values,
+    # csd_values %>%
+    # filter(!vector %in% c(v_CA16_3999_vectors, v_CA16_1355_vectors)),
+    by = "geo_uid"
+  ) %>%
+  filter(is.na(value)) %>%
+  left_join(vectors_original, by = "vector") %>%
+  select(highest_parent_vector, vector, label, geo_uid) %>%
+  left_join(csd_values %>% filter(vector == "v_CA21_1") %>% select(geo_uid, value)) %>%
+  count(vector = highest_parent_vector) %>%
+  left_join(vectors_original, by = "vector") %>%
+  select(label, n) %>%
+  arrange(-n)
+
+# Remove any CSDs and CTs that have >5% missing data
+
+csd_remove <- csd_values %>%
+  filter(!vector %in% c(ethnic_cultural_origin_vectors, language_at_home_vectors)) %>%
+  mutate(n_vectors = n_distinct(vector)) %>%
+  filter(is.na(value)) %>%
+  count(geo_uid, n_vectors) %>%
+  mutate(prop = n / n_vectors) %>%
+  filter(prop >= 0.05) %>%
+  distinct(geo_uid)
+
+csd_values <- csd_values %>%
+  anti_join(csd_remove, by = "geo_uid")
+
+ct_remove <- ct_values %>%
+  filter(!vector %in% c(ethnic_cultural_origin_vectors, language_at_home_vectors)) %>%
+  mutate(n_vectors = n_distinct(vector)) %>%
+  filter(is.na(value)) %>%
+  count(geo_uid, n_vectors) %>%
+  mutate(prop = n / n_vectors) %>%
+  filter(prop >= 0.05) %>%
+  distinct(geo_uid)
+
+ct_values <- ct_values %>%
+  anti_join(ct_remove, by = "geo_uid")
+
+# Write removal datasets so that they are removed in geographic data sets too
+
+saveRDS(csd_remove, here::here("data-raw", "intermediary", "csd_remove.rds"))
+saveRDS(ct_remove, here::here("data-raw", "intermediary", "ct_remove.rds"))
 
 # Collapse / remove etc ----
 
