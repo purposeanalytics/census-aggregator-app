@@ -336,8 +336,8 @@
       "RemoteRepo": "census-aggregator-package",
       "RemoteUsername": "purposeanalytics",
       "RemoteRef": "HEAD",
-      "RemoteSha": "e264779ee7813b69be7f5cd80314240d113af2e9",
-      "Hash": "4c8c6615b75ffaddb787981d7fdb6565",
+      "RemoteSha": "2ea0cdc7683b20d5e0d87ecca33dfa8e29caddfb",
+      "Hash": "2e14b6ef034986771d980ad1c1f892aa",
       "Requirements": [
         "cancensus",
         "curl",

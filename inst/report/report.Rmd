@@ -285,8 +285,7 @@ family_type <- data_breakdown %>%
   filter(
     label_short == "family_type",
     vector != highest_parent_vector
-  ) %>%
-  derive_census_vector_order()
+  )
 
 header_and_barchart(
   subsection_heading("Population by age cohorts"),
@@ -534,6 +533,8 @@ shelter_cost <- data_breakdown %>%
   ) %>%
   derive_census_vector_order()
 
+# If they are all NA, then fake as proportion so that no bars are shown
+shelter_cost_format <- ifelse(all(is.na(shelter_cost[["value"]])), "proportion", "dollar")
 
 household_tenure <- data_breakdown %>%
   filter(
@@ -545,7 +546,7 @@ household_tenure <- data_breakdown %>%
 header_and_barchart(
   subsection_heading("Average shelter cost"),
   shelter_cost %>%
-    inline_barchart("dollar"),
+    inline_barchart(shelter_cost_format),
   subsection_heading("Household tenure"),
   household_tenure %>%
     inline_barchart()
