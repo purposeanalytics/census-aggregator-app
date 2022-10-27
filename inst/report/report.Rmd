@@ -1,4 +1,5 @@
 ---
+title: "CensusAggregator Report"
 output:
   html_document:
     theme:
@@ -17,6 +18,10 @@ knitr::opts_chunk$set(
 ```
 
 ```{css css-styles}
+.title{
+  display: none;
+}
+
 .section-heading {
   background-color: lightgrey;
   padding-left: 5px;
