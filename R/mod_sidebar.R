@@ -61,7 +61,7 @@ mod_sidebar_ui <- function(id) {
       breathe(),
       shiny::div(
         shiny::div("Summary of selected areas", class = "summary-statistics-header breathe"),
-        shiny::htmlOutput(ns("summary_statistics"))
+        gt::gt_output(ns("summary_statistics"))
       ),
       breathe(),
       shiny::div(
@@ -220,7 +220,7 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
           "Area",
           "Population density"
         )) %>%
-          dplyr::mutate(value = "\u2014")
+          dplyr::mutate(value = NA)
       } else {
         # Enable buttons
         shinyjs::enable("reset")
@@ -228,14 +228,10 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
         shinyjs::enable("export_boundary")
         shinyjs::enable("export_data")
 
-
-
         summary_statistics_source <- switch(input_aggregate_area(),
           "csd" = censusaggregatorapp::csd,
           "ct" = censusaggregatorapp::ct
         )
-
-
 
         summary_statistics <- summary_statistics_source %>%
           dplyr::inner_join(selected_geographies(), by = "geo_uid") %>%
@@ -251,8 +247,6 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
             name %in% c("area_sq_km", "population_density") ~ scales::comma(value, accuracy = 0.1),
             name == "n" ~ as.character(value)
           ))
-
-
 
         n_units <- switch(input_aggregate_area(),
           csd = "Census Subdivision",
@@ -281,11 +275,19 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
           dplyr::select(.data$label, .data$value)
       }
 
-      output$summary_statistics <- shiny::renderText({
+      output$summary_statistics <- gt::render_gt({
         summary_statistics %>%
-          knitr::kable("html", col.names = NULL, escape = FALSE, align = "lr") %>%
-          kableExtra::kable_styling(full_width = FALSE, position = "left", bootstrap_options = "basic") %>%
-          kableExtra::column_spec(column = 1, bold = TRUE)
+          gt::gt() %>%
+          gt::sub_missing(columns = value) %>%
+          gt::cols_align("right", value) %>%
+          gt::fmt_markdown(columns = value) %>%
+          gt::tab_options(
+            table.width = "100%",
+            column_labels.hidden = TRUE,
+            table_body.border.bottom.color = "transparent",
+            table_body.border.top.color = "transparent",
+            table.font.names = "Lato"
+          )
       })
     })
 
