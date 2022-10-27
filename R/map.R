@@ -158,7 +158,7 @@ add_census_tooltips <- function(map, geography) {
   <b>Population</b>: {{population}}<br>
   <b>Households</b>: {{households}}<br>
   <b>Area</b>: {{area_sq_km}} km<sup>2</sup><br>
-  <b>Population Density</b>: {{population_density}} people per km<sup>2</sup>
+  <b>Population Density</b>: {{population_density}} people/km<sup>2</sup>
   "
 
   map %>%

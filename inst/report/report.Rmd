@@ -260,7 +260,7 @@ shiny::column(
 ```{r population_density}
 shiny::column(
   width = 3,
-  snapshot_card("Population density<br>(people per square km)", population_density)
+  snapshot_card("Population density<br>(people/km<sup>2</sup>)", population_density)
 )
 ```
 
