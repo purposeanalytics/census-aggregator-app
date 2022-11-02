@@ -5,7 +5,7 @@ output:
     theme:
       version: 4
 params:
-  geo_uid: !r c("5917811")
+  geo_uid: !r c("4601057")
   level: "csd"
   csv_location: "data_export.csv"
 ---
@@ -339,7 +339,7 @@ header_and_barchart(
 ```
 
 ```{r household_type}
-multiple_family_households <- data_breakdown %>%
+household_type <- data_breakdown %>%
   filter(
     label_short == "household_type",
     vector != highest_parent_vector
@@ -355,8 +355,8 @@ multiple_family_households <- data_breakdown %>%
   arrange(label)
 
 header_and_barchart(
-  subsection_heading("Multiple family households"),
-  multiple_family_households %>%
+  subsection_heading("Household type"),
+  household_type %>%
     inline_barchart()
 )
 ```
@@ -595,6 +595,8 @@ header_and_barchart(
 
 :::
 
+<div class = "pagebreak"></div>
+
 ```{r section-diversity-immigration}
 section_heading("Diversity and immigration")
 ```
@@ -699,6 +701,30 @@ header_and_barchart(
 
 :::
 
+<div class = "pagebreak"></div>
+
+::: {.row}
+
+```{r variable-definitions}
+shiny::div(
+  style = "column-count: 2;",
+  variable_definitions %>%
+    gt::gt() %>%
+    gt::cols_align("left", variable_definition) %>%
+    gt::fmt_markdown(columns = variable_definition) %>%
+    gt::tab_options(
+      column_labels.hidden = TRUE,
+      table_body.border.bottom.color = "transparent",
+      table_body.border.top.color = "transparent",
+      table.font.names = "Lato"
+    )
+)
+```
+
+:::
+
+<div class = "pagebreak"></div>
+
 #### IDs
 
 ```{r, output = "asis"}
@@ -743,8 +769,11 @@ data_export <- bind_rows(
     ),
   # Buckets
 
-  data_export %>% filter(label_short == "income_buckets") %>% mutate(vector = paste(vector, "($20,000 buckets)")) %>%
-    mutate(breakdown = fct_relevel(breakdown, levels(total_income[["label"]]))) %>% arrange(breakdown),
+  data_export %>%
+    filter(label_short == "income_buckets") %>%
+    mutate(vector = paste(vector, "($20,000 buckets)")) %>%
+    mutate(breakdown = fct_relevel(breakdown, levels(total_income[["label"]]))) %>%
+    arrange(breakdown),
 
   # Original breakdowns
 
@@ -762,7 +791,10 @@ data_export <- bind_rows(
   # Household tenure
   data_export %>% filter(label_short == "household_tenure"),
   # Average shelter cost
-  data_export %>% filter(label_short %in% c("shelter_cost_owner", "shelter_cost_renter")) %>% mutate(vector = "Average monthly shelter cost") %>% mutate(value = round(value, 2)),
+  data_export %>%
+    filter(label_short %in% c("shelter_cost_owner", "shelter_cost_renter")) %>%
+    mutate(vector = "Average monthly shelter cost") %>%
+    mutate(value = round(value, 2)),
   # Age (5 year buckets)
   data_export %>%
     filter(label_short == "age") %>%
@@ -796,14 +828,18 @@ data_export <- bind_rows(
   # Indigenous identity
   data_export %>% filter(label_short == "indigenous_identity"),
   # Ethnic or cultural origin
-  ethnic_origin %>% rename(breakdown = label) %>% mutate(vector = "Top 10 ethnic or cultural origins"),
+  ethnic_origin %>%
+    rename(breakdown = label) %>%
+    mutate(vector = "Top 10 ethnic or cultural origins"),
   # Educational attainment
   # TODO
   # Family type
   data_export %>% filter(label_short == "family_type"),
   # Multiple family households
-  data_export %>% filter(label_short == "household_type") %>%
-    mutate(breakdown = fct_relevel(breakdown, levels(multiple_family_households[["label"]]))) %>% arrange(breakdown)
+  data_export %>%
+    filter(label_short == "household_type") %>%
+    mutate(breakdown = fct_relevel(breakdown, levels(household_type[["label"]]))) %>%
+    arrange(breakdown)
 ) %>%
   select(Vector = vector, Breakdown = breakdown, Value = value, Proportion = value_proportion) %>%
   mutate(Proportion = round(Proportion, 3))
