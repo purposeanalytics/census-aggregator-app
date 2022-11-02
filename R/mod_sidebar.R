@@ -294,9 +294,12 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
     # Export data ----
     output$export_data <- shiny::downloadHandler(
       filename = function() {
-        "export.zip"
+        "CensusAggregator Export.zip"
       },
       content = function(file) {
+
+        cat("export start \n")
+        cat(paste0(Sys.time()), "\n")
 
         # Move to tempdir to save files
         original_wd <- setwd(tempdir())
@@ -307,9 +310,9 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
         temp_template <- "report.Rmd"
         file.copy(app_sys("report/report.Rmd"), temp_template, overwrite = TRUE)
 
-        report_html <- "report.html"
-        report_pdf <- "report.pdf"
-        data_export <- "data.csv"
+        report_html <- "CensusAggregator Report.html"
+        report_pdf <- "CensusAggregator Report.pdf"
+        data_export <- "CensusAggregator Data Export.csv"
 
         # Set up parameters to pass to Rmd document
         params <- list(
@@ -318,14 +321,21 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
           csv_location = data_export
         )
 
+        cat("rendering report \n")
+        cat(paste0(Sys.time()), "\n")
+
         # Knit the document, passing in the `params` list, and eval it in a
         # child of the global environment (this isolates the code in the document
         # from the code in this app).
         rmarkdown::render(temp_template,
           output_file = report_html,
           params = params,
-          envir = new.env(parent = globalenv())
+          envir = new.env(parent = globalenv()),
+          quiet = TRUE
         )
+
+        cat("report rendered, printing to pdf \n")
+        cat(paste0(Sys.time()), "\n")
 
         # Print to PDF
         pagedown::chrome_print(
@@ -335,8 +345,14 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
           verbose = FALSE
         )
 
+        cat("zipping \n")
+        cat(paste0(Sys.time()), "\n")
+
         # Zip HTML, PDF, and data export
         utils::zip(file, c(report_html, report_pdf, data_export))
+
+        cat("done \n")
+        cat(paste0(Sys.time()), "\n")
       }
     )
   })
