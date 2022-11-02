@@ -18,6 +18,25 @@ knitr::opts_chunk$set(
 ```
 
 ```{css css-styles}
+@import url('https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap');
+
+:root {
+  --font: "Lato", Sans-Serif;
+  --base-size: 14px;
+  --bigger-size: 16px;
+  --regular-weight: 400;
+  --bold-weight: 700;
+  --secondary-color: #3D3D3D;
+  --tertiary-color: #BFBFBF;
+  --breathing-room: 10px
+}
+
+body {
+  font-family: var(--font);
+  font-size: var(--base-size);
+  font-weight: var(--regular-weight);
+}
+
 .title{
   display: none;
 }
@@ -46,6 +65,20 @@ knitr::opts_chunk$set(
   margin-top: auto;
   font-size: 2rem;
   font-weight: bold;
+}
+
+h1 {
+  font-size: 1.5rem;
+}
+
+h2 {
+  font-size: 1.25rem;
+}
+
+@media print {
+  .pagebreak {
+    page-break-before: always;
+  }
 }
 ```
 
@@ -164,7 +197,7 @@ data_breakdown <- vectors_data_filtered %>%
   distinct()
 ```
 
-```{r map, fig.height = 5, dpi = 300, fig.alt = "A map showing the outlines of the selected geographies."}
+```{r map, fig.height = 3.5, dpi = 300, fig.alt = "A map showing the outlines of the selected geographies."}
 boundaries_dataset <- glue::glue("extdata/{level}")
 
 boundaries_data <- open_dataset(system.file(boundaries_dataset, package = "censusaggregatorapp"))
@@ -344,6 +377,8 @@ header_and_barchart(
 ```
 
 :::
+
+<div class = "pagebreak"></div>
 
 ```{r section-language}
 section_heading("Language")
