@@ -22,6 +22,8 @@ add_census_layer <- function(map, geography) {
 add_census_fill_layer <- function(map, geography) {
   click_layer_id <- geography_to_layer_id(geography, "fill_click")
   show_layer_id <- geography_to_layer_id(geography, "fill_show")
+  quantiles <- unname(get(paste0(geography, "_population_density_quantiles")))
+  palette <- c("#FFFFFF", "#FFBFBF", "#FF7F7F", "#FF3F3F", "#FF0000")
 
   map %>%
     mapboxer::add_layer(
@@ -31,8 +33,17 @@ add_census_fill_layer <- function(map, geography) {
         "source" = geography_to_source_id(geography),
         "source-layer" = geography_to_source_layer_id(geography),
         "paint" = list(
-          "fill-opacity" = 0,
-          "fill-color" = "white"
+          "fill-color" = list(
+            "property" = "population_density",
+            stops = list(
+              list(quantiles[1], palette[1]),
+              list(quantiles[2], palette[2]),
+              list(quantiles[3], palette[2]),
+              list(quantiles[4], palette[4]),
+              list(quantiles[5], palette[5])
+            )
+          ),
+          "fill-opacity" = 0.75
         ),
         layout = list(
           "visibility" = "none"
@@ -155,10 +166,10 @@ add_census_tooltips <- function(map, geography) {
     "
   <b>Region</b>: {{region_name}}<br>
   <b>Census ID</b>: {{geo_uid}}<br>
-  <b>Population</b>: {{population}}<br>
-  <b>Households</b>: {{households}}<br>
-  <b>Area</b>: {{area_sq_km}} km<sup>2</sup><br>
-  <b>Population Density</b>: {{population_density}} people/km<sup>2</sup>
+  <b>Population</b>: {{population_fmt}}<br>
+  <b>Households</b>: {{households_fmt}}<br>
+  <b>Area</b>: {{area_sq_km_fmt}} km<sup>2</sup><br>
+  <b>Population Density</b>: {{population_density_fmt}} people/km<sup>2</sup>
   "
 
   map %>%

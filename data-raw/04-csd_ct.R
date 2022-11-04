@@ -38,8 +38,7 @@ csd_raw <- get_census(
 # Derive population density for tooltips
 csd <- csd_raw %>%
   mutate(
-    population_density = population / area_sq_km,
-    population_density = scales::comma(population_density, accuracy = 1)
+    population_density = population / area_sq_km
   )
 
 # Exclude CSDs with >10% missing data (mainly 50-100% missing), since we will not be able to render reports for them anyways
@@ -97,6 +96,18 @@ csd_geometry %>%
     hive_style = FALSE
   )
 
+# Create formatted version of values, round original population density
+csd <- csd %>%
+  mutate(
+    across(c(population, households), .fns = list(fmt = scales::comma)),
+    across(c(area_sq_km, population_density), .fns = list(fmt = ~ scales::comma(.x, accuracy = 0.1))),
+    population_density = round(population_density)
+  )
+
+# Remove original values (except population density)
+csd <- csd %>%
+  select(-population, -households, -area_sq_km)
+
 # Now to upload to mapbox
 
 csd <- csd %>%
@@ -125,7 +136,7 @@ upload_tiles(
 
 csd <- csd %>%
   st_set_geometry(NULL) %>%
-  select(-population_density, -region_name)
+  select(-region_name, -tidyselect::ends_with("fmt"))
 
 usethis::use_data(csd, overwrite = TRUE)
 
@@ -178,8 +189,19 @@ ct_geometry %>%
 ct <- ct %>%
   mutate(
     population_density = population / area_sq_km,
-    population_density = scales::comma(population_density, accuracy = 1)
   )
+
+# Create formatted version of values, round original population density
+ct <- ct %>%
+  mutate(
+    across(c(population, households), .fns = list(fmt = scales::comma)),
+    across(c(area_sq_km, population_density), .fns = list(fmt = ~ scales::comma(.x, accuracy = 0.1))),
+    population_density = round(population_density)
+  )
+
+# Remove original values (except population density)
+ct <- ct %>%
+  select(-population, -households, -area_sq_km)
 
 # Now to upload to mapbox
 
@@ -194,10 +216,10 @@ upload_tiles(
   multipart = TRUE
 )
 
-# Save without geography (and population density) for usage in app
+# Save without geography (and population density, and formatted values) for usage in app
 
 ct <- ct %>%
   st_set_geometry(NULL) %>%
-  select(-population_density, -region_name)
+  select(-population_density, -region_name, -tidyselect::("ends_with"))
 
 usethis::use_data(ct, overwrite = TRUE)
