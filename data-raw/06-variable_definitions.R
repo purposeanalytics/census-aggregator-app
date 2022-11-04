@@ -9,4 +9,4 @@ variable_definitions <- variable_definitions %>%
          variable_definition = str_squish(variable_definition)) %>%
   select(-Variable, -Definition)
 
-usethis::use_data(variable_definitions)
+usethis::use_data(variable_definitions, overwrite = TRUE)

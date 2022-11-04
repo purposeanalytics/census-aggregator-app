@@ -23,7 +23,6 @@ knitr::opts_chunk$set(
 :root {
   --font: "Lato", Sans-Serif;
   --base-size: 14px;
-  --bigger-size: 16px;
   --regular-weight: 400;
   --bold-weight: 700;
   --secondary-color: #3D3D3D;
@@ -716,7 +715,8 @@ shiny::div(
       column_labels.hidden = TRUE,
       table_body.border.bottom.color = "transparent",
       table_body.border.top.color = "transparent",
-      table.font.names = "Lato"
+      table.font.names = "Lato", 
+      table.font.size = 14
     )
 )
 ```
