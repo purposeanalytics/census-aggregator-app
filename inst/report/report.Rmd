@@ -705,9 +705,15 @@ header_and_barchart(
 ::: {.row}
 
 ```{r variable-definitions}
-shiny::div(
-  style = "column-count: 2;",
-  variable_definitions %>%
+# Split into two columns manually, after "Language spoken most often at home" will make it fit on 1 page
+
+cutoff <- variable_definitions %>%
+  mutate(id = row_number()) %>%
+  filter(str_detect(variable_definition, "Language spoken most often at home")) %>%
+  pull(id)
+
+definitions_table <- function(data) {
+  data %>%
     gt::gt() %>%
     gt::cols_align("left", variable_definition) %>%
     gt::fmt_markdown(columns = variable_definition) %>%
@@ -715,9 +721,23 @@ shiny::div(
       column_labels.hidden = TRUE,
       table_body.border.bottom.color = "transparent",
       table_body.border.top.color = "transparent",
-      table.font.names = "Lato", 
+      table.font.names = "Lato",
       table.font.size = 14
     )
+}
+
+shiny::column(
+  width = 6,
+  variable_definitions %>%
+    filter(row_number() <= cutoff) %>%
+    definitions_table()
+)
+
+shiny::column(
+  width = 6,
+  variable_definitions %>%
+    filter(row_number() > cutoff) %>%
+    definitions_table()
 )
 ```
 
