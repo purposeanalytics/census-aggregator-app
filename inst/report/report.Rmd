@@ -25,6 +25,7 @@ knitr::opts_chunk$set(
   --base-size: 14px;
   --regular-weight: 400;
   --bold-weight: 700;
+  --main-color: #0745a8;
   --secondary-color: #3D3D3D;
   --tertiary-color: #BFBFBF;
   --breathing-room: 10px
@@ -36,28 +37,31 @@ body {
   font-weight: var(--regular-weight);
 }
 
-.title{
+.title {
   display: none;
 }
 
-.section-heading {
-  background-color: lightgrey;
-  padding-left: 5px;
+.section-heading hr {
+  border-top: 2px solid var(--main-color);
+}
+
+.subsection-heading {
+  font-weight: var(--bold-weight);
+  background-color: white;
+  color: var(--main-color);
+  padding-top: 0.5rem;
+  padding-bottom: 0;
 }
 
 .box {
   height: 100%;
-  background-color: lightgrey;
+  background-color: var(--main-color);
+  color: white;
   # text-align: center;
   padding: 0.5rem;
   # margin-right: 0.5rem;
   display: flex;
   flex-direction: column;
-}
-
-.box-last {
-  # margin-right: 0;
-  # margin-left: 0.5rem;
 }
 
 .card-value {
@@ -67,7 +71,7 @@ body {
 }
 
 h1 {
-  font-size: 1.5rem;
+  font-size: 2rem;
 }
 
 h2 {
@@ -84,14 +88,18 @@ h2 {
 ```{r html-utils}
 section_heading <- function(title) {
   htmltools::div(
+    htmltools::hr(),
+  htmltools::div(
     class = "section-heading",
-    htmltools::h1(title)
+    htmltools::h1(title),
+    htmltools::hr()
+  )
   )
 }
 
 subsection_heading <- function(title, class = NULL) {
   htmltools::div(
-    class = "section-heading",
+    class = "subsection-heading",
     htmltools::h2(title)
   )
 }
@@ -196,7 +204,7 @@ data_breakdown <- vectors_data_filtered %>%
   distinct()
 ```
 
-```{r map, fig.height = 3.5, dpi = 300, fig.alt = "A map showing the outlines of the selected geographies."}
+```{r map, fig.height = 3.25, dpi = 300, fig.alt = "A map showing the outlines of the selected geographies."}
 boundaries_dataset <- glue::glue("extdata/{level}")
 
 boundaries_data <- open_dataset(system.file(boundaries_dataset, package = "censusaggregatorapp"))
@@ -702,6 +710,10 @@ header_and_barchart(
 
 <div class = "pagebreak"></div>
 
+```{r}
+section_heading("Definitions")
+```
+
 ::: {.row}
 
 ```{r variable-definitions}
@@ -722,7 +734,7 @@ definitions_table <- function(data) {
       table_body.border.bottom.color = "transparent",
       table_body.border.top.color = "transparent",
       table.font.names = "Lato",
-      table.font.size = 14
+      table.font.size = 13
     )
 }
 
