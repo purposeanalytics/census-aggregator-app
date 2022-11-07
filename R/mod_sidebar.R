@@ -14,11 +14,11 @@ mod_sidebar_ui <- function(id) {
     shiny::div(
       lemrstyles::legend_categorical(c("#FFFFFF", "#C1D0E9", "#83A2D3", "#4573BD", "#0745A8"),
         csd_quantiles_text,
-        id = ns("csd-population-density")
+        id = ns("csd-population-density"), alt_text =
       ),
         lemrstyles::legend_categorical(c("#FFFFFF", "#C1D0E9", "#83A2D3", "#4573BD", "#0745A8"),
           ct_quantiles_text,
-          id = ns("ct-population-density")
+          id = ns("ct-population-density"), alt_text = "TODO"
 
       ),
       breathe(),
@@ -43,7 +43,7 @@ mod_sidebar_ui <- function(id) {
           shiny::actionButton(
             ns("reset"),
             "Reset selected geographies",
-            class = "btn-link"
+            class = "btn-link btn-secondary-effect"
           )
         )
       ),

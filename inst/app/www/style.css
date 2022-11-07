@@ -64,6 +64,7 @@ p, h1, h2, h3, h4, h5, h6 {
   --bigger-size: 16px;
   --regular-weight: 400;
   --bold-weight: 700;
+  --main-color: #0745a8;
   --secondary-color: #3D3D3D;
   --tertiary-color: #BFBFBF;
   --breathing-room: 10px
@@ -73,7 +74,6 @@ p, h1, h2, h3, h4, h5, h6 {
 
 body {
   font-family: var(--font);
-  font-size: var(--base-size);
   font-weight: var(--regular-weight);
 }
 
@@ -147,6 +147,11 @@ button:disabled, .btn.disabled {
   background-color: inherit !important;
   border-style: none !important;
   padding: 0;
+  color: var(--main-color);
+}
+
+.btn-link.btn-secondary-effect {
+  color: red;
 }
 
 /* Tooltip positioning - top left instead of following mouse */
