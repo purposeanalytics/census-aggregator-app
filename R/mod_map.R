@@ -26,8 +26,8 @@ mod_map_server <- function(id, input_aggregate_area, input_selection_tool, selec
       map() %>%
         add_census_tooltips("csd") %>%
         add_census_tooltips("ct") %>%
-        show_census_layers("csd") %>%
-        hide_census_layers("ct") %>%
+        show_census_layers("ct") %>%
+        hide_census_layers("csd") %>%
         htmlwidgets::onRender("
     function() {
 

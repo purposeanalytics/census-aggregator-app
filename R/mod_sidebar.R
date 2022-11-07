@@ -26,8 +26,8 @@ mod_sidebar_ui <- function(id) {
         ns("aggregate_area"),
         "Choose aggregate area",
         choices = list(
-          "Census Subdivisions" = "csd",
-          "Census Tracts" = "ct"
+          "Census Tracts" = "ct",
+          "Census Subdivisions" = "csd"
         )
       ),
       shinyWidgets::prettyRadioButtons(

@@ -1,6 +1,6 @@
 map <- function() {
   mapboxer::mapboxer(style = "mapbox://styles/purposeanalytics/cl6mafpzk002r14pdbda7la8r") %>%
-    mapboxer::set_view_state(-92, 52, zoom = 5) %>%
+    mapboxer::set_view_state(-80, 45, zoom = 6) %>%
     mapboxer::add_navigation_control(showCompass = FALSE, pos = "bottom-right") %>%
     add_census_layer("ct") %>%
     add_census_layer("csd")
