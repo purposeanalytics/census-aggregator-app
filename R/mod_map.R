@@ -178,20 +178,24 @@ if (curZoom < 6 & message == 'ct') {
         switch(input_aggregate_area(),
           csd = mapboxer::mapboxer_proxy(ns("map")) %>%
             mapboxer::set_filter(
-              layer_id = "csd_fill_show",
+              layer_id = "csd_line_click",
               filter = filter_list
             ) %>%
             show_census_layers("csd") %>%
             mapboxer::set_filter(
-              layer_id = "ct_fill_show",
+              layer_id = "ct_line_click",
               filter = list("in", "geo_uid", "")
             ) %>%
             hide_census_layers("ct"),
           ct = mapboxer::mapboxer_proxy(ns("map")) %>%
             show_census_layers("ct") %>%
             mapboxer::set_filter(
-              layer_id = "ct_fill_show",
+              layer_id = "ct_line_click",
               filter = filter_list
+            ) %>%
+            mapboxer::set_filter(
+              layer_id = "csd_line_click",
+              filter = list("in", "geo_uid", "")
             ) %>%
             hide_census_layers("csd"),
         ) %>%

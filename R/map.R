@@ -21,9 +21,8 @@ add_census_layer <- function(map, geography) {
 
 add_census_fill_layer <- function(map, geography) {
   click_layer_id <- geography_to_layer_id(geography, "fill_click")
-  show_layer_id <- geography_to_layer_id(geography, "fill_show")
   quantiles <- get(paste0(geography, "_population_density_quantiles"))
-  palette <- c("#FFFFFF", "#FFBFBF", "#FF7F7F", "#FF3F3F", "#FF0000")
+  palette <- c("#FFFFFF", "#C1D0E9", "#83A2D3", "#4573BD", "#0745A8")
 
   map %>%
     mapboxer::add_layer(
@@ -50,31 +49,12 @@ add_census_fill_layer <- function(map, geography) {
         ),
         popup = "{{geo_uid}}"
       )
-    ) %>%
-    mapboxer::add_layer(
-      list(
-        "id" = show_layer_id,
-        "type" = "fill",
-        "source" = geography_to_source_id(geography),
-        "source-layer" = geography_to_source_layer_id(geography),
-        "paint" = list(
-          "fill-opacity" = 0.8,
-          "fill-color" = "white"
-        ),
-        layout = list(
-          "visibility" = "none"
-        )
-      )
-    ) %>%
-    mapboxer::set_filter(
-      layer_id = show_layer_id,
-      # Start with all data filtered OUT
-      filter = list("in", "geo_uid", "")
     )
 }
 
 add_census_line_layer <- function(map, geography) {
   line_layer_id <- geography_to_layer_id(geography, "line")
+  click_layer_id <- geography_to_layer_id(geography, "line_click")
   hover_layer_id <- geography_to_layer_id(geography, "line_hover")
 
   map %>%
@@ -86,7 +66,7 @@ add_census_line_layer <- function(map, geography) {
         "source-layer" = geography_to_source_layer_id(geography),
         paint = list(
           "line-color" = "#0745a8",
-          "line-width" = 1.5,
+          "line-width" = 2,
           "line-opacity" = 0.25
         ),
         layout = list(
@@ -96,12 +76,33 @@ add_census_line_layer <- function(map, geography) {
     ) %>%
     mapboxer::add_layer(
       list(
+        "id" = click_layer_id,
+        "type" = "line",
+        "source" = geography_to_source_id(geography),
+        "source-layer" = geography_to_source_layer_id(geography),
+        paint = list(
+          "line-color" = "#0745a8",
+          "line-width" = 2,
+          "line-opacity" = 0.75
+        ),
+        layout = list(
+          "visibility" = "none"
+        )
+      )
+    ) %>%
+    mapboxer::set_filter(
+      layer_id = click_layer_id,
+      # Start with all data filtered OUT
+      filter = list("in", "geo_uid", "")
+    ) %>%
+    mapboxer::add_layer(
+      list(
         "id" = hover_layer_id,
         "type" = "line",
         "source" = geography_to_source_id(geography),
         "source-layer" = geography_to_source_layer_id(geography),
         "paint" = list(
-          "line-color" = "#0745a8",
+          "line-color" = "red",
           "line-opacity" = list(
             "case",
             list("boolean", c("feature-state", "hover"), FALSE), 1,
@@ -132,14 +133,14 @@ geography_to_source_layer_id <- function(geography) {
 show_census_layers <- function(map, geography) {
   map %>%
     toggle_layer_visible(geography_to_layer_id(geography, "fill_click")) %>%
-    toggle_layer_visible(geography_to_layer_id(geography, "fill_show")) %>%
+    toggle_layer_visible(geography_to_layer_id(geography, "line_click")) %>%
     toggle_layer_visible(geography_to_layer_id(geography, "line"))
 }
 
 hide_census_layers <- function(map, geography) {
   map %>%
     toggle_layer_invisible(geography_to_layer_id(geography, "fill_click")) %>%
-    toggle_layer_invisible(geography_to_layer_id(geography, "fill_show")) %>%
+    toggle_layer_invisible(geography_to_layer_id(geography, "line_click")) %>%
     toggle_layer_invisible(geography_to_layer_id(geography, "line"))
 }
 

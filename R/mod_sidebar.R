@@ -12,11 +12,11 @@ mod_sidebar_ui <- function(id) {
   bslib::card(
     shinybusy::add_busy_spinner("circle", color = "white", height = "30px", width = "30px"),
     shiny::div(
-      lemrstyles::legend_categorical(c("#FFFFFF", "#FFBFBF", "#FF7F7F", "#FF3F3F", "#FF0000"),
+      lemrstyles::legend_categorical(c("#FFFFFF", "#C1D0E9", "#83A2D3", "#4573BD", "#0745A8"),
         csd_quantiles_text,
         id = ns("csd-population-density")
       ),
-        lemrstyles::legend_categorical(c("#FFFFFF", "#FFBFBF", "#FF7F7F", "#FF3F3F", "#FF0000"),
+        lemrstyles::legend_categorical(c("#FFFFFF", "#C1D0E9", "#83A2D3", "#4573BD", "#0745A8"),
           ct_quantiles_text,
           id = ns("ct-population-density")
 
