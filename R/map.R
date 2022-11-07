@@ -22,7 +22,7 @@ add_census_layer <- function(map, geography) {
 add_census_fill_layer <- function(map, geography) {
   click_layer_id <- geography_to_layer_id(geography, "fill_click")
   show_layer_id <- geography_to_layer_id(geography, "fill_show")
-  quantiles <- unname(get(paste0(geography, "_population_density_quantiles")))
+  quantiles <- get(paste0(geography, "_population_density_quantiles"))
   palette <- c("#FFFFFF", "#FFBFBF", "#FF7F7F", "#FF3F3F", "#FF0000")
 
   map %>%

@@ -12,6 +12,16 @@ mod_sidebar_ui <- function(id) {
   bslib::card(
     shinybusy::add_busy_spinner("circle", color = "white", height = "30px", width = "30px"),
     shiny::div(
+      lemrstyles::legend_categorical(c("#FFFFFF", "#FFBFBF", "#FF7F7F", "#FF3F3F", "#FF0000"),
+        csd_quantiles_text,
+        id = ns("csd-population-density")
+      ),
+        lemrstyles::legend_categorical(c("#FFFFFF", "#FFBFBF", "#FF7F7F", "#FF3F3F", "#FF0000"),
+          ct_quantiles_text,
+          id = ns("ct-population-density")
+
+      ),
+      breathe(),
       shinyWidgets::prettyRadioButtons(
         ns("aggregate_area"),
         "Choose aggregate area",
@@ -159,6 +169,15 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
       priority = 300, # Set lower priority so aggregate_area input is set to whatever is in bookmark first
       {
         input_aggregate_area(input$aggregate_area)
+
+        # Change which legend is shown
+        if (input_aggregate_area() == "csd") {
+          shinyjs::show("csd-population-density")
+          shinyjs::hide("ct-population-density")
+        } else {
+          shinyjs::hide("csd-population-density")
+          shinyjs::show("ct-population-density")
+        }
       }
     )
 
@@ -297,7 +316,6 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
         "CensusAggregator Export.zip"
       },
       content = function(file) {
-
         cat("export start \n")
         cat(paste0(Sys.time()), "\n")
 

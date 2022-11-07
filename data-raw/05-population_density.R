@@ -4,6 +4,7 @@ library(cancensus)
 library(dplyr)
 library(BAMMtools)
 library(purrr)
+library(glue)
 devtools::load_all()
 
 dataset <- "CA21"
@@ -33,30 +34,17 @@ csd %>%
   pull(population_density) %>%
   hist()
 
-# From SO https://stackoverflow.com/a/32508105
-round_to <- function(x, y = 1000) {
-  if ((y - x %% y) <= x %% y) {
-    x + (y - x %% y)
-  } else {
-    x - (x %% y)
-  }
-}
-
-csd_population_density_quantiles <- quantile(csd$population_density)
+csd_population_density_quantiles <- c(0, 400, 1000, 2000, 5000, 20000)
+csd_quantiles_text <- glue("{csd_population_density_quantiles} - {lead(csd_population_density_quantiles)}")
+csd_quantiles_text[1] <- glue("< {csd_population_density_quantiles[2]}")
+csd_quantiles_text <- csd_quantiles_text[-length(csd_quantiles_text)]
+csd_quantiles_text[5] <- glue("{csd_population_density_quantiles[5]}+")
 
 usethis::use_data(csd_population_density_quantiles, overwrite = TRUE)
-
-csd_jenks_breaks <- getJenksBreaks(csd[["population_density"]], k = 5)
-csd_jenks_breaks
-# These are quite uneven, so do more deliberately - e.g. 0, 500, 2000, 6000, 15000?
-# csd_jenks_breaks <- map_dbl(csd_jenks_breaks, round_to, 500)
+usethis::use_data(csd_quantiles_text, overwrite = TRUE)
 
 csd %>%
-  mutate(
-    group = cut(population_density, breaks = csd_jenks_breaks),
-    group = as.character(group),
-    group = coalesce(group, paste0(csd_jenks_breaks[5], "+"))
-  ) %>%
+  mutate(group = cut(population_density, breaks = c(-1, 400, 1000, 2000, 5000, 20000))) %>%
   count(group)
 
 # CT ----
@@ -78,11 +66,15 @@ ct %>%
   pull(population_density) %>%
   hist()
 
-ct_population_density_quantiles <- quantile(ct$population_density)
+ct_population_density_quantiles <- c(0, 400, 1000, 5000, 25000, 80000)
+ct_quantiles_text <- glue("{ct_population_density_quantiles} - {lead(ct_population_density_quantiles)}")
+ct_quantiles_text[1] <- glue("< {ct_population_density_quantiles[2]}")
+ct_quantiles_text <- ct_quantiles_text[-length(ct_quantiles_text)]
+ct_quantiles_text[5] <- glue("{ct_population_density_quantiles[5]}+")
 
 usethis::use_data(ct_population_density_quantiles, overwrite = TRUE)
+usethis::use_data(ct_quantiles_text, overwrite = TRUE)
 
-ct_jenks_breaks <- getJenksBreaks(ct[["population_density"]], k = 5)
-ct_jenks_breaks
-ct_jenks_breaks <- map_dbl(ct_jenks_breaks, round_to, 500)
-# 0, 3500, 10000, 25000, 75000
+ct %>%
+  mutate(group = cut(population_density, breaks = c(-1, 400, 1000, 5000, 25000, 80000))) %>%
+  count(group)
