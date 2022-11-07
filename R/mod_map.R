@@ -31,120 +31,26 @@ mod_map_server <- function(id, input_aggregate_area, input_selection_tool, selec
         htmlwidgets::onRender("
     function() {
 
-      var map = mapboxer._widget['map-map'].map;
-    // disable map rotation using right click + drag
+    var map = mapboxer._widget['map-map'].map;
+
+    // Disable map rotation using right click + drag
     map.dragRotate.disable();
 
-    // disable map rotation using touch rotation gesture
+    // Disable map rotation using touch rotation gesture
     map.touchZoomRotate.disableRotation();
 
     // Send an indicator to shiny that the widget has been rendered, so other reactives don't run until it's rendered
     Shiny.setInputValue('map_rendered', true);
 
-    // Add popup to map that says to zoom in when CSDs/CTs aren't shown
-const constZoomPopup = new mapboxgl.Popup({ closeOnClick: false, closeButton: false, maxWidth: 'none'})
-  .setLngLat([-96, 37.8]) // Doesn't matter where this is since with CSS it is in top left corner
-  .setHTML('Please zoom in to see geographies.')
-  .addTo(map)
-
-constZoomPopup.addClassName('zoom-popup')
-
-var zoomPopup = document.getElementsByClassName('zoom-popup')[0];
-
-// Initialize as not visible
-zoomPopup.style.display = 'none';
-
-// Listen to zoom end and check for rendered features
-
- map.on('zoomend', function () {
-    var newZoom = map.getZoom();
-
-ctFeatures = map.queryRenderedFeatures( { layers: ['ct_fill_click'] });
-csdFeatures = map.queryRenderedFeatures( { layers: ['csd_fill_click'] });
-
-    if (ctFeatures.length == 0 & csdFeatures.length == 0) {
-      zoomPopup.style.display = '';
-    } else {
-      zoomPopup.style.display = 'none';
-    }
-  });
-
-// Listen to area changing, hide popup when it does and check based on zoom again
-Shiny.addCustomMessageHandler('aggregate_area', function(message) {
-    zoomPopup.style.display = 'none';
-
-var curZoom = map.getZoom();
-
-if (curZoom < 6 & message == 'ct') {
-      zoomPopup.style.display = '';
-    } else if (curZoom < 5 & message == 'csd') {
-      zoomPopup.style.display = '';
-    } else {
-      zoomPopup.style.display = 'none';
-    }
-});
+    // Popup to zoom in when CSDs/CTs aren't shown, hide when they are
+    showZoomPopup(map);
 
     // Highlight / fill geography on hover
     highlightGeographyOnHover(map);
 
-    // Draw a polygon
-
-    var draw = new MapboxDraw({
-        displayControlsDefault: false,
-        controls: {
-            polygon: true,
-            trash: true
-        },
-        defaultMode: 'draw_polygon'
-    });
-
-    // When the selection tool changes
-    Shiny.addCustomMessageHandler('selection_tool', function(message) {
-
-    if (message === 'polygon') {
-
-    // If the map does not already have a drawing control
-      if (!(map._draw)) {
-        map.addControl(draw);
-      }
-
-      map._draw = true; // Flag drawing control for above check
-
-    // Clear everything any time the aggregate area changes - by removing and adding the control back on
-    // This ensures that the polygon is deleted and the features are cleared
-    Shiny.addCustomMessageHandler('aggregate_area', function(message) {
-        map.removeControl(draw);
-        map.addControl(draw);
-    })
-
-    // Also just do this when 'reset' button is clicked - easiest way to reset everything
-    Shiny.addCustomMessageHandler('reset', function(message) {
-        map.removeControl(draw);
-        map.addControl(draw);
-    })
-
-      map.on('draw.create', (e) => getFeaturesFromPolygon(e, map, 'csd'));
-      map.on('draw.update', (e) => getFeaturesFromPolygon(e, map, 'csd'));
-      map.on('draw.delete', (e) => clearFeatures(e, 'csd'));
-      // Only allows drawing one polygon at a time - clears existing polygon and features if you go to draw a new one
-      map.on('draw.modechange', (e) => clearPolygonAndFeatures(e, map, 'csd', draw));
-
-      map.on('draw.create', (e) => getFeaturesFromPolygon(e, map, 'ct'));
-      map.on('draw.update', (e) => getFeaturesFromPolygon(e, map, 'ct'));
-      map.on('draw.delete', (e) => clearFeatures(e, 'ct'));
-      map.on('draw.modechange', (e) => clearPolygonAndFeatures(e, map, 'ct', draw));
-    }
-
-    // Remove drawing control and set to false if the selection tool is click
-      if (message === 'click' && map._draw) {
-        map.removeControl(draw);
-        map._draw = false;
-      }
-
-  })
-
-}
-")
+    // Polygon draw and associated controls
+    polygonDrawControl(map);
+}")
     )
 
     # Use bounds from any bookmarking to fit the bounds of the map ----
