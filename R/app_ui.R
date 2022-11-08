@@ -8,25 +8,18 @@ app_ui <- function(request) {
     golem_add_external_resources(),
     # shiny::div(
     # style = "display: flex;",
-    bslib::page_navbar(
-      title = "Census Aggregator",
+    bslib::page_fluid(
       theme = bslib::bs_theme(version = 4),
-      shiny::tabPanel(
-        "Map",
-        shiny::fluidPage(
-          shiny::fluidRow(
-            shiny::column(
-              width = 9,
-              mod_map_ui("map")
-            ),
-            shiny::column(
-              width = 3,
-              mod_sidebar_ui("sidebar")
-            )
-          )
+      shiny::fluidRow(
+        shiny::column(
+          width = 9,
+          mod_map_ui("map")
+        ),
+        shiny::column(
+          width = 3,
+          mod_sidebar_ui("sidebar")
         )
-      ),
-      shiny::tabPanel("About")
+      )
     )
   )
 }
@@ -49,7 +42,9 @@ golem_add_external_resources <- function() {
       path = app_sys("app/www"),
       app_title = "Census Aggregator"
     ),
-    shinyjs::useShinyjs()
+    shinyjs::useShinyjs(),
+    bsplus::use_bs_popover(),
+    bsplus::use_bs_tooltip()
     # Add here other external resources
     # for example, you can add shinyalert::useShinyalert()
   )

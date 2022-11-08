@@ -66,7 +66,7 @@ ct %>%
   pull(population_density) %>%
   hist()
 
-ct_population_density_quantiles <- c(0, 400, 1000, 5000, 25000, 80000)
+ct_population_density_quantiles <- c(0, 400, 1000, 2500, 10000, 80000)
 ct_quantiles_text <- glue("{ct_population_density_quantiles} - {lead(ct_population_density_quantiles)}")
 ct_quantiles_text[1] <- glue("< {ct_population_density_quantiles[2]}")
 ct_quantiles_text <- ct_quantiles_text[-length(ct_quantiles_text)]
@@ -76,5 +76,5 @@ usethis::use_data(ct_population_density_quantiles, overwrite = TRUE)
 usethis::use_data(ct_quantiles_text, overwrite = TRUE)
 
 ct %>%
-  mutate(group = cut(population_density, breaks = c(-1, 400, 1000, 5000, 25000, 80000))) %>%
+  mutate(group = cut(population_density, breaks = c(-1, 400, 1000, 2500, 10000, 80000))) %>%
   count(group)

@@ -1,7 +1,7 @@
 map <- function() {
   mapboxer::mapboxer(style = "mapbox://styles/purposeanalytics/cl6mafpzk002r14pdbda7la8r") %>%
     mapboxer::set_view_state(-80, 45, zoom = 6) %>%
-    mapboxer::add_navigation_control(showCompass = FALSE, pos = "bottom-right") %>%
+    mapboxer::add_navigation_control(showCompass = FALSE, pos = "top-right") %>%
     add_census_layer("ct") %>%
     add_census_layer("csd")
 }
@@ -22,7 +22,8 @@ add_census_layer <- function(map, geography) {
 add_census_fill_layer <- function(map, geography) {
   click_layer_id <- geography_to_layer_id(geography, "fill_click")
   quantiles <- get(paste0(geography, "_population_density_quantiles"))
-  palette <- c("#FFFFFF", "#C1D0E9", "#83A2D3", "#4573BD", "#0745A8")
+  palette <- c("#dbf0ec", "#afe9de", "#6bc7b5", "#3a9281", "#155e4f")
+
 
   map %>%
     mapboxer::add_layer(
@@ -65,7 +66,7 @@ add_census_line_layer <- function(map, geography) {
         "source" = geography_to_source_id(geography),
         "source-layer" = geography_to_source_layer_id(geography),
         paint = list(
-          "line-color" = "#0745a8",
+          "line-color" = "#155e4f",
           "line-width" = 2,
           "line-opacity" = 0.25
         ),
@@ -81,7 +82,7 @@ add_census_line_layer <- function(map, geography) {
         "source" = geography_to_source_id(geography),
         "source-layer" = geography_to_source_layer_id(geography),
         paint = list(
-          "line-color" = "#0745a8",
+          "line-color" = "#155e4f",
           "line-width" = 2,
           "line-opacity" = 0.75
         ),
@@ -102,7 +103,7 @@ add_census_line_layer <- function(map, geography) {
         "source" = geography_to_source_id(geography),
         "source-layer" = geography_to_source_layer_id(geography),
         "paint" = list(
-          "line-color" = "red",
+          "line-color" = "#fff703",
           "line-opacity" = list(
             "case",
             list("boolean", c("feature-state", "hover"), FALSE), 1,

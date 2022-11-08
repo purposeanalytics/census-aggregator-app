@@ -9,55 +9,57 @@
 #' @importFrom shiny NS tagList
 mod_sidebar_ui <- function(id) {
   ns <- NS(id)
-  bslib::card(
+  shiny::div(
+    style = "height: 100vh", # TODO make overflow scroll within div
     shinybusy::add_busy_spinner("circle", color = "white", height = "30px", width = "30px"),
     shiny::div(
-      lemrstyles::legend_categorical(c("#FFFFFF", "#C1D0E9", "#83A2D3", "#4573BD", "#0745A8"),
-        csd_quantiles_text,
-        id = ns("csd-population-density"), alt_text =
-      ),
-        lemrstyles::legend_categorical(c("#FFFFFF", "#C1D0E9", "#83A2D3", "#4573BD", "#0745A8"),
-          ct_quantiles_text,
-          id = ns("ct-population-density"), alt_text = "TODO"
-
-      ),
+      shiny::img(src = "www/logo.png", alt = "CensusAggregator logo", style = "width: 50%"),
       breathe(),
+      shiny::p("CensusAggregator makes it easier to retrieve and aggregate common census variables for regions that cover multiple census geographic areas. Follow the steps below to create a custom area on the map and download a summary report, data file, and boundary file for that area. CensusAggregator uses data from the 2021 Canadian census."),
+      sidebar_header(
+        "Step 1: Choose a geographic unit",
+        tooltip("Census subdivision (CSD) is the general term for municipalities (as determined by provincial/territorial legislation) or areas treated as municipal equivalents for statistical purposes (e.g., Indian reserves, Indian settlements and unorganized territories).<br><br>Census tracts (CTs) are small, relatively stable geographic areas that usually have a population of fewer than 7,500 persons, based on data from the previous Census of Population Program. They are located in census metropolitan areas (CMAs) and in census agglomerations (CAs) that had a core population of 50,000 or more in the previous census.")
+      ),
       shinyWidgets::prettyRadioButtons(
         ns("aggregate_area"),
-        "Choose aggregate area",
+        NULL,
         choices = list(
-          "Census Tracts" = "ct",
-          "Census Subdivisions" = "csd"
-        )
+          "Census tract" = "ct",
+          "Census subdivision" = "csd"
+        ),
+        inline = TRUE
+      ),
+      sidebar_header(
+        "Step 2: Choose an area selection method",
+        tooltip(shiny::HTML("Use the “Click to select/deselect” option to select one geographic area at a time. Each selected geographic area will be highlighted with a bold outline. This option also permits the selection of non-contiguous areas.<br><br>Use the “Draw a polygon” option to draw a continuous boundary. Each mouse click marks a new point in the boundary. To complete the polygon selection, use a double mouse click for the final point or click on the first point to close the loop. The census geographic areas that overlap with polygon will be selected and highlighted with a bold outline."))
       ),
       shinyWidgets::prettyRadioButtons(
         ns("selection_tool"),
-        "Choose selection tool",
+        NULL,
         choices = list(
-          "Click to select geographies" = "click",
+          "Click to select/deselect" = "click",
           "Draw a polygon" = "polygon"
+        ),
+        inline = TRUE
+      ),
+      shinyjs::disabled(
+        shiny::actionButton(
+          ns("reset"),
+          "Clear selection",
+          class = "btn-link btn-secondary-effect"
         )
       ),
+      sidebar_header("Step 3: Download data"),
       shiny::div(
         shinyjs::disabled(
-          shiny::actionButton(
-            ns("reset"),
-            "Reset selected geographies",
-            class = "btn-link btn-secondary-effect"
+          shiny::downloadButton(
+            ns("export_data"),
+            "Export data",
+            width = "100%",
+            icon = NULL
           )
         )
       ),
-      breathe(),
-      shiny::div(
-        shinyjs::disabled(
-          shiny::actionButton(
-            ns("bookmark_selections"),
-            "Bookmark selections",
-            class = "btn-link"
-          )
-        )
-      ),
-      breathe(),
       shiny::div(
         shinyjs::disabled(
           shiny::downloadButton(
@@ -70,20 +72,18 @@ mod_sidebar_ui <- function(id) {
       ),
       breathe(),
       shiny::div(
-        shiny::div("Summary of selected areas", class = "summary-statistics-header breathe"),
+        sidebar_header("Summary of selected areas"),
         gt::gt_output(ns("summary_statistics"))
       ),
-      breathe(),
       shiny::div(
         shinyjs::disabled(
-          shiny::downloadButton(
-            ns("export_data"),
-            "Export data",
-            width = "100%",
-            icon = NULL
+          shiny::actionButton(
+            ns("bookmark_selections"),
+            "Bookmark selections",
+            class = "btn-link"
           )
         )
-      ),
+      )
     )
   )
 }
@@ -375,6 +375,19 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
     )
   })
 }
+
+sidebar_header <- function(...) {
+  shiny::div(
+    ...,
+    class = "summary-statistics-header breathe"
+  )
+}
+
+tooltip <- function(content) {
+  shiny::icon("question", `data-html`="true") %>%
+    bsplus::bs_embed_popover(title = NULL, content = content, placement = "right", container = "body", trigger = "hover")
+}
+
 
 # Via: https://github.com/RLesur/chrome_print_shiny
 #' Return Chrome CLI arguments

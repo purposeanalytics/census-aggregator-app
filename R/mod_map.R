@@ -7,12 +7,7 @@
 #' @noRd
 mod_map_ui <- function(id) {
   ns <- shiny::NS(id)
-  bslib::card(
-    height = "calc(100vh - 106px)",
-    shiny::div(
-      mapboxer::mapboxerOutput(ns("map"), height = "calc(100vh - 40px - 106px)")
-    )
-  )
+  mapboxer::mapboxerOutput(ns("map"), height = "100vh")
 }
 
 #' map Server Functions
