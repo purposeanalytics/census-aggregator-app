@@ -7,7 +7,10 @@
 #' @noRd
 mod_map_ui <- function(id) {
   ns <- shiny::NS(id)
-  mapboxer::mapboxerOutput(ns("map"), height = "100vh")
+  shiny::div(
+    class = "censusagg-map",
+    mapboxer::mapboxerOutput(ns("map"), height = "100vh")
+  )
 }
 
 #' map Server Functions

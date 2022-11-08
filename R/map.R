@@ -66,8 +66,8 @@ add_census_line_layer <- function(map, geography) {
         "source" = geography_to_source_id(geography),
         "source-layer" = geography_to_source_layer_id(geography),
         paint = list(
-          "line-color" = "#155e4f",
-          "line-width" = 2,
+          "line-color" = "white",
+          "line-width" = 1,
           "line-opacity" = 0.25
         ),
         layout = list(
@@ -83,8 +83,8 @@ add_census_line_layer <- function(map, geography) {
         "source-layer" = geography_to_source_layer_id(geography),
         paint = list(
           "line-color" = "#155e4f",
-          "line-width" = 2,
-          "line-opacity" = 0.75
+          "line-width" = 3,
+          "line-opacity" = 1
         ),
         layout = list(
           "visibility" = "none"
@@ -109,11 +109,7 @@ add_census_line_layer <- function(map, geography) {
             list("boolean", c("feature-state", "hover"), FALSE), 1,
             0
           ),
-          "line-width" = list(
-            "case",
-            list("boolean", c("feature-state", "hover"), FALSE), 2,
-            1.5
-          )
+          "line-width" = 3
         )
       )
     )

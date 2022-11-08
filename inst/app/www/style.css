@@ -67,7 +67,8 @@ p, h1, h2, h3, h4, h5, h6 {
   --main-color: #0745a8;
   --secondary-color: #3D3D3D;
   --tertiary-color: #BFBFBF;
-  --breathing-room: 10px
+  --breathing-room: 25px;
+  --little-breath: 5px;
 }
 
 /* ------  Header and font styles ------ */
@@ -77,15 +78,48 @@ body {
   font-weight: var(--regular-weight);
 }
 
+.shiny-options-group, .btn-default {
+  font-size: var(--base-size);
+}
+
 /* General */
+
+.censusagg-col {
+  padding-left: 0;
+  padding-right: 0;
+}
 
 .breathe {
   margin-bottom: var(--breathing-room);
 }
 
+.little-breath {
+  margin-bottom: var(--little-breath);
+}
+
 table {
   color: var(--secondary-color);
   padding-left: 17px;
+}
+
+.gt_table {
+  max-width: 500px;
+}
+
+.censusagg-map {
+  height: 100vh;
+}
+
+.censusagg-sidebar {
+  height: 100vh;
+  padding: 25px;
+  position: relative;
+}
+
+.pa-logo { /* TODO */
+  position: absolute;
+  bottom: var(--breathing-room);
+  right: var(--breathing-room);
 }
 
 /* Inputs */
@@ -121,9 +155,8 @@ table {
   color: var(--secondary-color);
 }
 
-.summary-statistics-header {
+.header {
   font-size: var(--bigger-size);
-  font-weight: var(--bold-weight);
 }
 
 /* Polygon drawing */

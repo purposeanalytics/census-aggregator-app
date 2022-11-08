@@ -10,10 +10,10 @@
 mod_sidebar_ui <- function(id) {
   ns <- NS(id)
   shiny::div(
-    style = "height: 100vh", # TODO make overflow scroll within div
+    class = "censusagg-sidebar",
     shinybusy::add_busy_spinner("circle", color = "white", height = "30px", width = "30px"),
     shiny::div(
-      shiny::img(src = "www/logo.png", alt = "CensusAggregator logo", style = "width: 50%"),
+      shiny::img(src = "www/logo.png", alt = "CensusAggregator logo", style = "max-width: 50%; min-width: 150"),
       breathe(),
       shiny::p("CensusAggregator makes it easier to retrieve and aggregate common census variables for regions that cover multiple census geographic areas. Follow the steps below to create a custom area on the map and download a summary report, data file, and boundary file for that area. CensusAggregator uses data from the 2021 Canadian census."),
       sidebar_header(
@@ -54,25 +54,31 @@ mod_sidebar_ui <- function(id) {
         shinyjs::disabled(
           shiny::downloadButton(
             ns("export_data"),
-            "Export data",
+            "Download report",
             width = "100%",
             icon = NULL
           )
-        )
-      ),
-      shiny::div(
+        ),
+        shinyjs::disabled(
+          shiny::downloadButton(
+            ns("download_data"),
+            "Download data (.csv)",
+            width = "100%",
+            icon = NULL
+          )
+        ),
         shinyjs::disabled(
           shiny::downloadButton(
             ns("export_boundary"),
-            "Export boundary",
-            class = "btn-link",
+            "Download boundary (.geojson)",
+            width = "100%",
             icon = NULL
           )
         )
       ),
       breathe(),
       shiny::div(
-        sidebar_header("Summary of selected areas"),
+        sidebar_header("Summary of selected area"),
         gt::gt_output(ns("summary_statistics"))
       ),
       shiny::div(
@@ -83,6 +89,11 @@ mod_sidebar_ui <- function(id) {
             class = "btn-link"
           )
         )
+      ),
+      shiny::div(
+        class = "pa-logo",
+        shiny::a(href = "https://purposeanalytics.ca/", target = "_blank",
+                 shiny::img(src = "www/pa-logo.png", alt = "Purpose Analytics logo", width = "50px"))
       )
     )
   )
@@ -219,7 +230,6 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
           sf::st_write(con)
       }
     )
-
     # Summary statistics table ----
     shiny::observeEvent(selected_geographies(), ignoreInit = FALSE, priority = 30, {
       shiny::req(input_aggregate_area())
@@ -232,7 +242,7 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
         shinyjs::disable("export_boundary")
         shinyjs::disable("export_data")
 
-        summary_statistics <- dplyr::tibble(name = c(
+        summary_statistics <- dplyr::tibble(label = c(
           "Areas selected",
           "Population",
           "Households",
@@ -299,13 +309,16 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
           gt::gt() %>%
           gt::sub_missing(columns = value) %>%
           gt::cols_align("right", value) %>%
+          gt::tab_style(style = gt::cell_text(weight = "bold"), locations = gt::cells_body(columns = label)) %>%
           gt::fmt_markdown(columns = value) %>%
           gt::tab_options(
             table.width = "100%",
             column_labels.hidden = TRUE,
             table_body.border.bottom.color = "transparent",
             table_body.border.top.color = "transparent",
-            table.font.names = "Lato"
+            table.font.names = "Lato",
+            table.font.size = 14,
+            table.align = "left"
           )
       })
     })
@@ -379,12 +392,12 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
 sidebar_header <- function(...) {
   shiny::div(
     ...,
-    class = "summary-statistics-header breathe"
+    class = "header little-breath"
   )
 }
 
 tooltip <- function(content) {
-  shiny::icon("question", `data-html`="true") %>%
+  shiny::icon("question-circle", `data-html` = "true", style = "color: lightgrey;") %>%
     bsplus::bs_embed_popover(title = NULL, content = content, placement = "right", container = "body", trigger = "hover")
 }
 
