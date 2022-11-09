@@ -5,8 +5,8 @@ output:
     theme:
       version: 4
 params:
-  geo_uid: !r c("4601057")
-  level: "csd"
+  geo_uid: !r c("5350167.02", "5350167.01", "5350165.00", "5350164.00", "5350163.00", "5350162.00", "5350161.00", "5350131.00", "5350130.00", "5350126.00", "5350125.00", "5350124.00", "5350123.00", "5350122.00", "5350121.00", "5350120.00", "5350119.00", "5350118.00", "5350117.00", "5350116.00", "5350115.00", "5350114.00", "5350113.00", "5350112.00", "5350110.00", "5350109.00", "5350097.04", "5350097.03", "5350097.01", "5350096.02", "5350096.01", "5350095.00", "5350094.00", "5350093.00", "5350092.00", "5350091.02", "5350091.01", "5350090.00", "5350089.00", "5350088.00", "5350087.00", "5350086.00", "5350064.00", "5350063.06", "5350063.05", "5350063.04", "5350063.03", "5350062.04", "5350062.03", "5350062.01", "5350061.00", "5350060.00", "5350059.00", "5350058.00", "5350057.00", "5350056.00", "5350055.00", "5350054.00", "5350053.00", "5350047.04", "5350047.03", "5350047.02", "5350046.00", "5350045.00", "5350044.01", "5350043.00", "5350042.00", "5350041.00", "5350040.00", "5350039.00", "5350038.00", "5350037.00", "5350036.00", "5350035.00", "5350034.02", "5350034.01", "5350015.00", "5350014.00", "5350011.02", "5350011.01")
+  level: "ct"
   csv_location: "data_export.csv"
 ---
 
@@ -78,9 +78,40 @@ h2 {
   font-size: 1.25rem;
 }
 
+.print-header {
+  display: block;
+  width: 100%;
+}
+
+.print-header.page-header {
+  display: none;
+}
+
+.print-header .left-logo {
+  float: left;
+  text-align: left;
+  width: 50%
+}
+
+.print-header .right-logo {
+  float: right;
+  text-align: right;
+  width: 50%
+}
+
 @media print {
   .pagebreak {
     page-break-before: always;
+  }
+
+  .print-header.page-header {
+    display: block;
+  }
+
+  @page {
+    @bottom-center {
+      content: counter(page);
+    }
   }
 }
 ```
@@ -89,11 +120,11 @@ h2 {
 section_heading <- function(title) {
   htmltools::div(
     htmltools::hr(),
-  htmltools::div(
-    class = "section-heading",
-    htmltools::h1(title),
-    htmltools::hr()
-  )
+    htmltools::div(
+      class = "section-heading",
+      htmltools::h1(title),
+      htmltools::hr()
+    )
   )
 }
 
@@ -138,6 +169,28 @@ pull_and_format_value <- function(data, format = "percent") {
     percent = scales::percent(value, 0.1),
     comma = scales::comma(value, 1),
     dollar = scales::dollar(value)
+  )
+}
+
+logo <- function(pagebreak = TRUE) {
+  logo_height <- "100px"
+
+  shiny::div(
+    class = paste("print-header", ifelse(pagebreak, "page-header", "")),
+    shiny::div(
+      class = "left-logo",
+      shiny::img(
+      src = system.file("app/www/logo.png", package = "censusaggregatorapp"),
+      height = logo_height,
+      alt = "CensusAggregator logo"
+    ), style = ""),
+    shiny::div(
+      class = "right-logo",
+      shiny::img(
+      src = system.file("app/www/pa-logo.png", package = "censusaggregatorapp"),
+      height = logo_height,
+      alt = "Purpose Analytics logo"
+    ))
   )
 }
 ```
@@ -204,43 +257,56 @@ data_breakdown <- vectors_data_filtered %>%
   distinct()
 ```
 
-```{r map, fig.height = 3.25, dpi = 300, fig.alt = "A map showing the outlines of the selected geographies."}
+```{r}
+logo(FALSE)
+```
+
+
+```{r map, fig.height = 3.25, dpi = 150, fig.alt = "A map showing the outline of the selected geographies."}
 boundaries_dataset <- glue::glue("extdata/{level}")
 
 boundaries_data <- open_dataset(system.file(boundaries_dataset, package = "censusaggregatorapp"))
 boundaries_data <- boundaries_data %>%
-  filter(geo_uid %in% regions) %>%
   read_sf_dataset()
 
-multiple_regions <- length(regions) > 1
+# Limit to regions, combine boundaries
+region_boundaries <- boundaries_data %>%
+  filter(geo_uid %in% regions) %>%
+  st_union()
 
-if (multiple_regions) {
-  combined_boundaries <- boundaries_data %>%
-    st_union()
+# Get bounding box
+regions_bbox <- region_boundaries %>%
+  st_bbox()
 
-  initial_colour <- "grey"
-} else {
-  initial_colour <- "black"
-}
+# Get all boundaries within bbox
+all_boundaries_in_bbox <- boundaries_data %>%
+  st_crop(regions_bbox)
 
 p <- ggplot() +
-  geom_sf(data = boundaries_data, colour = initial_colour, fill = NA) +
+  geom_sf(data = all_boundaries_in_bbox, colour = "grey", fill = NA) +
+  geom_sf(data = region_boundaries, colour = "black", fill = "white", alpha = 0.75) +
   theme_void()
-
-if (multiple_regions) {
-  p <- p +
-    geom_sf(data = combined_boundaries, colour = "black", fill = NA)
-}
 
 p
 ```
 
-
-```{r snapshot_heading}
-section_heading("Snapshot")
-```
-
 ::: {.row .mb-2}
+
+```{r}
+level_text <- switch(level,
+  "csd" = "subdivision",
+  "ct" = "tract"
+)
+regions_text <- glue::glue("Selected census {level_text}{plural}: {regions}",
+  plural = ifelse(length(regions) > 1, "s", ""),
+  regions = paste0(regions, collapse = ", ")
+)
+
+shiny::column(
+  width = 12,
+  shiny::p(regions_text)
+)
+```
 
 ```{r snapshot}
 # Number of geographies (CSDs/CTs), population, number of households, population change (2011 to 2016), population density
@@ -269,6 +335,10 @@ population_change <- vectors_data %>%
 
 population_change_formatted <- population_change %>%
   pull_and_format_value()
+
+if (!str_starts(population_change_formatted, "-")) {
+  population_change_formatted <- paste0("+", population_change_formatted)
+}
 
 population_density <- vectors_data %>%
   filter(label %in% c("Population, 2021", "Land area in square kilometres")) %>%
@@ -326,26 +396,23 @@ household_size <- data_breakdown %>%
     vector != highest_parent_vector
   )
 
-family_type <- data_breakdown %>%
-  filter(
-    label_short == "family_type",
-    vector != highest_parent_vector
-  )
-
 header_and_barchart(
   subsection_heading("Population by age cohorts"),
   age_cohorts %>%
     inline_barchart(),
   subsection_heading("Private households by size"),
   household_size %>%
-    inline_barchart(),
-  subsection_heading("Family type"),
-  family_type %>%
     inline_barchart()
 )
 ```
 
 ```{r household_type}
+family_type <- data_breakdown %>%
+  filter(
+    label_short == "family_type",
+    vector != highest_parent_vector
+  )
+
 household_type <- data_breakdown %>%
   filter(
     label_short == "household_type",
@@ -361,7 +428,11 @@ household_type <- data_breakdown %>%
   )) %>%
   arrange(label)
 
+
 header_and_barchart(
+  subsection_heading("Family type"),
+  family_type %>%
+    inline_barchart(),
   subsection_heading("Household type"),
   household_type %>%
     inline_barchart()
@@ -386,6 +457,10 @@ header_and_barchart(
 :::
 
 <div class = "pagebreak"></div>
+
+```{r}
+logo()
+```
 
 ```{r section-language}
 section_heading("Language")
@@ -604,6 +679,10 @@ header_and_barchart(
 
 <div class = "pagebreak"></div>
 
+```{r}
+logo()
+```
+
 ```{r section-diversity-immigration}
 section_heading("Diversity and immigration")
 ```
@@ -711,6 +790,10 @@ header_and_barchart(
 <div class = "pagebreak"></div>
 
 ```{r}
+logo()
+```
+
+```{r}
 section_heading("Definitions")
 ```
 
@@ -757,10 +840,8 @@ shiny::column(
 
 <div class = "pagebreak"></div>
 
-#### IDs
-
-```{r, output = "asis"}
-dput(regions)
+```{r}
+logo()
 ```
 
 ```{r data-export}

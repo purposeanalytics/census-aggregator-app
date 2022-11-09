@@ -92,8 +92,10 @@ mod_sidebar_ui <- function(id) {
       ),
       shiny::div(
         class = "pa-logo",
-        shiny::a(href = "https://purposeanalytics.ca/", target = "_blank",
-                 shiny::img(src = "www/pa-logo.png", alt = "Purpose Analytics logo", width = "50px"))
+        shiny::a(
+          href = "https://purposeanalytics.ca/", target = "_blank",
+          shiny::img(src = "www/pa-logo.png", alt = "Purpose Analytics logo", width = "50px")
+        )
       )
     )
   )
@@ -340,6 +342,8 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
 
         temp_template <- "report.Rmd"
         file.copy(app_sys("report/report.Rmd"), temp_template, overwrite = TRUE)
+        file.copy(app_sys("app/www/logo.png"), "logo.png", overwrite = TRUE)
+        file.copy(app_sys("app/www/pa-logo.png"), "pa-logo.png", overwrite = TRUE)
 
         report_html <- "CensusAggregator Report.html"
         report_pdf <- "CensusAggregator Report.pdf"
@@ -372,6 +376,20 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
         pagedown::chrome_print(
           report_html,
           output = report_pdf,
+          options = list(
+            displayHeaderFooter = TRUE,
+            footerTemplate = format(
+              shiny::div(
+                style = "width: 100%; font-size: 10pt; font-family: 'Lato'",
+                shiny::div(shiny::span(Sys.Date()), style = "float: left; text-align: left; padding-left: 2.25cm;"),
+                shiny::div(shiny::span(class = "pageNumber"), style = "float: right; text-align: right; padding-right: 2.25cm;")
+              ),
+              indent = FALSE
+            ),
+            headerTemplate = format(shiny::div(), indent = FALSE),
+            marginTop = 1,
+            marginBottom = 1
+          ),
           extra_args = chrome_extra_args(),
           verbose = FALSE
         )
@@ -400,7 +418,6 @@ tooltip <- function(content) {
   shiny::icon("question-circle", `data-html` = "true", style = "color: lightgrey;") %>%
     bsplus::bs_embed_popover(title = NULL, content = content, placement = "right", container = "body", trigger = "hover")
 }
-
 
 # Via: https://github.com/RLesur/chrome_print_shiny
 #' Return Chrome CLI arguments

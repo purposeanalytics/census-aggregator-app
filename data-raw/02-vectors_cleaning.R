@@ -155,7 +155,8 @@ breakdown_vectors_recoding <- tribble(
   "One-census-family households with additional persons", "1 census family, + additional persons",
   "Two-or-more-person non-census-family households", "2+ persons non census family",
   "One-person households", "1 person",
-  "2016 to 2021", "Recent immigrants (2016 to 2021)"
+  "2016 to 2021", "Recent immigrants (2016 to 2021)",
+  "Dwelling provided by the local government, First Nation or Indian band", "Dwelling provided by First Nation or Indian band"
 )
 
 vectors <- vectors %>%
