@@ -1,6 +1,6 @@
 map <- function() {
   mapboxer::mapboxer(style = "mapbox://styles/purposeanalytics/cl6mafpzk002r14pdbda7la8r") %>%
-    mapboxer::set_view_state(-80, 45, zoom = 6) %>%
+    mapboxer::set_view_state(-79.38, 43.8, zoom = 10) %>%
     mapboxer::add_navigation_control(showCompass = FALSE, pos = "top-right") %>%
     add_census_layer("ct") %>%
     add_census_layer("csd")
@@ -162,12 +162,12 @@ toggle_layer_invisible <- function(map, id) {
 add_census_tooltips <- function(map, geography) {
   tooltip_text <-
     "
-  <b>Region</b>: {{region_name}}<br>
-  <b>Census ID</b>: {{geo_uid}}<br>
-  <b>Population</b>: {{population_fmt}}<br>
-  <b>Households</b>: {{households_fmt}}<br>
-  <b>Area</b>: {{area_sq_km_fmt}} km<sup>2</sup><br>
-  <b>Population Density</b>: {{population_density_fmt}} people/km<sup>2</sup>
+  <b>Census Unit ID</b>: {{geo_uid}}<br>
+  Region: {{region_name}}<br>
+  Population: {{population_fmt}}<br>
+  Households: {{households_fmt}}<br>
+  Area: {{area_sq_km_fmt}} km<sup>2</sup><br>
+  Population density: {{population_density_fmt}} people/km<sup>2</sup>
   "
 
   map %>%

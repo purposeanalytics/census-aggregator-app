@@ -217,9 +217,12 @@ upload_tiles(
 )
 
 # Save without geography (and population density, and formatted values) for usage in app
+#
+# ct <- ct %>%
+#   st_set_geometry(NULL) %>%
+#   select(-population_density, -region_name, -tidyselect::("ends_with"))
 
-ct <- ct %>%
-  st_set_geometry(NULL) %>%
-  select(-population_density, -region_name, -tidyselect::("ends_with"))
+# TODO
+
 
 usethis::use_data(ct, overwrite = TRUE)

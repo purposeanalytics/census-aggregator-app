@@ -52,11 +52,13 @@ mod_sidebar_ui <- function(id) {
       sidebar_header("Step 3: Download data"),
       shiny::div(
         shinyjs::disabled(
-          shiny::downloadButton(
-            ns("export_data"),
-            "Download report",
-            width = "100%",
-            icon = NULL
+          shinyWidgets::dropdownButton(
+            inputId = ns("download_report"),
+            circle = FALSE,
+            inline = TRUE,
+            label = "Download report",
+            mod_download_report_ui(ns("pdf"), "(.pdf)"),
+            mod_download_report_ui(ns("html"), "(.html)")
           )
         ),
         shinyjs::disabled(
@@ -69,7 +71,7 @@ mod_sidebar_ui <- function(id) {
         ),
         shinyjs::disabled(
           shiny::downloadButton(
-            ns("export_boundary"),
+            ns("download_boundary"),
             "Download boundary (.geojson)",
             width = "100%",
             icon = NULL
@@ -84,9 +86,10 @@ mod_sidebar_ui <- function(id) {
       shiny::div(
         shinyjs::disabled(
           shiny::actionButton(
-            ns("bookmark_selections"),
-            "Bookmark selections",
-            class = "btn-link"
+            ns("share"),
+            "Share",
+            class = "btn-link",
+            icon = shiny::icon("share-alt")
           )
         )
       ),
@@ -109,9 +112,11 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
     ns <- session$ns
 
     # Set up bookmarking ----
-    shiny::observeEvent(input$bookmark_selections, {
+    bookmark_query <- shiny::reactive(
       bookmark_query <- construct_bookmark(input, session, exclude = c("selection_tool", "export_data", "bookmark_selections", "export_geography", "export_boundary_bttn", "reset"), selected_geographies())
-      shiny:::showBookmarkUrlModal(bookmark_query)
+      )
+    shiny::observeEvent(input$share, {
+      shiny:::showBookmarkUrlModal(bookmark_query())
     })
 
     # Observe any bookmarking to update inputs with ----
@@ -240,9 +245,10 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
 
         # Disable buttons
         shinyjs::disable("reset")
-        shinyjs::disable("bookmark_selections")
-        shinyjs::disable("export_boundary")
-        shinyjs::disable("export_data")
+        shinyjs::disable("share")
+        shinyjs::disable("download_report")
+        shinyjs::disable("download_data")
+        shinyjs::disable("download_boundary")
 
         summary_statistics <- dplyr::tibble(label = c(
           "Areas selected",
@@ -255,9 +261,10 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
       } else {
         # Enable buttons
         shinyjs::enable("reset")
-        shinyjs::enable("bookmark_selections")
-        shinyjs::enable("export_boundary")
-        shinyjs::enable("export_data")
+        shinyjs::enable("share")
+        shinyjs::enable("download_report")
+        shinyjs::enable("download_data")
+        shinyjs::enable("download_boundary")
 
         summary_statistics_source <- switch(input_aggregate_area(),
           "csd" = censusaggregatorapp::csd,
@@ -326,84 +333,9 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
     })
 
     # Export data ----
-    output$export_data <- shiny::downloadHandler(
-      filename = function() {
-        "CensusAggregator Export.zip"
-      },
-      content = function(file) {
-        cat("export start \n")
-        cat(paste0(Sys.time()), "\n")
+    mod_download_report_server("pdf", input_aggregate_area(), selected_geographies(), bookmark_query())
+    mod_download_report_server("html",input_aggregate_area(),  selected_geographies(), bookmark_query())
 
-        # Move to tempdir to save files
-        original_wd <- setwd(tempdir())
-
-        # Go back to working directory after function
-        on.exit(setwd(original_wd))
-
-        temp_template <- "report.Rmd"
-        file.copy(app_sys("report/report.Rmd"), temp_template, overwrite = TRUE)
-        file.copy(app_sys("app/www/logo.png"), "logo.png", overwrite = TRUE)
-        file.copy(app_sys("app/www/pa-logo.png"), "pa-logo.png", overwrite = TRUE)
-
-        report_html <- "CensusAggregator Report.html"
-        report_pdf <- "CensusAggregator Report.pdf"
-        data_export <- "CensusAggregator Data Export.csv"
-
-        # Set up parameters to pass to Rmd document
-        params <- list(
-          geo_uid = selected_geographies()$geo_uid,
-          level = input$aggregate_area,
-          csv_location = data_export
-        )
-
-        cat("rendering report \n")
-        cat(paste0(Sys.time()), "\n")
-
-        # Knit the document, passing in the `params` list, and eval it in a
-        # child of the global environment (this isolates the code in the document
-        # from the code in this app).
-        rmarkdown::render(temp_template,
-          output_file = report_html,
-          params = params,
-          envir = new.env(parent = globalenv()),
-          quiet = TRUE
-        )
-
-        cat("report rendered, printing to pdf \n")
-        cat(paste0(Sys.time()), "\n")
-
-        # Print to PDF
-        pagedown::chrome_print(
-          report_html,
-          output = report_pdf,
-          options = list(
-            displayHeaderFooter = TRUE,
-            footerTemplate = format(
-              shiny::div(
-                style = "width: 100%; font-size: 10pt; font-family: 'Lato'",
-                shiny::div(shiny::span(Sys.Date()), style = "float: left; text-align: left; padding-left: 2.25cm;"),
-                shiny::div(shiny::span(class = "pageNumber"), style = "float: right; text-align: right; padding-right: 2.25cm;")
-              ),
-              indent = FALSE
-            ),
-            headerTemplate = format(shiny::div(), indent = FALSE),
-            marginTop = 1,
-            marginBottom = 1
-          ),
-          extra_args = chrome_extra_args(),
-          verbose = FALSE
-        )
-
-        cat("zipping \n")
-        cat(paste0(Sys.time()), "\n")
-
-        # Zip HTML, PDF, and data export
-        utils::zip(file, c(report_html, report_pdf, data_export))
-
-        cat("done \n")
-        cat(paste0(Sys.time()), "\n")
-      }
-    )
   })
 }
 
@@ -418,33 +350,3 @@ tooltip <- function(content) {
   shiny::icon("question-circle", `data-html` = "true", style = "color: lightgrey;") %>%
     bsplus::bs_embed_popover(title = NULL, content = content, placement = "right", container = "body", trigger = "hover")
 }
-
-# Via: https://github.com/RLesur/chrome_print_shiny
-#' Return Chrome CLI arguments
-#'
-#' This is a helper function which returns arguments to be passed to Chrome.
-#' This function tests whether the code is running on shinyapps and returns the
-#' appropriate Chrome extra arguments.
-#'
-#' @param default_args Arguments to be used in any circumstances.
-#'
-#' @return A character vector with CLI arguments to be passed to Chrome.
-#' @noRd
-chrome_extra_args <- function(default_args = c("--disable-gpu")) {
-  args <- default_args
-  # Test whether we are in a shinyapps container
-  if (identical(Sys.getenv("R_CONFIG_ACTIVE"), "shinyapps")) {
-    args <- c(
-      args,
-      "--no-sandbox", # required because we are in a container
-      "--disable-dev-shm-usage"
-    ) # in case of low available memory
-  }
-  args
-}
-
-## To be copied in the UI
-# mod_sidebar_ui("sidebar_1")
-
-## To be copied in the server
-# mod_sidebar_server("sidebar_1")
