@@ -17,8 +17,8 @@ prepare_data <- function(geography, regions) {
     dplyr::mutate(geo_uid = forcats::fct_expand(geo_uid, regions))
 
   metadata <- switch(geography,
-    "csd" = csd,
-    "ct" = ct
+    "csd" = censusaggregatorapp:::csd,
+    "ct" = censusaggregatorapp:::ct
   ) %>%
     dplyr::filter(geo_uid %in% regions)
 
@@ -26,7 +26,7 @@ prepare_data <- function(geography, regions) {
     dplyr::left_join(metadata, by = "geo_uid")
 
   vectors_data <- vectors_data %>%
-    dplyr::left_join(vectors, by = "vector") %>%
+    dplyr::left_join(censusaggregatorapp:::vectors, by = "vector") %>%
     censusaggregate::derive_aggregation_type()
 
   # Aggregate vectors - treat land area separately (used for population density), population 2016 separately (user for population change, median total income separately (used for median income if only 1 region selected)
@@ -37,7 +37,7 @@ prepare_data <- function(geography, regions) {
   data_breakdown <- vectors_data_filtered %>%
     censusaggregate::aggregate_census_vectors() %>%
     dplyr::distinct() %>%
-    dplyr::left_join(vectors, by = c("highest_parent_vector", "vector", "type", "label", "units", "parent_vector", "aggregation", "details")) %>%
+    dplyr::left_join(censusaggregatorapp:::vectors, by = c("highest_parent_vector", "vector", "type", "label", "units", "parent_vector", "aggregation", "details")) %>%
     dplyr::select(highest_parent_vector, vector, label, label_short, value, value_proportion) %>%
     dplyr::group_by(highest_parent_vector) %>%
     tidyr::fill(label_short, .direction = "updown") %>%
@@ -126,7 +126,7 @@ prepare_data <- function(geography, regions) {
         label_short == "language_at_home",
         vector != highest_parent_vector
       ) %>%
-      dplyr::inner_join(vectors %>%
+      dplyr::inner_join(censusaggregatorapp:::vectors %>%
         dplyr::filter(label_short == "language_at_home", stringr::str_detect(details, "Single")) %>%
         dplyr::select(vector), by = "vector") %>%
       dplyr::filter(!label %in% c("English", "French")) %>%

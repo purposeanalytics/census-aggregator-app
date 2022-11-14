@@ -267,8 +267,8 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
         shinyjs::enable("download_boundary")
 
         summary_statistics_source <- switch(input_aggregate_area(),
-          "csd" = censusaggregatorapp::csd,
-          "ct" = censusaggregatorapp::ct
+          "csd" = censusaggregatorapp:::csd,
+          "ct" = censusaggregatorapp:::ct
         )
 
         summary_statistics <- summary_statistics_source %>%

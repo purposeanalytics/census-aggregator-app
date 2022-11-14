@@ -21,9 +21,8 @@ add_census_layer <- function(map, geography) {
 
 add_census_fill_layer <- function(map, geography) {
   click_layer_id <- geography_to_layer_id(geography, "fill_click")
-  quantiles <- get(paste0(geography, "_population_density_quantiles"))
+  quantiles <- switch(geography, csd = censusaggregatorapp:::csd_population_density_quantiles, ct = censusaggregatorapp:::ct_population_density_quantiles)
   palette <- c("#dbf0ec", "#afe9de", "#6bc7b5", "#3a9281", "#155e4f")
-
 
   map %>%
     mapboxer::add_layer(

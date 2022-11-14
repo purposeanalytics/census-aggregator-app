@@ -758,7 +758,7 @@ section_heading("Definitions")
 ```{r variable-definitions}
 # Split into two columns manually, after "Language spoken most often at home" will make it fit on 1 page
 
-cutoff <- variable_definitions %>%
+cutoff <- censusaggregatorapp:::variable_definitions %>%
   mutate(id = row_number()) %>%
   filter(str_detect(variable_definition, "Language spoken most often at home")) %>%
   pull(id)
@@ -779,14 +779,14 @@ definitions_table <- function(data) {
 
 shiny::column(
   width = 6,
-  variable_definitions %>%
+  censusaggregatorapp:::variable_definitions %>%
     filter(row_number() <= cutoff) %>%
     definitions_table()
 )
 
 shiny::column(
   width = 6,
-  variable_definitions %>%
+  censusaggregatorapp:::variable_definitions %>%
     filter(row_number() > cutoff) %>%
     definitions_table()
 )
