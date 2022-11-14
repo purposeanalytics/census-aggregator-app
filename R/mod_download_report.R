@@ -45,7 +45,6 @@ mod_download_report_server <- function(id, aggregate_area, selected_geographies,
         params <- list(
           geo_uid = selected_geographies$geo_uid,
           geography = aggregate_area,
-          csv_location = "test.csv",
           bookmark = bookmark
         )
 

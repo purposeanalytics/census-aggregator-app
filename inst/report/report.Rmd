@@ -7,14 +7,12 @@ output:
 params:
   geo_uid: !r c("5350167.02", "5350167.01", "5350165.00", "5350164.00", "5350163.00", "5350162.00", "5350161.00", "5350131.00", "5350130.00", "5350126.00", "5350125.00", "5350124.00", "5350123.00", "5350122.00", "5350121.00", "5350120.00", "5350119.00", "5350118.00", "5350117.00", "5350116.00", "5350115.00", "5350114.00", "5350113.00", "5350112.00", "5350110.00", "5350109.00", "5350097.04", "5350097.03", "5350097.01", "5350096.02", "5350096.01", "5350095.00", "5350094.00", "5350093.00", "5350092.00", "5350091.02", "5350091.01", "5350090.00", "5350089.00", "5350088.00", "5350087.00", "5350086.00", "5350064.00", "5350063.06", "5350063.05", "5350063.04", "5350063.03", "5350062.04", "5350062.03", "5350062.01", "5350061.00", "5350060.00", "5350059.00", "5350058.00", "5350057.00", "5350056.00", "5350055.00", "5350054.00", "5350053.00", "5350047.04", "5350047.03", "5350047.02", "5350046.00", "5350045.00", "5350044.01", "5350043.00", "5350042.00", "5350041.00", "5350040.00", "5350039.00", "5350038.00", "5350037.00", "5350036.00", "5350035.00", "5350034.02", "5350034.01", "5350015.00", "5350014.00", "5350011.02", "5350011.01")
   geography: "ct"
-  csv_location: "data_export.csv"
   bookmark: "https://censusaggregator.ca/"
 ---
 
 ```{r setup, echo = FALSE}
 knitr::opts_chunk$set(
-  echo = FALSE, message = FALSE, warning = FALSE, cache = FALSE,
-  out.width = "100%", fig.height = 2, error = TRUE
+  echo = FALSE, message = FALSE, warning = FALSE, cache = FALSE
 )
 ```
 
@@ -401,6 +399,7 @@ shiny::column(
 header_and_barchart(
   subsection_heading("Non-official language spoken at home"),
   data[["Top 10 non-official languages primarily spoken at home"]] %>%
+    mutate(label = forcats::fct_inorder(label)) %>%
     inline_barchart()
 )
 ```
@@ -414,21 +413,9 @@ section_heading("Income and housing")
 ::: {.row .mb-2}
 
 ```{r median_income}
-# If there is only one region, just report the actual median
-# Otherwise, estimate the median
+median_income_label <- ifelse(length(regions) == 1, "Median household income", "Estimated median household income")
 
-if (length(regions) == 1) {
-  median_income <- vectors_data %>%
-    filter(vector == "v_CA21_906")
-  median_income_label <- "Median household income"
-} else {
-  median_income <- data_breakdown %>%
-    filter(label_short == "income") %>%
-    aggregate_estimated_median_income()
-  median_income_label <- "Estimated median household income"
-}
-
-median_income <- median_income %>%
+median_income <- data[[median_income_label]] %>%
   pull_and_format_value("dollar")
 
 shiny::column(
@@ -456,16 +443,10 @@ shiny::column(
 ::: {.row}
 
 ```{r total-income}
-total_income <- data_breakdown %>%
-  filter(label_short == "income_buckets") %>%
-  mutate(label = fct_relevel(
-    label, "Under $20,000", "$20,000 to $40,000", "$40,000 to $60,000",
-    "$60,000 to $80,000", "$80,000 to $100,000", "$100,000 and over"
-  ))
-
 header_and_barchart(
   subsection_heading("Total household income"),
-  total_income %>%
+  data[["Total household income ($20,000 buckets)"]] %>%
+    mutate(label = forcats::fct_inorder(label)) %>%
     inline_barchart()
 )
 ```
@@ -556,7 +537,8 @@ header_and_barchart(
 ```{r ethnic_origin, eval}
 header_and_barchart(
   subsection_heading("Ethnic or cultural origin"),
-  ethnic_origin %>%
+  data[["Top 10 ethnic or cultural origins"]] %>%
+    mutate(label = forcats::fct_inorder(label)) %>%
     inline_barchart()
 )
 ```
@@ -609,121 +591,3 @@ shiny::column(
 ```
 
 :::
-
-<div class = "pagebreak"></div>
-
-```{r data-export}
-# Start prepping data for export
-# Add highest parent vector label to each, and relabel breakdowns to "breakdown"
-highest_parent_vector_label <- data_breakdown %>%
-  filter(vector == highest_parent_vector) %>%
-  select(highest_parent_vector, vector = label)
-
-breakdowns <- data_breakdown %>%
-  filter(vector != highest_parent_vector) %>%
-  select(highest_parent_vector, breakdown = label, value, value_proportion, label_short)
-
-data_export <- breakdowns %>%
-  left_join(highest_parent_vector_label, by = "highest_parent_vector") %>%
-  select(vector, breakdown, value, value_proportion, label_short)
-
-data_export <- bind_rows(
-  tribble(
-    ~vector, ~value,
-    "Population, 2021", population,
-    "Households", households,
-    "Population change (2016 to 2021)", as.character(population_change[["value"]]),
-    "Population density", population_density
-  ) %>%
-    mutate(
-      value = readr::parse_number(value),
-      value = round(value, 3),
-      breakdown = vector
-    ),
-  # Household size
-  data_export %>% filter(label_short == "household_size"),
-  # (Estimated) median household income
-  tibble(vector = median_income_label, value = median_income) %>%
-    mutate(
-      value = readr::parse_number(value),
-      breakdown = vector
-    ),
-  # Buckets
-
-  data_export %>%
-    filter(label_short == "income_buckets") %>%
-    mutate(vector = paste(vector, "($20,000 buckets)")) %>%
-    mutate(breakdown = fct_relevel(breakdown, levels(total_income[["label"]]))) %>%
-    arrange(breakdown),
-
-  # Original breakdowns
-
-  data_export %>% filter(label_short == "income"),
-
-  # Unaffordable housing
-
-  data_export %>% filter(label_short == "unaffordable_housing"),
-
-  # Low-income measure after tax (LIM-AT)
-  data_export %>% filter(label_short == "lim_at"),
-  # Visible minority population
-  # Total visible minority population (and all breakdowns within)
-  data_export %>% filter(label_short == "visible_minority"),
-  # Household tenure
-  data_export %>% filter(label_short == "household_tenure"),
-  # Average shelter cost
-  data_export %>%
-    filter(label_short %in% c("shelter_cost_owner", "shelter_cost_renter")) %>%
-    mutate(vector = "Average monthly shelter cost") %>%
-    mutate(value = round(value, 2)),
-  # Age (5 year buckets)
-  data_export %>%
-    filter(label_short == "age") %>%
-    separate(breakdown,
-      into = c("min", "max"),
-      sep = " to ", remove = FALSE, convert = TRUE, fill = "right"
-    ) %>%
-    arrange(max) %>%
-    select(-min, -max) %>%
-    mutate(vector = "Age (5 year groups)"),
-  # Age (cohorts)
-  data_export %>%
-    filter(label_short == "age_cohorts") %>%
-    separate(breakdown,
-      into = c("min", "max"),
-      sep = " to ", remove = FALSE, convert = TRUE, fill = "right"
-    ) %>%
-    arrange(max) %>%
-    select(-min, -max) %>%
-    mutate(vector = "Age (cohorts)"),
-  # Language spoken at home
-  # TODO - English and French
-  language_at_home %>%
-    rename(breakdown = label) %>%
-    mutate(vector = "Top 10 non-official languages primarily spoken at home"),
-  # Knowledge of English
-  data_export %>% filter(label_short == "knowledge_of_english"),
-  # Immigrant Status
-  # Immigrants, Recent Immigrants (since 2016)
-  data_export %>% filter(label_short == "immigrant_status"),
-  # Indigenous identity
-  data_export %>% filter(label_short == "indigenous_identity"),
-  # Ethnic or cultural origin
-  ethnic_origin %>%
-    rename(breakdown = label) %>%
-    mutate(vector = "Top 10 ethnic or cultural origins"),
-  # Educational attainment
-  # TODO
-  # Family type
-  data_export %>% filter(label_short == "family_type"),
-  # Multiple family households
-  data_export %>%
-    filter(label_short == "household_type") %>%
-    mutate(breakdown = fct_relevel(breakdown, levels(household_type[["label"]]))) %>%
-    arrange(breakdown)
-) %>%
-  select(Vector = vector, Breakdown = breakdown, Value = value, Proportion = value_proportion) %>%
-  mutate(Proportion = round(Proportion, 3))
-
-readr::write_csv(data_export, params$csv_location, na = "")
-```

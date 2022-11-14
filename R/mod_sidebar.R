@@ -31,7 +31,7 @@ mod_sidebar_ui <- function(id) {
       ),
       sidebar_header(
         "Step 2: Choose an area selection method",
-        tooltip(shiny::HTML("Use the “Click to select/deselect” option to select one geographic area at a time. Each selected geographic area will be highlighted with a bold outline. This option also permits the selection of non-contiguous areas.<br><br>Use the “Draw a polygon” option to draw a continuous boundary. Each mouse click marks a new point in the boundary. To complete the polygon selection, use a double mouse click for the final point or click on the first point to close the loop. The census geographic areas that overlap with polygon will be selected and highlighted with a bold outline."))
+        tooltip(shiny::HTML('Use the "Click to select/deselect" option to select one geographic area at a time. Each selected geographic area will be highlighted with a bold outline. This option also permits the selection of non-contiguous areas.<br><br>Use the "Draw a polygon" option to draw a continuous boundary. Each mouse click marks a new point in the boundary. To complete the polygon selection, use a double mouse click for the final point or click on the first point to close the loop. The census geographic areas that overlap with polygon will be selected and highlighted with a bold outline.'))
       ),
       shinyWidgets::prettyRadioButtons(
         ns("selection_tool"),
@@ -221,22 +221,6 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
       }
     )
 
-    # Export boundary ----
-
-    output$download_boundary <- shiny::downloadHandler(
-      filename = function() {
-        "boundary.geojson"
-      },
-      content = function(con) {
-        dataset <- arrow::open_dataset(app_sys(glue::glue("extdata/{input$aggregate_area}")))
-
-        query <- dplyr::filter(dataset, .data$geo_uid %in% selected_geographies()[["geo_uid"]])
-
-        sfarrow::read_sf_dataset(query) %>%
-          sf::st_union() %>%
-          sf::st_write(con)
-      }
-    )
     # Summary statistics table ----
     shiny::observeEvent(selected_geographies(), ignoreInit = FALSE, priority = 30, {
       shiny::req(input_aggregate_area())
@@ -332,9 +316,36 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
       })
     })
 
-    # Export data ----
+    # Export  ----
     mod_download_report_server("pdf", input_aggregate_area(), selected_geographies(), bookmark_query())
     mod_download_report_server("html", input_aggregate_area(), selected_geographies(), bookmark_query())
+
+    output$download_data <- shiny::downloadHandler(
+      filename = function() {
+        "CensusAggregator Data.csv"
+      },
+      content = function(file) {
+        data <- prepare_data(input_aggregate_area(), selected_geographies()[["geo_uid"]])
+        names(data) <- c("Vector", "Breakdown", "Value", "Proportion")
+        data[["Proportion"]] <- round(data[["Proportion"]], digits = 3)
+        write.csv(data, file, na = "", row.names = FALSE)
+      }
+    )
+
+    output$download_boundary <- shiny::downloadHandler(
+      filename = function() {
+        "CensusAggregator Boundary.geojson"
+      },
+      content = function(file) {
+        dataset <- arrow::open_dataset(app_sys(glue::glue("extdata/{input$aggregate_area}")))
+
+        query <- dplyr::filter(dataset, .data$geo_uid %in% selected_geographies()[["geo_uid"]])
+
+        sfarrow::read_sf_dataset(query) %>%
+          sf::st_union() %>%
+          sf::st_write(file)
+      }
+    )
   })
 }
 
