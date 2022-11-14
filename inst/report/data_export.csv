@@ -1,0 +1,115 @@
+Vector,Breakdown,Value,Proportion
+"Population, 2021","Population, 2021",356712,
+Households,Households,181230,
+Population change (2016 to 2021),Population change (2016 to 2021),0.051,
+Population density,Population density,9510,
+Household size,1 person,82455,0.455
+Household size,2 persons,59470,0.328
+Household size,3 persons,19510,0.108
+Household size,4 persons,13435,0.074
+Household size,5+ persons,6330,0.035
+Estimated median household income,Estimated median household income,82000,
+"Total household income ($20,000 buckets)","Under $20,000",17145,0.095
+"Total household income ($20,000 buckets)","$20,000 to $40,000",26930,0.149
+"Total household income ($20,000 buckets)","$40,000 to $60,000",23320,0.129
+"Total household income ($20,000 buckets)","$60,000 to $80,000",21585,0.119
+"Total household income ($20,000 buckets)","$80,000 to $100,000",18675,0.103
+"Total household income ($20,000 buckets)","$100,000 and over",73540,0.406
+Total household income,"Under $5,000",6125,0.034
+Total household income,"$5,000 to $9,999",2720,0.015
+Total household income,"$10,000 to $14,999",3630,0.02
+Total household income,"$15,000 to $19,999",4670,0.026
+Total household income,"$20,000 to $24,999",8250,0.046
+Total household income,"$25,000 to $29,999",6700,0.037
+Total household income,"$30,000 to $34,999",6005,0.033
+Total household income,"$35,000 to $39,999",5975,0.033
+Total household income,"$40,000 to $44,999",6000,0.033
+Total household income,"$45,000 to $49,999",5875,0.032
+Total household income,"$50,000 to $59,999",11445,0.063
+Total household income,"$60,000 to $69,999",11045,0.061
+Total household income,"$70,000 to $79,999",10540,0.058
+Total household income,"$80,000 to $89,999",9880,0.055
+Total household income,"$90,000 to $99,999",8795,0.049
+Total household income,"$100,000 to $124,999",17480,0.096
+Total household income,"$125,000 to $149,999",12530,0.069
+Total household income,"$150,000 to $199,999",16250,0.09
+Total household income,"$200,000 and over",27280,0.151
+Unaffordable housing,Spending 30% or more of income on shelter,70070,0.392
+Low income (LIM-AT),Low income (LIM-AT),50740,0.146
+Visible minority population,Total visible minority population,136545,0.391
+Visible minority population,South Asian,22615,0.065
+Visible minority population,Chinese,40680,0.117
+Visible minority population,Black,17685,0.051
+Visible minority population,Filipino,9330,0.027
+Visible minority population,Arab,4880,0.014
+Visible minority population,Latin American,11750,0.034
+Visible minority population,Southeast Asian,5870,0.017
+Visible minority population,West Asian,4695,0.013
+Visible minority population,Korean,5995,0.017
+Visible minority population,Japanese,2785,0.008
+Visible minority population,"Visible minority, n.i.e.",2795,0.008
+Visible minority population,Multiple visible minorities,7215,0.021
+Household tenure,Owner,75700,0.417
+Household tenure,Renter,105745,0.583
+Household tenure,Dwelling provided by First Nation or Indian band,0,0
+Average monthly shelter cost,Owned dwellings,,
+Average monthly shelter cost,Rented dwellings,1812.13,
+Age (5 year groups),0 to 4,12095,0.034
+Age (5 year groups),5 to 9,10990,0.031
+Age (5 year groups),10 to 14,10555,0.03
+Age (5 year groups),15 to 19,12065,0.034
+Age (5 year groups),20 to 24,29520,0.083
+Age (5 year groups),25 to 29,45450,0.127
+Age (5 year groups),30 to 34,43610,0.122
+Age (5 year groups),35 to 39,31725,0.089
+Age (5 year groups),40 to 44,22830,0.064
+Age (5 year groups),45 to 49,20255,0.057
+Age (5 year groups),50 to 54,20330,0.057
+Age (5 year groups),55 to 59,20675,0.058
+Age (5 year groups),60 to 64,18140,0.051
+Age (5 year groups),65 to 69,16145,0.045
+Age (5 year groups),70 to 74,14355,0.04
+Age (5 year groups),75 to 79,10720,0.03
+Age (5 year groups),80 to 84,8055,0.023
+Age (5 year groups),85 to 89,5460,0.015
+Age (5 year groups),90 to 94,2915,0.008
+Age (5 year groups),95 to 99,780,0.002
+Age (5 year groups),100+,105,0
+Age (cohorts),0 to 14,33645,0.094
+Age (cohorts),15 to 24,41585,0.117
+Age (cohorts),25 to 44,143615,0.403
+Age (cohorts),45 to 65,79400,0.223
+Age (cohorts),65 to 84,49275,0.138
+Age (cohorts),85+,9250,0.026
+Top 10 non-official languages primarily spoken at home,Mandarin,11740,0.033
+Top 10 non-official languages primarily spoken at home,Portuguese,11205,0.032
+Top 10 non-official languages primarily spoken at home,Yue (Cantonese),6585,0.019
+Top 10 non-official languages primarily spoken at home,Spanish,5620,0.016
+Top 10 non-official languages primarily spoken at home,Italian,2705,0.008
+Top 10 non-official languages primarily spoken at home,Korean,2295,0.007
+Top 10 non-official languages primarily spoken at home,"Tagalog (Pilipino, Filipino)",1990,0.006
+Top 10 non-official languages primarily spoken at home,Iranian Persian,1620,0.005
+Top 10 non-official languages primarily spoken at home,Vietnamese,1610,0.005
+Top 10 non-official languages primarily spoken at home,Russian,1590,0.005
+Immigrant status,Immigrants,124455,0.357
+Immigrant status,Recent immigrants (2016 to 2021),21550,0.062
+Indigenous identity,Indigenous identity,3455,0.01
+Top 10 ethnic or cultural origins,English,45565,0.131
+Top 10 ethnic or cultural origins,Irish,43885,0.126
+Top 10 ethnic or cultural origins,Scottish,40660,0.117
+Top 10 ethnic or cultural origins,Chinese,40355,0.116
+Top 10 ethnic or cultural origins,Italian,24240,0.069
+Top 10 ethnic or cultural origins,Portuguese,22255,0.064
+Top 10 ethnic or cultural origins,German,21735,0.062
+Top 10 ethnic or cultural origins,Canadian,20885,0.06
+Top 10 ethnic or cultural origins,Jewish,18865,0.054
+Top 10 ethnic or cultural origins,"French, n.o.s.",17585,0.05
+Family type,Couples with children,28095,0.336
+Family type,Single parent,12800,0.153
+Family type,Single woman+ parent,10525,0.126
+Multiple family households,1 person,82465,0.455
+Multiple family households,2+ persons non census family,17120,0.094
+Multiple family households,"1 census family, no additional persons",74575,0.411
+Multiple family households,"1 census family, + additional persons",3830,0.021
+Multiple family households,Multiple census families,730,0.004
+Multiple family households,Multigen. households,2510,0.014
