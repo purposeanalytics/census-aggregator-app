@@ -428,8 +428,8 @@
       "RemoteRepo": "census-aggregator-app",
       "RemoteUsername": "purposeanalytics",
       "RemoteRef": "HEAD",
-      "RemoteSha": "78092bb7749fcae86d2486cdfeb35a524edd5b70",
-      "Hash": "454947da15e8e7c9963accdd4a723d43",
+      "RemoteSha": "61ed1ddca52876e4ee35cec497376ea046d13459",
+      "Hash": "e76ecbe1879ee3e7acb720c637ad77d7",
       "Requirements": [
         "arrow",
         "bslib",
@@ -438,6 +438,7 @@
         "config",
         "curl",
         "dplyr",
+        "forcats",
         "glue",
         "golem",
         "gt",
@@ -457,6 +458,7 @@
         "shinyWidgets",
         "shinybusy",
         "shinyjs",
+        "stringr",
         "tibble",
         "tidyr"
       ]
