@@ -8,19 +8,19 @@ prepare_data <- function(geography, regions) {
 
   vectors_data <- data %>%
     # Filter for regions
-    dplyr::filter(geo_uid %in% regions) %>%
-    dplyr::select(-id) %>%
+    dplyr::filter(.data$geo_uid %in% regions) %>%
+    dplyr::select(-.data$id) %>%
     dplyr::collect()
 
   # Expand to have all vectors for all regions
   vectors_data <- vectors_data %>%
-    dplyr::mutate(geo_uid = forcats::fct_expand(geo_uid, regions))
+    dplyr::mutate(geo_uid = forcats::fct_expand(.data$geo_uid, regions))
 
   metadata <- switch(geography,
     "csd" = censusaggregatorapp:::csd,
     "ct" = censusaggregatorapp:::ct
   ) %>%
-    dplyr::filter(geo_uid %in% regions)
+    dplyr::filter(.data$geo_uid %in% regions)
 
   vectors_data <- vectors_data %>%
     dplyr::left_join(metadata, by = "geo_uid")
@@ -31,20 +31,18 @@ prepare_data <- function(geography, regions) {
 
   # Aggregate vectors - treat land area separately (used for population density), population 2016 separately (user for population change, median total income separately (used for median income if only 1 region selected)
   vectors_data_filtered <- vectors_data %>%
-    dplyr::filter(!(label %in% c("Population, 2016", "Land area in square kilometres", "Median total household income")))
+    dplyr::filter(!(.data$label %in% c("Population, 2016", "Land area in square kilometres", "Median total household income")))
 
   # Also exclude income vectors, aggregate separately
   data_breakdown <- vectors_data_filtered %>%
     censusaggregate::aggregate_census_vectors() %>%
     dplyr::distinct() %>%
     dplyr::left_join(censusaggregatorapp:::vectors, by = c("highest_parent_vector", "vector", "type", "label", "units", "parent_vector", "aggregation", "details")) %>%
-    dplyr::select(highest_parent_vector, vector, label, label_short, value, value_proportion) %>%
-    dplyr::group_by(highest_parent_vector) %>%
-    tidyr::fill(label_short, .direction = "updown") %>%
+    dplyr::select(.data$highest_parent_vector, .data$vector, .data$label, .data$label_short, .data$value, .data$value_proportion) %>%
+    dplyr::group_by(.data$highest_parent_vector) %>%
+    tidyr::fill(.data$label_short, .direction = "updown") %>%
     dplyr::ungroup() %>%
     dplyr::distinct()
-
-  browser()
 
   data <- dplyr::bind_rows(
     # Population, 2021
@@ -53,23 +51,23 @@ prepare_data <- function(geography, regions) {
       dplyr::mutate(label = NA),
     # Households
     metadata %>%
-      select(geo_uid, households) %>%
-      distinct() %>%
-      summarise(value = sum(households)) %>%
-      mutate(
+      dplyr::select(.data$geo_uid, .data$households) %>%
+      dplyr::distinct() %>%
+      dplyr::summarise(value = sum(.data$households)) %>%
+      dplyr::mutate(
         parent_label = "Households"
       ),
     # Population change (2016 to 2021)
     vectors_data %>%
-      aggregate_population_change() %>%
-      dplyr::select(label, value) %>%
+      censusaggregate::aggregate_population_change() %>%
+      dplyr::select(.data$label, .data$value) %>%
       dplyr::mutate(parent_label = "Population change, 2016 to 2021") %>%
       dplyr::mutate(label = NA),
     # Population density
     vectors_data %>%
-      dplyr::filter(label %in% c("Population, 2021", "Land area in square kilometres")) %>%
-      aggregate_population_density() %>%
-      dplyr::select(value) %>%
+      dplyr::filter(.data$label %in% c("Population, 2021", "Land area in square kilometres")) %>%
+      censusaggregate::aggregate_population_density() %>%
+      dplyr::select(.data$value) %>%
       dplyr::mutate(parent_label = "Population density"),
     # Age (5 year buckets)
     # TODO
@@ -86,14 +84,14 @@ prepare_data <- function(geography, regions) {
     data_breakdown %>%
       filter_breakdown("household_type", "Household type") %>%
       dplyr::mutate(label = forcats::fct_relevel(
-        label, "1 person",
+        .data$label, "1 person",
         "2+ persons non census family",
         "1 census family, no additional persons",
         "1 census family, + additional persons",
         "Multiple census families",
         "Multigen. households"
       )) %>%
-      dplyr::arrange(label),
+      dplyr::arrange(.data$label),
     # Knowledge of English
     data_breakdown %>%
       filter_breakdown("knowledge_of_english_french", "Knowledge of official languages") %>%
@@ -123,19 +121,19 @@ prepare_data <- function(geography, regions) {
     # Non-official language spoken at home
     data_breakdown %>%
       dplyr::filter(
-        label_short == "language_at_home",
-        vector != highest_parent_vector
+        .data$label_short == "language_at_home",
+        .data$vector != .data$highest_parent_vector
       ) %>%
       dplyr::inner_join(censusaggregatorapp:::vectors %>%
-        dplyr::filter(label_short == "language_at_home", stringr::str_detect(details, "Single")) %>%
-        dplyr::select(vector), by = "vector") %>%
-      dplyr::filter(!label %in% c("English", "French")) %>%
+        dplyr::filter(.data$label_short == "language_at_home", stringr::str_detect(.data$details, "Single")) %>%
+        dplyr::select(.data$vector), by = "vector") %>%
+      dplyr::filter(!.data$label %in% c("English", "French")) %>%
       dplyr::top_n(10, wt = value) %>%
-      dplyr::filter(value > 0) %>%
-      dplyr::arrange(-value) %>%
+      dplyr::filter(.data$value > 0) %>%
+      dplyr::arrange(-.data$value) %>%
       head(10) %>%
-      derive_census_vector_order(by_value = TRUE) %>%
-      dplyr::select(label, value, value_proportion) %>%
+      censusaggregate::derive_census_vector_order(by_value = TRUE) %>%
+      dplyr::select(.data$label, .data$value, .data$value_proportion) %>%
       dplyr::mutate(parent_label = "Top 10 non-official languages primarily spoken at home"),
     # (Estimated) median household income
     # Buckets
@@ -166,24 +164,24 @@ prepare_data <- function(geography, regions) {
   )
 
   data %>%
-    dplyr::rename(breakdown = label) %>%
-    dplyr::rename(label = parent_label) %>%
-    dplyr::select(label, breakdown, value, value_proportion)
+    dplyr::rename(breakdown = .data$label) %>%
+    dplyr::rename(label = .data$parent_label) %>%
+    dplyr::select(.data$label, .data$breakdown, .data$value, .data$value_proportion)
 }
 
 filter_breakdown <- function(data, label_short, parent_label = NA, exclude_parent = TRUE, proportion = TRUE) {
   if (exclude_parent) {
     data <- data %>%
-      dplyr::filter(vector != highest_parent_vector)
+      dplyr::filter(.data$vector != .data$highest_parent_vector)
   }
 
   data <- data %>%
-    dplyr::filter(label_short %in% !!label_short) %>%
-    dplyr::select(label, value, value_proportion)
+    dplyr::filter(.data$label_short %in% !!label_short) %>%
+    dplyr::select(.data$label, .data$value, .data$value_proportion)
 
   if (!proportion) {
     data <- data %>%
-      dplyr::select(-value_proportion)
+      dplyr::select(-.data$value_proportion)
   }
 
   data %>%
@@ -192,8 +190,8 @@ filter_breakdown <- function(data, label_short, parent_label = NA, exclude_paren
 
 additional_filter_and_combine <- function(data, label, new_label) {
   data %>%
-    dplyr::group_by(parent_label) %>%
-    dplyr::filter(label %in% !!label) %>%
-    dplyr::summarise(dplyr::across(c(value, value_proportion), sum)) %>%
+    dplyr::group_by(.data$parent_label) %>%
+    dplyr::filter(.data$label %in% !!label) %>%
+    dplyr::summarise(dplyr::across(c(.data$value, .data$value_proportion), sum)) %>%
     dplyr::mutate(label = new_label)
 }

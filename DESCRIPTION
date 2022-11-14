@@ -19,6 +19,7 @@ Imports:
     config (>= 0.3.1),
     curl,
     dplyr,
+    forcats,
     glue,
     golem (>= 0.3.2),
     gt,
@@ -38,6 +39,7 @@ Imports:
     shinybusy,
     shinyjs,
     shinyWidgets,
+    stringr,
     tibble,
     tidyr
 Encoding: UTF-8

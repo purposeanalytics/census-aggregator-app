@@ -281,9 +281,9 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
           dplyr::ungroup() %>%
           tidyr::pivot_longer(dplyr::everything()) %>%
           dplyr::mutate(value = dplyr::case_when(
-            name %in% c("population", "households") ~ scales::comma(value, accuracy = 1),
-            name %in% c("area_sq_km", "population_density") ~ scales::comma(value, accuracy = 0.1),
-            name == "n" ~ as.character(value)
+            name %in% c("population", "households") ~ scales::comma(.data$value, accuracy = 1),
+            name %in% c("area_sq_km", "population_density") ~ scales::comma(.data$value, accuracy = 0.1),
+            name == "n" ~ as.character(.data$value)
           ))
 
         n_units <- switch(input_aggregate_area(),
@@ -316,10 +316,10 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
       output$summary_statistics <- gt::render_gt({
         summary_statistics %>%
           gt::gt() %>%
-          gt::sub_missing(columns = value) %>%
-          gt::cols_align("right", value) %>%
-          gt::tab_style(style = gt::cell_text(weight = "bold"), locations = gt::cells_body(columns = label)) %>%
-          gt::fmt_markdown(columns = value) %>%
+          gt::sub_missing(columns = .data$value) %>%
+          gt::cols_align("right", .data$value) %>%
+          gt::tab_style(style = gt::cell_text(weight = "bold"), locations = gt::cells_body(columns = .data$label)) %>%
+          gt::fmt_markdown(columns = .data$value) %>%
           gt::tab_options(
             table.width = "100%",
             column_labels.hidden = TRUE,

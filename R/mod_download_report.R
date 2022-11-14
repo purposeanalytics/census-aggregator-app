@@ -22,7 +22,7 @@ mod_download_report_ui <- function(id, label) {
 #'
 #' @noRd
 mod_download_report_server <- function(id, aggregate_area, selected_geographies, bookmark) {
-  moduleServer(id, function(input, output, session) {
+  shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
     type <- ifelse(stringr::str_ends(id, "pdf"), "pdf", "html")
@@ -77,7 +77,7 @@ mod_download_report_server <- function(id, aggregate_area, selected_geographies,
   })
 }
 
-print_report <- function(input = here::here("inst", "report", "report.html"), output = "report.pdf") {
+print_report <- function(input = "inst/report/report.html", output = "report.pdf") {
   pagedown::chrome_print(
     input,
     output = output,
