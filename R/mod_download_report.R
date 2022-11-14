@@ -32,6 +32,7 @@ mod_download_report_server <- function(id, aggregate_area, selected_geographies,
         glue::glue("CensusAggregator Report.{type}")
       },
       content = function(file) {
+
         # Move to tempdir to save files
         original_wd <- setwd(tempdir())
 

@@ -11,7 +11,7 @@ mod_sidebar_ui <- function(id) {
   ns <- NS(id)
   shiny::div(
     class = "censusagg-sidebar",
-    shinybusy::add_busy_spinner("circle", color = "white", height = "30px", width = "30px"),
+    shinybusy::add_busy_spinner("circle", color = "#447E72", height = "30px", width = "30px"),
     shiny::div(
       shiny::img(src = "www/logo.png", alt = "CensusAggregator logo", style = "max-width: 50%; min-width: 150"),
       breathe(),
