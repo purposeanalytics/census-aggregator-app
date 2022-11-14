@@ -49,8 +49,6 @@ prepare_data <- function(geography, regions) {
     dplyr::ungroup() %>%
     dplyr::distinct()
 
-  browser()
-
   data <- dplyr::bind_rows(
     # Population, 2021
     data_breakdown %>%

@@ -223,7 +223,7 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
 
     # Export boundary ----
 
-    output$export_boundary <- shiny::downloadHandler(
+    output$download_boundary <- shiny::downloadHandler(
       filename = function() {
         "boundary.geojson"
       },
