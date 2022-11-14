@@ -157,7 +157,7 @@ prepare_data <- function(geography, regions) {
       } else {
         median_income <- data_breakdown %>%
           dplyr::filter(.data$label_short == "income") %>%
-         censusaggregate::aggregate_estimated_median_income()
+          censusaggregate::aggregate_estimated_median_income()
         median_income_label <- "Estimated median household income"
       }
 

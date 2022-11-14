@@ -5,8 +5,8 @@ output:
     theme:
       version: 4
 params:
-  geo_uid: !r c("5350167.02", "5350167.01", "5350165.00", "5350164.00", "5350163.00", "5350162.00", "5350161.00", "5350131.00", "5350130.00", "5350126.00", "5350125.00", "5350124.00", "5350123.00", "5350122.00", "5350121.00", "5350120.00", "5350119.00", "5350118.00", "5350117.00", "5350116.00", "5350115.00", "5350114.00", "5350113.00", "5350112.00", "5350110.00", "5350109.00", "5350097.04", "5350097.03", "5350097.01", "5350096.02", "5350096.01", "5350095.00", "5350094.00", "5350093.00", "5350092.00", "5350091.02", "5350091.01", "5350090.00", "5350089.00", "5350088.00", "5350087.00", "5350086.00", "5350064.00", "5350063.06", "5350063.05", "5350063.04", "5350063.03", "5350062.04", "5350062.03", "5350062.01", "5350061.00", "5350060.00", "5350059.00", "5350058.00", "5350057.00", "5350056.00", "5350055.00", "5350054.00", "5350053.00", "5350047.04", "5350047.03", "5350047.02", "5350046.00", "5350045.00", "5350044.01", "5350043.00", "5350042.00", "5350041.00", "5350040.00", "5350039.00", "5350038.00", "5350037.00", "5350036.00", "5350035.00", "5350034.02", "5350034.01", "5350015.00", "5350014.00", "5350011.02", "5350011.01")
-  geography: "ct"
+  geo_uid: !r c("1103035")
+  geography: "csd"
   bookmark: "https://censusaggregator.ca/"
 ---
 
@@ -195,6 +195,16 @@ logo <- function(pagebreak = TRUE) {
     )
   )
 }
+
+suppressed_note <- function(...) {
+  data <- list(...)
+
+  if (any(data == "&#8212;")) {
+    shiny::div(
+      shiny::HTML("<i>Note: &#8212; indicates data for one or more of the selected areas is not available or is suppressed due to confidentiality.</i>")
+    )
+  }
+}
 ```
 
 ```{r packages}
@@ -319,8 +329,11 @@ shiny::column(
   snapshot_card("Population density<br>(people/km<sup>2</sup>)", population_density)
 )
 ```
-
 :::
+
+```{r}
+suppressed_note(population, households, population_change, population_density)
+```
 
 ```{r section-age-households-families}
 section_heading("Age, households, and families")
@@ -361,37 +374,53 @@ section_heading("Language")
 ::: {.row .mb-2}
 
 ```{r knowledge_of_english}
+knowledge_of_english <- data[["Knowledge of official languages"]] %>%
+  filter(label == "Knowledge of English") %>%
+  pull_and_format_value(column = "value_proportion")
+
 shiny::column(
   width = 3,
   snapshot_card(
-    "Knowledge of English",
-    data[["Knowledge of official languages"]] %>% filter(label == "Knowledge of English") %>% pull_and_format_value(column = "value_proportion")
+    "Knowledge of English", knowledge_of_english
   )
 )
 ```
 
 ```{r knowledge_of_french}
+knowledge_of_french <- data[["Knowledge of official languages"]] %>%
+  filter(label == "Knowledge of French") %>%
+  pull_and_format_value(column = "value_proportion")
 shiny::column(
   width = 3,
-  snapshot_card("Knowledge of French", data[["Knowledge of official languages"]] %>% filter(label == "Knowledge of French") %>% pull_and_format_value(column = "value_proportion"))
+  snapshot_card("Knowledge of French", knowledge_of_french)
 )
 ```
 
 ```{r english-at-home}
+english_at_home <- data[["Official languages primarily spoken at home"]] %>%
+  filter(label == "English spoken at home") %>%
+  pull_and_format_value(column = "value_proportion")
 shiny::column(
   width = 3,
-  snapshot_card("English spoken at home", data[["Official languages primarily spoken at home"]] %>% filter(label == "English spoken at home") %>% pull_and_format_value(column = "value_proportion"))
+  snapshot_card("English spoken at home", english_at_home)
 )
 ```
 
 ```{r french-at-home}
+french_at_home <- data[["Official languages primarily spoken at home"]] %>%
+  filter(label == "French spoken at home") %>%
+  pull_and_format_value(column = "value_proportion")
 shiny::column(
   width = 3,
-  snapshot_card("French spoken at home", data[["Official languages primarily spoken at home"]] %>% filter(label == "French spoken at home") %>% pull_and_format_value(column = "value_proportion"))
+  snapshot_card("French spoken at home", french_at_home)
 )
 ```
 
 :::
+
+```{r}
+suppressed_note(knowledge_of_english, knowledge_of_french, english_at_home, french_at_home)
+```
 
 ::: {.row}
 
@@ -425,20 +454,26 @@ shiny::column(
 ```
 
 ```{r lim_at}
+lim_at <- data[["Low-income measure after tax (LIM-AT)"]] %>% pull_and_format_value(column = "value_proportion")
 shiny::column(
   width = 4,
-  snapshot_card("Low income (LIM-AT)", data[["Low-income measure after tax (LIM-AT)"]] %>% pull_and_format_value(column = "value_proportion"))
+  snapshot_card("Low income (LIM-AT)", lim_at)
 )
 ```
 
 ```{r unaffordable_housing}
+unaffordable_housing <- data[["Unaffordable housing"]] %>% pull_and_format_value(column = "value_proportion")
 shiny::column(
   width = 4,
-  snapshot_card("Unaffordable housing", data[["Unaffordable housing"]] %>% pull_and_format_value(column = "value_proportion"))
+  snapshot_card("Unaffordable housing", unaffordable_housing)
 )
 ```
 
 :::
+
+```{r}
+suppressed_note(median_income, lim_at, unaffordable_housing)
+```
 
 ::: {.row}
 
@@ -510,17 +545,21 @@ shiny::column(
 ```
 
 ```{r indigenous-identity}
+indigenous_identity <- data[["Indigenous identity"]] %>%
+  pull_and_format_value(column = "value_proportion")
 shiny::column(
   width = 3,
   snapshot_card(
-    "Indigenous identity",
-    data[["Indigenous identity"]] %>%
-      pull_and_format_value(column = "value_proportion")
+    "Indigenous identity", indigenous_identity
   )
 )
 ```
 
 :::
+
+```{r}
+suppressed_note(visible_minority_summary, immigrant_status_total, immigrant_status_recent, indigenous_identity)
+```
 
 ::: {.row}
 
