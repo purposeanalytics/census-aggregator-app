@@ -67,10 +67,11 @@ ct %>%
   hist()
 
 ct_population_density_quantiles <- c(0, 400, 1000, 2500, 10000, 80000)
-ct_quantiles_text <- glue("{ct_population_density_quantiles} - {lead(ct_population_density_quantiles)}")
-ct_quantiles_text[1] <- glue("< {ct_population_density_quantiles[2]}")
+ct_population_density_quantiles_text <- scales::comma(ct_population_density_quantiles)
+ct_quantiles_text <- glue("{ct_population_density_quantiles_text} - {lead(ct_population_density_quantiles_text)}")
+ct_quantiles_text[1] <- glue("< {ct_population_density_quantiles_text[2]}")
 ct_quantiles_text <- ct_quantiles_text[-length(ct_quantiles_text)]
-ct_quantiles_text[5] <- glue("{ct_population_density_quantiles[5]}+")
+ct_quantiles_text[5] <- glue("{ct_population_density_quantiles_text[5]}+")
 
 usethis::use_data(ct_population_density_quantiles, overwrite = TRUE)
 usethis::use_data(ct_quantiles_text, overwrite = TRUE)

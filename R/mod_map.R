@@ -9,7 +9,9 @@ mod_map_ui <- function(id) {
   ns <- shiny::NS(id)
   shiny::div(
     class = "censusagg-map",
-    mapboxer::mapboxerOutput(ns("map"), height = "100vh")
+    mapboxer::mapboxerOutput(ns("map"), height = "100vh"),
+    population_density_legend("ct", ns, display = "block"),
+    population_density_legend("csd", ns)
   )
 }
 
@@ -73,6 +75,15 @@ mod_map_server <- function(id, input_aggregate_area, input_selection_tool, selec
         # Only run these once the map has been rendered for the first time
         shiny::req(map_rendered())
         shiny::req(input_aggregate_area())
+
+        # Toggle legend visibility
+        if (input_aggregate_area() == "csd") {
+          shinyjs::show("csd-legend")
+          shinyjs::hide("ct-legend")
+        } else if (input_aggregate_area() == "ct") {
+          shinyjs::show("ct-legend")
+          shinyjs::hide("csd-legend")
+        }
 
         filter_list <- append(
           list("in", "geo_uid"),
@@ -168,4 +179,33 @@ mod_map_server <- function(id, input_aggregate_area, input_selection_tool, selec
       }
     )
   })
+}
+
+population_density_legend <- function(geography, ns, display = "none") {
+  palette <- c("#dbf0ec", "#afe9de", "#6bc7b5", "#3a9281", "#155e4f")
+
+  legend_text <- switch(geography,
+    "csd" = censusaggregatorapp::csd_quantiles_text,
+    ct = censusaggregatorapp::ct_quantiles_text
+  )
+
+  shiny::div(
+    id = glue::glue(ns("{geography}-legend")),
+    class = "legend map-overlay",
+    style = glue::glue("display: {display};"),
+    shiny::tags$b("Population density"),
+    purrr::map2(
+      palette, legend_text,
+      function(color, text) {
+        shiny::div(
+          shiny::span(
+            class = "legend-key",
+            style = glue::glue("background-color: {color};")
+          ),
+          shiny::span(text)
+        )
+      }
+    ) %>%
+      shiny::tagList()
+  )
 }
