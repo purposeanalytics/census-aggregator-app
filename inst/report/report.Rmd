@@ -5,14 +5,14 @@ output:
     theme:
       version: 4
 params:
-  geo_uid: !r c("1103035")
+  geo_uid: !r c("5947807")
   geography: "csd"
   bookmark: "https://censusaggregator.ca/"
 ---
 
 ```{r setup, echo = FALSE}
 knitr::opts_chunk$set(
-  echo = FALSE, message = FALSE, warning = FALSE, cache = FALSE
+  echo = FALSE, message = FALSE, warning = FALSE, cache = FALSE, error = TRUE
 )
 ```
 
@@ -425,11 +425,18 @@ suppressed_note(knowledge_of_english, knowledge_of_french, english_at_home, fren
 ::: {.row}
 
 ```{r language_at_home}
-header_and_barchart(
-  subsection_heading("Non-official language spoken at home"),
-  data[["Top 10 non-official languages primarily spoken at home"]] %>%
+top_languages <- data[["Top 10 non-official languages primarily spoken at home"]]
+if (is.null(top_languages)) {
+  top_languages <- "No non-official languages primarily spoken at home."
+} else {
+  top_languages <- data[["Top 10 non-official languages primarily spoken at home"]] %>%
     mutate(label = forcats::fct_inorder(label)) %>%
     inline_barchart()
+}
+
+header_and_barchart(
+  subsection_heading("Top non-official languages spoken at home"),
+  top_languages
 )
 ```
 
@@ -492,10 +499,20 @@ shelter_cost <- data[["Average shelter cost"]]
 # If they are all NA, then fake as proportion so that no bars are shown
 shelter_cost_format <- ifelse(all(is.na(shelter_cost[["value"]])), "proportion", "dollar")
 
+# Remove 'count' field if still there, fix widths
+shelter_cost <- shelter_cost %>%
+    inline_barchart(shelter_cost_format)
+
+if ("count" %in% names(shelter_cost[["_data"]])) {
+  shelter_cost <- shelter_cost %>%
+    gt::cols_hide(count) %>%
+    gt::cols_width(label ~ 250, value_fmt ~ 
+      75, hist ~ 100)
+}
+
 header_and_barchart(
   subsection_heading("Average shelter cost"),
-  shelter_cost %>%
-    inline_barchart(shelter_cost_format),
+  shelter_cost,
   subsection_heading("Household tenure"),
   data[["Tenure"]] %>%
     mutate(label = fct_inorder(label)) %>%
@@ -573,12 +590,20 @@ header_and_barchart(
 )
 ```
 
-```{r ethnic_origin, eval}
-header_and_barchart(
-  subsection_heading("Ethnic or cultural origin"),
-  data[["Top 10 ethnic or cultural origins"]] %>%
+```{r ethnic_or_cultural_origin, eval}
+ethnic_or_cultural_origin <- data[["Top 10 ethnic or cultural origins"]]
+
+if (is.null(ethnic_or_cultural_origin)) {
+  ethnic_or_cultural_origin <- "No data available on ethnic or cultural origin."
+} else {
+  ethnic_or_cultural_origin <- data[["Top 10 ethnic or cultural origins"]] %>%
     mutate(label = forcats::fct_inorder(label)) %>%
     inline_barchart()
+}
+
+header_and_barchart(
+  subsection_heading("Top ethnic or cultural origins"),
+  ethnic_or_cultural_origin
 )
 ```
 
