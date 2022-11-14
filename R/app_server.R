@@ -51,7 +51,7 @@ app_server <- function(input, output, session) {
     ignoreNULL = FALSE,
     {
       if (input_aggregate_area() == "csd") {
-        if (all(input$csd_polygon_filter == ""| is.null(input$csd_polygon_filter))) {
+        if (all(input$csd_polygon_filter == "" | is.null(input$csd_polygon_filter))) {
           selected_geographies(
             tibble::tibble()
           )

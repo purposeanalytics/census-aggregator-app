@@ -1,3 +1,8 @@
+#' Prepare data for export/report
+#'
+#' @param geography CT or CSD
+#' @param regions Vector of geo_uids
+#'
 #' @export
 prepare_data <- function(geography, regions) {
 
@@ -17,8 +22,8 @@ prepare_data <- function(geography, regions) {
     dplyr::mutate(geo_uid = forcats::fct_expand(.data$geo_uid, regions))
 
   metadata <- switch(geography,
-    "csd" = censusaggregatorapp:::csd,
-    "ct" = censusaggregatorapp:::ct
+    "csd" = censusaggregatorapp::csd,
+    "ct" = censusaggregatorapp::ct
   ) %>%
     dplyr::filter(.data$geo_uid %in% regions)
 
@@ -26,7 +31,7 @@ prepare_data <- function(geography, regions) {
     dplyr::left_join(metadata, by = "geo_uid")
 
   vectors_data <- vectors_data %>%
-    dplyr::left_join(censusaggregatorapp:::vectors, by = "vector") %>%
+    dplyr::left_join(censusaggregatorapp::vectors, by = "vector") %>%
     censusaggregate::derive_aggregation_type()
 
   # Aggregate vectors - treat land area separately (used for population density), population 2016 separately (user for population change, median total income separately (used for median income if only 1 region selected)
@@ -37,12 +42,14 @@ prepare_data <- function(geography, regions) {
   data_breakdown <- vectors_data_filtered %>%
     censusaggregate::aggregate_census_vectors() %>%
     dplyr::distinct() %>%
-    dplyr::left_join(censusaggregatorapp:::vectors, by = c("highest_parent_vector", "vector", "type", "label", "units", "parent_vector", "aggregation", "details")) %>%
+    dplyr::left_join(censusaggregatorapp::vectors, by = c("highest_parent_vector", "vector", "type", "label", "units", "parent_vector", "aggregation", "details")) %>%
     dplyr::select(.data$highest_parent_vector, .data$vector, .data$label, .data$label_short, .data$value, .data$value_proportion) %>%
     dplyr::group_by(.data$highest_parent_vector) %>%
     tidyr::fill(.data$label_short, .direction = "updown") %>%
     dplyr::ungroup() %>%
     dplyr::distinct()
+
+  browser()
 
   data <- dplyr::bind_rows(
     # Population, 2021
@@ -70,7 +77,16 @@ prepare_data <- function(geography, regions) {
       dplyr::select(.data$value) %>%
       dplyr::mutate(parent_label = "Population density"),
     # Age (5 year buckets)
-    # TODO
+    data_breakdown %>%
+      dplyr::filter(.data$label_short == "age") %>%
+      tidyr::separate(.data$label,
+        into = c("min", "max"),
+        sep = " to ", remove = FALSE, convert = TRUE, fill = "right"
+      ) %>%
+      dplyr::arrange(.data$max) %>%
+      dplyr::select(-.data$min, -.data$max) %>%
+      dplyr::select(.data$label, .data$value, .data$value_proportion) %>%
+      dplyr::mutate(parent_label = "Age (5 year groups)"),
     # Age (cohorts)
     data_breakdown %>%
       filter_breakdown("age_cohorts", "Age (cohorts)"),
@@ -124,7 +140,7 @@ prepare_data <- function(geography, regions) {
         .data$label_short == "language_at_home",
         .data$vector != .data$highest_parent_vector
       ) %>%
-      dplyr::inner_join(censusaggregatorapp:::vectors %>%
+      dplyr::inner_join(censusaggregatorapp::vectors %>%
         dplyr::filter(.data$label_short == "language_at_home", stringr::str_detect(.data$details, "Single")) %>%
         dplyr::select(.data$vector), by = "vector") %>%
       dplyr::filter(!.data$label %in% c("English", "French")) %>%
