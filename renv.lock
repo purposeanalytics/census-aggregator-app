@@ -428,8 +428,8 @@
       "RemoteRepo": "census-aggregator-app",
       "RemoteUsername": "purposeanalytics",
       "RemoteRef": "HEAD",
-      "RemoteSha": "8d2f418a01af92d2ec1346fc08cefd4022d1b073",
-      "Hash": "c2000356c64c860d186e1bf2f724a684",
+      "RemoteSha": "64ec3445bc32f80df5f5abcf74cbf2587848df18",
+      "Hash": "db4432a55f52bdbeb333f614a5a1a123",
       "Requirements": [
         "arrow",
         "bslib",
