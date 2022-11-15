@@ -13,6 +13,7 @@ mod_sidebar_ui <- function(id) {
     class = "censusagg-sidebar",
     shinybusy::add_busy_spinner("circle", color = "#447E72", height = "30px", width = "30px"),
     shiny::div(
+      class = "sidebar-header",
       shiny::fluidRow(
         shiny::column(
           width = 6,
@@ -365,6 +366,7 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
         "CensusAggregator Data.csv"
       },
       content = function(file) {
+        shiny::req(nrow(selected_geographies()) > 0)
         data <- prepare_data(input_aggregate_area(), selected_geographies()[["geo_uid"]])
         names(data) <- c("Vector", "Breakdown", "Value", "Proportion")
         data[["Proportion"]] <- round(data[["Proportion"]], digits = 3)
@@ -377,6 +379,7 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
         "CensusAggregator Boundary.geojson"
       },
       content = function(file) {
+        shiny::req(nrow(selected_geographies()) > 0)
         dataset <- arrow::open_dataset(app_sys(glue::glue("extdata/{input$aggregate_area}")))
 
         query <- dplyr::filter(dataset, .data$geo_uid %in% selected_geographies()[["geo_uid"]])

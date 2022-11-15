@@ -255,4 +255,11 @@ button:disabled, .btn.disabled {
 
 @media (max-width: 550px) {
   /* Phones */
+  .mapboxer, .censusagg-map, .censusagg-sidebar {
+    height: 50vh !important;
+  }
+
+  .sidebar-header .col-sm-6 {
+    width: 50%;
+  }
 }
