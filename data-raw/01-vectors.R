@@ -12,6 +12,7 @@ vectors <- tribble(
   "v_CA21_2", "Population, 2016", "population_2016",
   "v_CA21_449", "Number of persons in private households", "population_in_private_households",
   "v_CA21_7", "Land area in square kilometres", "area",
+  "v_CA21_6", "Population density per square kilometre", "population_density",
   "v_CA21_8", "Total - Age", "age",
   "v_CA21_443", "Private households by household size", "household_size",
   "v_CA21_499", "Total number of census families in private households", "family_type",

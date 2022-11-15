@@ -17,34 +17,29 @@ area_vector <- list_census_vectors(dataset) %>%
   filter(label == "Land area in square kilometres") %>%
   pull(vector)
 
+population_density_vector <- list_census_vectors(dataset) %>%
+  filter(label == "Population density per square kilometre") %>%
+  pull(vector)
+
 # CSD -----
 
-# Get "Land area in square kilometres" vector (for calculating population density), since it is
-# how StatCan calculates population density. The Area field returned by cancensus is computed
-# from the polygons, and might include water areas (which StatCan removes) - we want to be consistent
-# with how StatCan calculates and displays these.
+# Get "Area" and "Population density" vectors
 
 csd_raw <- get_census(
   dataset = dataset,
   regions = canada_region,
   level = "CSD",
   geo_format = "sf",
-  vectors = area_vector,
+  vectors = c(area_vector, population_density_vector),
   labels = "short"
 ) %>%
   clean_names() %>%
-  select(geo_uid, pr_uid, region_name = name, population, households, area_sq_km = contains(tolower(area_vector)), geometry)
-
-# Derive population density for tooltips
-csd <- csd_raw %>%
-  mutate(
-    population_density = population / area_sq_km
-  )
+  select(geo_uid, pr_uid, region_name = name, population, households, area_sq_km = contains(tolower(area_vector)), population_density = contains(tolower(population_density_vector)), geometry)
 
 # Exclude CSDs with >10% missing data (mainly 50-100% missing), since we will not be able to render reports for them anyways
 csd_remove <- readRDS(here::here("data-raw", "intermediary", "csd_remove.rds"))
 
-csd <- csd %>%
+csd <- csd_raw %>%
   anti_join(csd_remove, by = "geo_uid")
 
 # Simplify features - based on number of points - required for uploading to mapbox
@@ -101,16 +96,16 @@ csd <- csd %>%
   mutate(
     across(c(population, households), .fns = list(fmt = scales::comma)),
     across(c(area_sq_km, population_density), .fns = list(fmt = ~ scales::comma(.x, accuracy = 0.1))),
-    population_density = round(population_density)
+    population_density = round(population_density, digits = 1)
   )
 
 # Remove original values (except population density)
-csd <- csd %>%
+csd_upload <- csd %>%
   select(-population, -households, -area_sq_km)
 
 # Now to upload to mapbox
 
-csd <- csd %>%
+csd_upload <- csd_upload %>%
   select(-pr_uid)
 
 # Optimizing as per recommendations in https://docs.mapbox.com/help/troubleshooting/uploads/#troubleshooting
@@ -119,20 +114,20 @@ csd <- csd %>%
 # Reproject to Web Mercator (EPSG:3857)
 # If not in this format, then Mapbox will reproject on upload, which takes time and can contribute to timing out
 
-csd <- csd %>%
+csd_upload <- csd_upload %>%
   st_transform(3857)
 
 # Upload
 
 upload_tiles(
-  input = csd,
+  input = csd_upload,
   username = "purposeanalytics",
   tileset_id = "2021_csd",
   tileset_name = "2021_census_csd",
   multipart = TRUE
 )
 
-# Save without geography for usage in app (don't need population density either, since it needs to be derived)
+# Save without geography for usage in app
 
 csd <- csd %>%
   st_set_geometry(NULL) %>%
@@ -147,11 +142,11 @@ ct_raw <- get_census(
   regions = canada_region,
   level = "CT",
   geo_format = "sf",
-  vectors = area_vector,
+  vectors = c(area_vector, population_density_vector),
   labels = "short"
 ) %>%
   clean_names() %>%
-  select(geo_uid, cd_uid, csd_uid, population, households, area_sq_km = contains(tolower(area_vector)), geometry)
+  select(geo_uid, cd_uid, csd_uid, population, households, area_sq_km = contains(tolower(area_vector)), population_density = contains(tolower(population_density_vector)), geometry)
 
 # Add region_name on, via csd
 csd_name <- csd_raw %>%
@@ -185,44 +180,35 @@ ct_geometry %>%
     hive_style = FALSE
   )
 
-# Derive population density for tooltips
-ct <- ct %>%
-  mutate(
-    population_density = population / area_sq_km,
-  )
-
 # Create formatted version of values, round original population density
 ct <- ct %>%
   mutate(
     across(c(population, households), .fns = list(fmt = scales::comma)),
     across(c(area_sq_km, population_density), .fns = list(fmt = ~ scales::comma(.x, accuracy = 0.1))),
-    population_density = round(population_density)
+    population_density = round(population_density, 1)
   )
 
 # Remove original values (except population density)
-ct <- ct %>%
+ct_upload <- ct %>%
   select(-population, -households, -area_sq_km)
 
 # Now to upload to mapbox
 
-ct <- ct %>%
+ct_upload <- ct_upload %>%
   select(-cd_uid)
 
 upload_tiles(
-  input = ct,
+  input = ct_upload,
   username = "purposeanalytics",
   tileset_id = "2021_ct",
   tileset_name = "2021_census_ct",
   multipart = TRUE
 )
 
-# Save without geography (and population density, and formatted values) for usage in app
-#
-# ct <- ct %>%
-#   st_set_geometry(NULL) %>%
-#   select(-population_density, -region_name, -tidyselect::("ends_with"))
+# Save without geography (and formatted values) for usage in app
 
-# TODO
-
+ct <- ct %>%
+  st_set_geometry(NULL) %>%
+  select(-region_name, -tidyselect::ends_with("fmt"), -cd_uid)
 
 usethis::use_data(ct, overwrite = TRUE)

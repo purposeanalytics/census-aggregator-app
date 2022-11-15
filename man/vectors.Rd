@@ -5,7 +5,7 @@
 \alias{vectors}
 \title{Vectors used in app}
 \format{
-An object of class \code{tbl_df} (inherits from \code{tbl}, \code{data.frame}) with 632 rows and 9 columns.
+An object of class \code{tbl_df} (inherits from \code{tbl}, \code{data.frame}) with 633 rows and 9 columns.
 }
 \usage{
 vectors

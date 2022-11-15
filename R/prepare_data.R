@@ -36,7 +36,7 @@ prepare_data <- function(geography, regions) {
 
   # Aggregate vectors - treat land area separately (used for population density), population 2016 separately (user for population change, median total income separately (used for median income if only 1 region selected)
   vectors_data_filtered <- vectors_data %>%
-    dplyr::filter(!(.data$label %in% c("Population, 2016", "Land area in square kilometres", "Median total household income")))
+    dplyr::filter(!(.data$label %in% c("Population, 2016", "Land area in square kilometres", "Median total household income", "Population density per square kilometre")))
 
   # Also exclude income vectors, aggregate separately
   data_breakdown <- vectors_data_filtered %>%
@@ -68,11 +68,21 @@ prepare_data <- function(geography, regions) {
       dplyr::select(.data$label, .data$value) %>%
       dplyr::mutate(parent_label = "Population change, 2016 to 2021", label = NA, value = round(.data$value, 3)),
     # Population density
-    vectors_data %>%
-      dplyr::filter(.data$label %in% c("Population, 2021", "Land area in square kilometres")) %>%
-      censusaggregate::aggregate_population_density() %>%
-      dplyr::select(.data$value) %>%
-      dplyr::mutate(parent_label = "Population density", value = round(.data$value, 1)),
+    # Use actual population density vector if there is only one
+    {
+      if (length(regions) == 1) {
+        population_density <- vectors_data %>%
+          dplyr::filter(.data$label == "Population density per square kilometre") %>%
+          dplyr::select(.data$value)
+      } else {
+        population_density <- vectors_data %>%
+          dplyr::filter(.data$label %in% c("Population, 2021", "Land area in square kilometres")) %>%
+          censusaggregate::aggregate_population_density() %>%
+          dplyr::select(.data$value)
+      }
+    population_density %>%
+      dplyr::mutate(parent_label = "Population density", value = round(.data$value, 1))
+    },
     # Age (5 year buckets)
     data_breakdown %>%
       dplyr::filter(.data$label_short == "age", .data$vector != .data$highest_parent_vector) %>%

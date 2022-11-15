@@ -168,6 +168,7 @@ pull_and_format_value <- function(data, format = "percent", column = "value") {
   switch(format,
     percent = scales::percent(value, 0.1),
     comma = scales::comma(value, 1),
+    comma_decimal = scales::comma(value, 0.1),
     dollar = scales::dollar(value)
   )
 }
@@ -281,7 +282,6 @@ ggplot() +
 shiny::tags$a(href = params$bookmark, "Bookmark", target = "_blank")
 ```
 
-
 ::: {.row .mb-2}
 
 ```{r snapshot}
@@ -299,7 +299,7 @@ if (!str_starts(population_change, "-")) {
 }
 
 population_density <- data[["Population density"]] %>%
-  pull_and_format_value("comma")
+  pull_and_format_value("comma_decimal")
 ```
 
 ```{r population}

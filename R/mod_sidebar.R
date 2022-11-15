@@ -290,12 +290,19 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
 
         summary_statistics <- summary_statistics_source %>%
           dplyr::inner_join(selected_geographies(), by = "geo_uid") %>%
-          dplyr::select(.data$population, .data$households, .data$area_sq_km) %>%
-          dplyr::mutate(n = dplyr::n()) %>%
-          dplyr::group_by(.data$n) %>%
-          dplyr::summarise_all(sum) %>%
-          dplyr::mutate(population_density = round(.data$population / .data$area_sq_km)) %>%
-          dplyr::ungroup() %>%
+          dplyr::select(.data$population, .data$households, .data$area_sq_km, .data$population_density) %>%
+          dplyr::mutate(n = dplyr::n())
+
+        if (nrow(selected_geographies()) > 1) {
+          summary_statistics <- summary_statistics %>%
+            dplyr::select(-.data$population_density) %>%
+            dplyr::group_by(.data$n) %>%
+            dplyr::summarise_all(sum) %>%
+            dplyr::mutate(population_density = round(.data$population / .data$area_sq_km)) %>%
+            dplyr::ungroup()
+        }
+
+        summary_statistics <- summary_statistics %>%
           tidyr::pivot_longer(dplyr::everything()) %>%
           dplyr::mutate(value = dplyr::case_when(
             name %in% c("population", "households") ~ scales::comma(.data$value, accuracy = 1),
@@ -322,8 +329,8 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
           "population_density", "Population density", "people/km<sup>2</sup>"
         )
 
-        summary_statistics <- summary_statistics %>%
-          dplyr::left_join(summary_statistics_labels_and_units, by = "name") %>%
+        summary_statistics <- summary_statistics_labels_and_units %>%
+          dplyr::left_join(summary_statistics, by = "name") %>%
           dplyr::mutate(
             value = glue::glue("{value} {units}", .na = "")
           ) %>%

@@ -5,7 +5,7 @@
 \alias{ct}
 \title{CT values}
 \format{
-An object of class \code{data.frame} with 6100 rows and 4 columns.
+An object of class \code{data.frame} with 6100 rows and 5 columns.
 }
 \usage{
 ct
