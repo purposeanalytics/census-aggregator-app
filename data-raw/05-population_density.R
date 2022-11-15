@@ -34,7 +34,7 @@ csd %>%
   pull(population_density) %>%
   hist()
 
-csd_population_density_quantiles <- c(0, 1, 10, 50, 500, 1000)
+csd_population_density_quantiles <- c(0, 1, 10, 50, 500, 20000)
 csd_quantiles_text <- glue("{csd_population_density_quantiles} - {lead(csd_population_density_quantiles)}")
 csd_quantiles_text[1] <- glue("< {csd_population_density_quantiles[2]}")
 csd_quantiles_text <- csd_quantiles_text[-length(csd_quantiles_text)]
