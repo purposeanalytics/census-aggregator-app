@@ -40,6 +40,7 @@ mod_download_report_server <- function(id, aggregate_area, selected_geographies,
         on.exit(setwd(original_wd))
 
         temp_template <- "report.Rmd"
+        file.copy(app_sys("report/style.css"), "style.css", overwrite = TRUE)
         file.copy(app_sys("report/report.Rmd"), temp_template, overwrite = TRUE)
 
         # Set up parameters to pass to Rmd document

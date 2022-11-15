@@ -1,0 +1,95 @@
+@import url('https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap');
+
+:root {
+  --font: "Lato", Sans-Serif;
+  --base-size: 14px;
+  --regular-weight: 400;
+  --bold-weight: 700;
+  --main-background-color: #61A89A;
+  --main-color: #447E72;
+  --secondary-color: #3D3D3D;
+  --tertiary-color: #BFBFBF;
+  --breathing-room: 10px
+}
+
+body {
+  font-family: var(--font);
+  font-size: var(--base-size);
+  font-weight: var(--regular-weight);
+}
+
+.title {
+  display: none;
+}
+
+.section-heading hr {
+  border-top: 2px solid var(--main-background-color);
+}
+
+.subsection-heading {
+  font-weight: var(--bold-weight);
+  background-color: white;
+  color: var(--main-color);
+  padding-top: 0.5rem;
+  padding-bottom: 0;
+}
+
+.box {
+  height: 100%;
+  background-color: var(--main-background-color);
+  color: white;
+  padding: 0.5rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.card-value {
+  margin-top: auto;
+  font-size: 2rem;
+  font-weight: bold;
+}
+
+h1 {
+  font-size: 2rem;
+}
+
+h2 {
+  font-size: 1.25rem;
+}
+
+.print-header {
+  display: block;
+  width: 100%;
+}
+
+.print-header.page-header {
+  display: none;
+}
+
+.print-header .left-logo {
+  float: left;
+  text-align: left;
+  width: 50%
+}
+
+.print-header .right-logo {
+  float: right;
+  text-align: right;
+  width: 50%
+}
+
+@media print {
+  .pagebreak {
+    page-break-before: always;
+  }
+
+  .print-header.page-header {
+    display: block;
+  }
+
+  @page {
+    @bottom-center {
+      content: counter(page);
+    }
+  }
+}
