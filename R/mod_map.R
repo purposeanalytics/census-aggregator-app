@@ -183,7 +183,7 @@ mod_map_server <- function(id, input_aggregate_area, input_selection_tool, selec
 }
 
 population_density_legend <- function(geography, ns, display = "none") {
-  palette <- c("#dbf0ec", "#afe9de", "#6bc7b5", "#3a9281", "#155e4f")
+  palette <- c("#dbf0ec", "#a3dcd1", "#6bc7b5", "#409382", "#155e4f")
 
   legend_text <- switch(geography,
     "csd" = censusaggregatorapp::csd_quantiles_text,

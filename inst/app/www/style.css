@@ -242,3 +242,17 @@ button:disabled, .btn.disabled {
   height: 10px;
   margin-right: 5px;
 }
+
+/* Media queries - default is desktop */
+
+@media (max-width: 1500px) {
+  /* Laptop */
+}
+
+@media (max-width: 1100px) {
+  /* Tablets */
+}
+
+@media (max-width: 550px) {
+  /* Phones */
+}

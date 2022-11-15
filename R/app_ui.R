@@ -12,11 +12,11 @@ app_ui <- function(request) {
       theme = bslib::bs_theme(version = 4),
       shiny::fluidRow(
         shiny::div(
-          class = "col-sm-9 censusagg-col",
+          class = "col-sm-8 censusagg-col",
           mod_map_ui("map")
         ),
         shiny::div(
-          class = "col-sm-3 censusagg-col",
+          class = "col-sm-4 censusagg-col",
           mod_sidebar_ui("sidebar")
         )
       )

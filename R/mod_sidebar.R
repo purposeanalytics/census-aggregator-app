@@ -50,7 +50,7 @@ mod_sidebar_ui <- function(id) {
           shiny::actionButton(
             ns("reset"),
             "Clear selection",
-            class = "btn-secondary-effect", style = "display: inline-block;"
+            class = "btn-link btn-secondary-effect", style = "display: inline-block; margin-left: 5px;"
           )
         )
       ),
@@ -96,11 +96,11 @@ mod_sidebar_ui <- function(id) {
       shiny::div(
         shiny::fluidRow(
           shiny::column(
-            width = 6,
+            width = 8,
             sidebar_header("Summary of selected area")
           ),
           shiny::column(
-            width = 6,
+            width = 4,
             shiny::div(
               style = "text-align: right;",
               shinyjs::disabled(
@@ -116,13 +116,13 @@ mod_sidebar_ui <- function(id) {
         ),
         gt::gt_output(ns("summary_statistics"))
       ),
-      shiny::div(
-        class = "pa-logo",
-        shiny::a(
-          href = "https://purposeanalytics.ca/", target = "_blank",
-          shiny::img(src = "www/pa-logo.png", alt = "Purpose Analytics logo", width = "50px")
-        )
-      )
+      # shiny::div(
+      #   class = "pa-logo",
+      #   shiny::a(
+      #     href = "https://purposeanalytics.ca/", target = "_blank",
+      #     shiny::img(src = "www/pa-logo.png", alt = "Purpose Analytics logo", width = "50px")
+      #   )
+      # )
     )
   )
 }
