@@ -40,9 +40,19 @@ mod_sidebar_ui <- function(id) {
         ),
         inline = TRUE
       ),
-      sidebar_header(
-        "Step 2: Choose an area selection method",
-        tooltip(shiny::HTML('Use the "Click to select/deselect" option to select one geographic area at a time. Each selected geographic area will be highlighted with a bold outline. This option also permits the selection of non-contiguous areas.<br><br>Use the "Draw a polygon" option to draw a continuous boundary. Each mouse click marks a new point in the boundary. To complete the polygon selection, use a double mouse click for the final point or click on the first point to close the loop. The census geographic areas that overlap with polygon will be selected and highlighted with a bold outline.'))
+      shiny::div(
+        sidebar_header(
+          "Step 2: Choose an area selection method",
+          tooltip(shiny::HTML('Use the "Click to select/deselect" option to select one geographic area at a time. Each selected geographic area will be highlighted with a bold outline. This option also permits the selection of non-contiguous areas.<br><br>Use the "Draw a polygon" option to draw a continuous boundary. Each mouse click marks a new point in the boundary. To complete the polygon selection, use a double mouse click for the final point or click on the first point to close the loop. The census geographic areas that overlap with polygon will be selected and highlighted with a bold outline.')),
+          style = "display: inline-block;"
+        ),
+        shinyjs::disabled(
+          shiny::actionButton(
+            ns("reset"),
+            "Clear selection",
+            class = "btn-secondary-effect", style = "display: inline-block;"
+          )
+        )
       ),
       shinyWidgets::prettyRadioButtons(
         ns("selection_tool"),
@@ -52,13 +62,6 @@ mod_sidebar_ui <- function(id) {
           "Draw a polygon" = "polygon"
         ),
         inline = TRUE
-      ),
-      shinyjs::disabled(
-        shiny::actionButton(
-          ns("reset"),
-          "Clear selection",
-          class = "btn-link btn-secondary-effect"
-        )
       ),
       sidebar_header("Step 3: Download data"),
       shiny::div(
@@ -91,18 +94,27 @@ mod_sidebar_ui <- function(id) {
       ),
       breathe(),
       shiny::div(
-        sidebar_header("Summary of selected area"),
-        gt::gt_output(ns("summary_statistics"))
-      ),
-      shiny::div(
-        shinyjs::disabled(
-          shiny::actionButton(
-            ns("share"),
-            "Share",
-            class = "btn-link",
-            icon = shiny::icon("share-alt")
+        shiny::fluidRow(
+          shiny::column(
+            width = 6,
+            sidebar_header("Summary of selected area")
+          ),
+          shiny::column(
+            width = 6,
+            shiny::div(
+              style = "text-align: right;",
+              shinyjs::disabled(
+                shiny::actionButton(
+                  ns("share"),
+                  "Share",
+                  class = "btn-link",
+                  icon = shiny::icon("share-alt")
+                )
+              )
+            )
           )
-        )
+        ),
+        gt::gt_output(ns("summary_statistics"))
       ),
       shiny::div(
         class = "pa-logo",
@@ -128,7 +140,7 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
       input$about,
       shiny::showModal(
         shiny::modalDialog(easyClose = TRUE)
-    )
+      )
     )
 
     # Contact ----
@@ -136,7 +148,8 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
     shiny::observeEvent(
       input$contact,
       shiny::showModal(
-        shiny::modalDialog(easyClose = TRUE))
+        shiny::modalDialog(easyClose = TRUE)
+      )
     )
 
     # Set up bookmarking ----
@@ -369,10 +382,11 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
   })
 }
 
-sidebar_header <- function(...) {
+sidebar_header <- function(..., style = NULL) {
   shiny::div(
     ...,
-    class = "header little-breath"
+    class = "header little-breath",
+    style = style
   )
 }
 

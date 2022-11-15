@@ -106,10 +106,6 @@ table {
   padding-left: 17px;
 }
 
-.gt_table {
-  max-width: 500px;
-}
-
 .censusagg-map {
   height: 100vh;
 }
@@ -190,15 +186,11 @@ button:disabled, .btn.disabled {
   border-style: none !important;
   padding: 0;
   color: var(--main-color);
+  font-size: var(--bigger-size);
 }
 
 .btn-link.btn-secondary-effect {
   color: red;
-}
-
-.btn-nav {
-  color: var(--main-color);
-  font-size: var(--bigger-size);
 }
 
 /* Tooltip positioning - top left instead of following mouse */
