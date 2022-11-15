@@ -7,7 +7,7 @@
   --bold-weight: 700;
   --main-background-color: #61A89A;
   --main-color: #447E72;
-  --secondary-color: #3D3D3D;
+  --secondary-color: #5FD3BC;
   --tertiary-color: #BFBFBF;
   --breathing-room: 10px
 }
@@ -60,22 +60,34 @@ h2 {
 .print-header {
   display: block;
   width: 100%;
-}
-
-.print-header.page-header {
-  display: none;
+  height: 100px;
 }
 
 .print-header .left-logo {
   float: left;
   text-align: left;
-  width: 50%
+  max-width: 75%;
+  height: 100%;
 }
 
 .print-header .right-logo {
   float: right;
   text-align: right;
-  width: 50%
+  max-width: 25%;
+  height: 100%;
+}
+
+.print-header img {
+  height: 100%;
+}
+
+.censusagg-link {
+  margin-bottom: 0.5rem;
+}
+
+.censusagg-link a {
+  color: var(--secondary-color);
+  font-weight: var(--bold-weight);
 }
 
 @media print {
@@ -91,5 +103,22 @@ h2 {
     @bottom-center {
       content: counter(page);
     }
+  }
+}
+
+@media (max-width: 550px) {
+  /* Phones */
+  .print-header {
+    height: 50px;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .row.mb-2 .col-sm-3, .row.mb-2 .col-sm-4 {
+    margin-bottom: 0.5rem;
+  }
+
+  h1 {
+    font-size: 1.5rem;
   }
 }

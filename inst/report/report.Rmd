@@ -6,15 +6,14 @@ output:
     theme:
       version: 4
 params:
-  geo_uid: !r c("5947807")
-  geography: "csd"
+  geo_uid: !r c("5350324.05","5350324.02","5350324.03","5350324.06")
+  geography: "ct"
   bookmark: "https://censusaggregator.ca/"
 ---
 
 ```{r setup, echo = FALSE}
 knitr::opts_chunk$set(
-  echo = FALSE, message = FALSE, warning = FALSE, cache = FALSE, error = TRUE
-)
+  echo = FALSE, message = FALSE, warning = FALSE, cache = FALSE, error = FALSE)
 ```
 
 ```{r html-utils}
@@ -75,23 +74,19 @@ pull_and_format_value <- function(data, format = "percent", column = "value") {
 }
 
 logo <- function(pagebreak = TRUE) {
-  logo_height <- "100px"
-
   shiny::div(
     class = "print-header",
     shiny::div(
       class = "left-logo",
       shiny::img(
         src = system.file("app/www/logo.png", package = "censusaggregatorapp"),
-        height = logo_height,
         alt = "CensusAggregator logo"
-      ), style = ""
+      )
     ),
     shiny::div(
       class = "right-logo",
       shiny::img(
         src = system.file("app/www/pa-logo.png", package = "censusaggregatorapp"),
-        height = logo_height,
         alt = "Purpose Analytics logo"
       )
     )
@@ -110,8 +105,8 @@ suppressed_note <- function(...) {
 ```
 
 ```{r packages}
-library(dplyr)
 library(censusaggregate)
+library(dplyr)
 library(purrr)
 library(scales)
 library(tidyr)
@@ -177,10 +172,17 @@ ggplot() +
   theme_void()
 
 # tmap::tm_shape(all_boundaries_in_bbox) + tmap::tm_polygons(alpha = 0, border.col = "grey") + tmap::tm_shape(region_boundaries) + tmap::tm_polygons(alpha = 0.75, border.col = "black", col = "white") + tmap::tm_layout(frame = FALSE)
+
+# plot(all_boundaries_in_bbox[["geometry"]], border = "grey", xlim = c(regions_bbox$xmin, regions_bbox$xmax), ylim = c(regions_bbox$ymin, regions_bbox$ymax))
+# par(new = TRUE, bg = NA)
+# plot(region_boundaries, col = scales::alpha("white", 0.4), xlim = c(regions_bbox$xmin, regions_bbox$xmax), ylim = c(regions_bbox$ymin, regions_bbox$ymax))
 ```
 
 ```{r}
-shiny::tags$a(href = params$bookmark, "Bookmark", target = "_blank")
+shiny::div(
+  class = "censusagg-link",
+  shiny::tags$a(href = params$bookmark, "Open in CensusAggregator", target = "_blank")
+)
 ```
 
 ::: {.row .mb-2}
@@ -402,13 +404,13 @@ shelter_cost_format <- ifelse(all(is.na(shelter_cost[["value"]])), "proportion",
 
 # Remove 'count' field if still there, fix widths
 shelter_cost <- shelter_cost %>%
-    inline_barchart(shelter_cost_format)
+  inline_barchart(shelter_cost_format)
 
 if ("count" %in% names(shelter_cost[["_data"]])) {
   shelter_cost <- shelter_cost %>%
     gt::cols_hide(count) %>%
-    gt::cols_width(label ~ 250, value_fmt ~ 
-      75, hist ~ 100)
+    gt::cols_width(label ~ 250, value_fmt ~
+    75, hist ~ 100)
 }
 
 header_and_barchart(
