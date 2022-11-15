@@ -64,7 +64,7 @@ p, h1, h2, h3, h4, h5, h6 {
   --bigger-size: 16px;
   --regular-weight: 400;
   --bold-weight: 700;
-  --main-color: #0745a8;
+  --main-color: #5FD3BC;
   --secondary-color: #3D3D3D;
   --tertiary-color: #BFBFBF;
   --breathing-room: 25px;
@@ -80,6 +80,10 @@ body {
 
 .shiny-options-group, .btn-default {
   font-size: var(--base-size);
+}
+
+.header {
+  font-size: var(--bigger-size);
 }
 
 /* General */
@@ -156,10 +160,6 @@ table {
   color: var(--secondary-color);
 }
 
-.header {
-  font-size: var(--bigger-size);
-}
-
 .btn-default {
   margin-bottom: var(--little-breath);
 }
@@ -194,6 +194,11 @@ button:disabled, .btn.disabled {
 
 .btn-link.btn-secondary-effect {
   color: red;
+}
+
+.btn-nav {
+  color: var(--main-color);
+  font-size: var(--bigger-size);
 }
 
 /* Tooltip positioning - top left instead of following mouse */

@@ -13,7 +13,18 @@ mod_sidebar_ui <- function(id) {
     class = "censusagg-sidebar",
     shinybusy::add_busy_spinner("circle", color = "#447E72", height = "30px", width = "30px"),
     shiny::div(
-      shiny::img(src = "www/logo.png", alt = "CensusAggregator logo", style = "max-width: 50%; min-width: 150"),
+      shiny::fluidRow(
+        shiny::column(
+          width = 6,
+          shiny::img(src = "www/logo.png", alt = "CensusAggregator logo", style = "width: 100%; min-width: 150px;")
+        ),
+        shiny::column(
+          width = 6,
+          style = "text-align: right;",
+          shiny::actionButton(ns("about"), "About", class = "btn-link btn-nav"),
+          shiny::actionButton(ns("contact"), "Contact", class = "btn-link btn-nav", style = "margin-left: 20px;")
+        )
+      ),
       breathe(),
       shiny::p("CensusAggregator makes it easier to retrieve and aggregate common census variables for regions that cover multiple census geographic areas. Follow the steps below to create a custom area on the map and download a summary report, data file, and boundary file for that area. CensusAggregator uses data from the 2021 Canadian census."),
       sidebar_header(
@@ -111,10 +122,28 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
+    # About ----
+
+    shiny::observeEvent(
+      input$about,
+      shiny::showModal(
+        shiny::modalDialog(easyClose = TRUE)
+    )
+    )
+
+    # Contact ----
+
+    shiny::observeEvent(
+      input$contact,
+      shiny::showModal(
+        shiny::modalDialog(easyClose = TRUE))
+    )
+
     # Set up bookmarking ----
     bookmark_query <- shiny::reactive(
       bookmark_query <- construct_bookmark(input, session, exclude = c("selection_tool", "export_data", "bookmark_selections", "export_geography", "export_boundary_bttn", "reset", "share", "download_report"), selected_geographies())
     )
+
     shiny::observeEvent(input$share, {
       shiny::showModal(shiny::urlModal(bookmark_query(), "Share link"))
     })
