@@ -160,6 +160,14 @@ table {
   font-size: var(--bigger-size);
 }
 
+.btn-default {
+  margin-bottom: var(--little-breath);
+}
+
+.dropdown-menu {
+  width: 98% !important;
+  min-width: 0 !important;
+}
 /* Polygon drawing */
 
 .mapbox-gl-draw_polygon.active {
@@ -192,8 +200,8 @@ button:disabled, .btn.disabled {
 
 .mapboxgl-popup {
   transform: none !important;
-  top: 5px !important;
-  left: 5px !important;
+  top: 10px !important;
+  left: 10px !important;
 }
 
 .mapboxgl-popup-anchor-top .mapboxgl-popup-tip,
@@ -212,19 +220,22 @@ button:disabled, .btn.disabled {
 
 .map-overlay {
   position: absolute;
-  top: 0;
-  right: 0;
+  top: 10px;
+  right: 30px;
   background: #fff;
   margin-right: 20px;
   overflow: auto;
   border-radius: 3px;
+  font-size: var(--base-size);
 }
 
 .legend {
   padding: 10px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   line-height: 1.5rem;
   margin-bottom: 30px;
+  -moz-box-shadow: 0 0 2px rgba(0,0,0,.1);
+  -webkit-box-shadow: 0 0 2px rgba(0,0,0,.1);
+  box-shadow: 0 0 0 2px rgba(0,0,0,.1);
 }
 
 .legend-key {

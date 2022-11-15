@@ -72,17 +72,18 @@ mod_map_server <- function(id, input_aggregate_area, input_selection_tool, selec
       },
       priority = 100,
       {
+
         # Only run these once the map has been rendered for the first time
         shiny::req(map_rendered())
         shiny::req(input_aggregate_area())
 
-        # Toggle legend visibility
+        # Change which legend is shown
         if (input_aggregate_area() == "csd") {
           shinyjs::show("csd-legend")
           shinyjs::hide("ct-legend")
         } else if (input_aggregate_area() == "ct") {
-          shinyjs::show("ct-legend")
           shinyjs::hide("csd-legend")
+          shinyjs::show("ct-legend")
         }
 
         filter_list <- append(
@@ -190,7 +191,7 @@ population_density_legend <- function(geography, ns, display = "none") {
   )
 
   shiny::div(
-    id = glue::glue(ns("{geography}-legend")),
+    id = ns(glue::glue("{geography}-legend")),
     class = "legend map-overlay",
     style = glue::glue("display: {display};"),
     shiny::tags$b("Population density"),

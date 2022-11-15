@@ -116,7 +116,7 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
       bookmark_query <- construct_bookmark(input, session, exclude = c("selection_tool", "export_data", "bookmark_selections", "export_geography", "export_boundary_bttn", "reset", "share", "download_report"), selected_geographies())
     )
     shiny::observeEvent(input$share, {
-      shiny:::showBookmarkUrlModal(bookmark_query())
+      shiny::showModal(shiny::urlModal(bookmark_query(), "Share link"))
     })
 
     # Observe any bookmarking to update inputs with ----
@@ -187,15 +187,6 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
       priority = 300, # Set lower priority so aggregate_area input is set to whatever is in bookmark first
       {
         input_aggregate_area(input$aggregate_area)
-
-        # Change which legend is shown
-        if (input_aggregate_area() == "csd") {
-          shinyjs::show("csd-population-density")
-          shinyjs::hide("ct-population-density")
-        } else {
-          shinyjs::hide("csd-population-density")
-          shinyjs::show("ct-population-density")
-        }
       }
     )
 
