@@ -198,10 +198,6 @@ button:disabled, .btn.disabled {
   font-size: var(--bigger-size);
 }
 
-.btn-link.btn-secondary-effect {
-  color: red;
-}
-
 /* Tooltip positioning - top left instead of following mouse */
 
 .mapboxgl-popup {

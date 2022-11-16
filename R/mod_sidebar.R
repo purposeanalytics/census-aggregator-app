@@ -47,14 +47,6 @@ mod_sidebar_ui <- function(id) {
           tooltip(shiny::HTML('Use the "Click to select/deselect" option to select one geographic area at a time. Each selected geographic area will be highlighted with a bold outline. This option also permits the selection of non-contiguous areas.<br><br>Use the "Draw a polygon" option to draw a continuous boundary. Each mouse click marks a new point in the boundary. To complete the polygon selection, use a double mouse click for the final point or click on the first point to close the loop. The census geographic areas that overlap with polygon will be selected and highlighted with a bold outline.')),
           style = "display: inline-block;"
         ),
-        shinyjs::disabled(
-          shiny::actionButton(
-            ns("reset"),
-            "Clear selection",
-            class = "btn-link btn-secondary-effect", style = "display: inline-block; margin-left: 5px;"
-          )
-        )
-      ),
       shinyWidgets::prettyRadioButtons(
         ns("selection_tool"),
         NULL,
@@ -63,6 +55,14 @@ mod_sidebar_ui <- function(id) {
           "Draw a polygon" = "polygon"
         ),
         inline = TRUE
+      ),
+      shinyjs::disabled(
+        shiny::actionButton(
+          ns("reset"),
+          "Clear selection",
+          class = "btn-link", style = "margin-top: -25px; margin-bottom: var(--breathing-room);"
+        )
+      )
       ),
       sidebar_header("Step 3: Download data"),
       shiny::div(
