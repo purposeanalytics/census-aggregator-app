@@ -6,7 +6,7 @@ output:
     theme:
       version: 4
 params:
-  geo_uid: !r c("5350324.05","5350324.02","5350324.03","5350324.06")
+  geo_uid: !r c("5750001.00")
   geography: "ct"
   bookmark: "https://censusaggregator.ca/"
 ---
@@ -515,7 +515,7 @@ header_and_barchart(
 
 <hr>
 
-<p>Data from CensusAggregator is adapted from Statistics Canada's 2021 Census of Population and may be freely used, reproduced, published, and distributed under the <a href = "https://www.statcan.gc.ca/eng/reference/licence" target = "_blank">Statistics Canada Open Data Licence</a>. Statistics Canada must be acknowledged as the source when using the data; acknowledgment of CensusAggregator is optional. The geographic boundaries have undergone some processing and may differ from the boundary files originally released by Statistics Canada.</p>
+<p>Data from CensusAggregator is adapted from Statistics Canada's 2021 Census of Population and may be freely used, reproduced, published, and distributed under the <a href = "https://www.statcan.gc.ca/eng/reference/licence" target = "_blank">Statistics Canada Open Data Licence</a>. Statistics Canada must be acknowledged as the source when using the data; acknowledgment of CensusAggregator is optional. The geographic boundaries have undergone some processing and may differ from the boundary files originally released by Statistics Canada. Statistics Canada randomly rounds to the nearest 0 or 5 - this can impact the precision of percentages shown in CensusAggregator.</p>
 
 <div class = "pagebreak"></div>
 

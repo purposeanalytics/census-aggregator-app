@@ -417,7 +417,7 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
 
         sfarrow::read_sf_dataset(query) %>%
           sf::st_union() %>%
-          sf::st_write(file)
+          sf::st_write(file, layer = "CensusAggregator Boundary")
       }
     )
   })
