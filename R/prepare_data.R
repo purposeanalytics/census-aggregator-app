@@ -125,21 +125,21 @@ prepare_data <- function(geography, regions) {
       additional_filter_and_combine(c("French only", "English and French"), "Knowledge of French"),
     # English spoken at home
     data_breakdown %>%
-      filter_breakdown("language_at_home", "Official languages primarily spoken at home") %>%
+      filter_breakdown("language_at_home", "Official languages most often spoken at home") %>%
       additional_filter_and_combine(
         c(
           "English", "English and French", "English and non-official language(s)", "English, French and non-official language(s)"
         ),
-        "English spoken at home"
+        "English"
       ),
     # French spoken at home
     data_breakdown %>%
-      filter_breakdown("language_at_home", "Official languages primarily spoken at home") %>%
+      filter_breakdown("language_at_home", "Official languages most often spoken at home") %>%
       additional_filter_and_combine(
         c(
           "French", "English and French", "French and non-official language(s)", "English, French and non-official language(s)"
         ),
-        "French spoken at home"
+        "French"
       ),
     # Non-official language spoken at home
     data_breakdown %>%
@@ -156,7 +156,7 @@ prepare_data <- function(geography, regions) {
       head(10) %>%
       censusaggregate::derive_census_vector_order(by_value = TRUE) %>%
       dplyr::select(.data$label, .data$value, .data$value_proportion) %>%
-      dplyr::mutate(parent_label = "Top 10 non-official languages primarily spoken at home"),
+      dplyr::mutate(parent_label = "Top non-official languages spoken most often at home"),
     # (Estimated) median household income
     {
       if (length(regions) == 1) {

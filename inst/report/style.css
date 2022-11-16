@@ -126,8 +126,16 @@ h2 {
     margin-bottom: 1rem;
   }
 
-  .row.mb-2 .col-sm-3, .row.mb-2 .col-sm-4 {
+  .row.mb-2.boxes {
+    margin-left: -5px;
+    margin-right: -5px;
+  }
+
+  .row.mb-2.boxes .col-sm-3, .row.mb-2.boxes .col-sm-4 {
     margin-bottom: 0.5rem;
+    width: 50%;
+    padding-left: 5px;
+    padding-right: 5px;
   }
 
   h1 {

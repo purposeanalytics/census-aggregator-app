@@ -186,7 +186,7 @@ shiny::div(
 )
 ```
 
-::: {.row .mb-2}
+::: {.row .mb-2 .boxes}
 
 ```{r snapshot}
 population <- data[["Population, 2021"]] %>%
@@ -275,7 +275,7 @@ header_and_barchart(
 section_heading("Language")
 ```
 
-::: {.row .mb-2}
+::: {.row .mb-2 .boxes}
 
 ```{r knowledge_of_english}
 knowledge_of_english <- data[["Knowledge of official languages"]] %>%
@@ -301,22 +301,22 @@ shiny::column(
 ```
 
 ```{r english-at-home}
-english_at_home <- data[["Official languages primarily spoken at home"]] %>%
-  filter(label == "English spoken at home") %>%
+english_at_home <- data[["Official languages most often spoken at home"]] %>%
+  filter(label == "English") %>%
   pull_and_format_value(column = "value_proportion")
 shiny::column(
   width = 3,
-  snapshot_card("English spoken at home", english_at_home)
+  snapshot_card("English spoken most often at home", english_at_home)
 )
 ```
 
 ```{r french-at-home}
-french_at_home <- data[["Official languages primarily spoken at home"]] %>%
-  filter(label == "French spoken at home") %>%
+french_at_home <- data[["Official languages most often spoken at home"]] %>%
+  filter(label == "French") %>%
   pull_and_format_value(column = "value_proportion")
 shiny::column(
   width = 3,
-  snapshot_card("French spoken at home", french_at_home)
+  snapshot_card("French spoken most often at home", french_at_home)
 )
 ```
 
@@ -329,17 +329,17 @@ suppressed_note(knowledge_of_english, knowledge_of_french, english_at_home, fren
 ::: {.row}
 
 ```{r language_at_home}
-top_languages <- data[["Top 10 non-official languages primarily spoken at home"]]
+top_languages <- data[["Top non-official languages spoken most often at home"]]
 if (is.null(top_languages)) {
-  top_languages <- "No non-official languages primarily spoken at home."
+  top_languages <- "No data on non-official languages spoken most often at home."
 } else {
-  top_languages <- data[["Top 10 non-official languages primarily spoken at home"]] %>%
+  top_languages <- data[["Top non-official languages spoken most often at home"]] %>%
     mutate(label = forcats::fct_inorder(label)) %>%
     inline_barchart()
 }
 
 header_and_barchart(
-  subsection_heading("Top non-official languages spoken at home"),
+  subsection_heading("Top non-official languages spoken most often at home"),
   top_languages
 )
 ```
@@ -350,7 +350,7 @@ header_and_barchart(
 section_heading("Income and housing")
 ```
 
-::: {.row .mb-2}
+::: {.row .mb-2 .boxes}
 
 ```{r median_income}
 median_income_label <- ifelse(length(regions) == 1, "Median household income", "Estimated median household income")
@@ -432,7 +432,7 @@ header_and_barchart(
 section_heading("Diversity and immigration")
 ```
 
-::: {.row .mb-2}
+::: {.row .mb-2 .boxes}
 
 ```{r visible-minority-summary, eval = TRUE}
 visible_minority_summary <- data[["Visible minority population"]] %>%
