@@ -194,7 +194,7 @@ population_density_legend <- function(geography, ns, display = "none") {
     id = ns(glue::glue("{geography}-legend")),
     class = "legend map-overlay",
     style = glue::glue("display: {display};"),
-    shiny::tags$b("Population density"),
+    shiny::tags$b(shiny::HTML("Population density (people/km<sup>2</sup>)")),
     purrr::map2(
       rev(palette), rev(legend_text),
       function(color, text) {
