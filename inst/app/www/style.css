@@ -123,7 +123,7 @@ table {
   height: 100vh;
   padding: 25px;
   position: relative;
-  overflow-y: scroll;
+  overflow-y: auto;
 }
 
 .pa-logo { /* TODO */
