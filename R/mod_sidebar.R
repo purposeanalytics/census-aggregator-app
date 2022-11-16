@@ -117,13 +117,13 @@ mod_sidebar_ui <- function(id) {
         ),
         gt::gt_output(ns("summary_statistics"))
       ),
-      # shiny::div(
-      #   class = "pa-logo",
-      #   shiny::a(
-      #     href = "https://purposeanalytics.ca/", target = "_blank",
-      #     shiny::img(src = "www/pa-logo.png", alt = "Purpose Analytics logo", width = "50px")
-      #   )
-      # )
+      shiny::div(
+        class = "pa-logo",
+        shiny::a(
+          href = "https://purposeanalytics.ca/", target = "_blank",
+          shiny::img(src = "www/pa-logo.png", alt = "Purpose Analytics logo", width = "50px")
+        )
+      )
     )
   )
 }
