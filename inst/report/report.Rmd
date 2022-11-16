@@ -13,7 +13,8 @@ params:
 
 ```{r setup, echo = FALSE}
 knitr::opts_chunk$set(
-  echo = FALSE, message = FALSE, warning = FALSE, cache = FALSE, error = FALSE)
+  echo = FALSE, message = FALSE, warning = FALSE, cache = FALSE, error = FALSE
+)
 ```
 
 ```{r html-utils}
@@ -512,13 +513,17 @@ header_and_barchart(
 
 :::
 
+<hr>
+
+<p>Data from CensusAggregator is adapted from Statistics Canada's 2021 Census of Population and may be freely used, reproduced, published, and distributed under the <a href = "https://www.statcan.gc.ca/eng/reference/licence" target = "_blank">Statistics Canada Open Data Licence</a>. Statistics Canada must be acknowledged as the source when using the data; acknowledgment of CensusAggregator is optional. The geographic boundaries have undergone some processing and may differ from the boundary files originally released by Statistics Canada.</p>
+
 <div class = "pagebreak"></div>
 
 ```{r}
 section_heading("Definitions")
 ```
 
-::: {.row}
+::: {.row .definitions-table}
 
 ```{r variable-definitions}
 # Split into two columns manually, after "Language spoken most often at home" will make it fit on 1 page
@@ -537,8 +542,7 @@ definitions_table <- function(data) {
       column_labels.hidden = TRUE,
       table_body.border.bottom.color = "transparent",
       table_body.border.top.color = "transparent",
-      table.font.names = "Lato",
-      table.font.size = 13
+      table.font.names = "Lato"
     )
 }
 
@@ -548,7 +552,6 @@ shiny::column(
     filter(row_number() <= cutoff) %>%
     definitions_table()
 )
-
 shiny::column(
   width = 6,
   censusaggregatorapp::variable_definitions %>%
