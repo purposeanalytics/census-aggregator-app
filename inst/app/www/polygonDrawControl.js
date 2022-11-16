@@ -3,8 +3,7 @@ function polygonDrawControl(map) {
   var draw = new MapboxDraw({
     displayControlsDefault: false,
     controls: {
-      polygon: true,
-      trash: true
+      polygon: true
     },
     defaultMode: 'draw_polygon'
   });
