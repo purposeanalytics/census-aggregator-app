@@ -196,7 +196,7 @@ population_density_legend <- function(geography, ns, display = "none") {
     style = glue::glue("display: {display};"),
     shiny::tags$b("Population density"),
     purrr::map2(
-      palette, legend_text,
+      rev(palette), rev(legend_text),
       function(color, text) {
         shiny::div(
           shiny::span(
