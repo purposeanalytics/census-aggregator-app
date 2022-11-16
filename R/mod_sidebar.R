@@ -140,7 +140,7 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
     shiny::observeEvent(
       input$about,
       shiny::showModal(
-        shiny::modalDialog(easyClose = TRUE)
+        shiny::modalDialog(shiny::includeHTML(app_sys("app/www/about.html")), size = "l", easyClose = TRUE)
       )
     )
 
@@ -149,7 +149,10 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
     shiny::observeEvent(
       input$contact,
       shiny::showModal(
-        shiny::modalDialog(easyClose = TRUE)
+        shiny::modalDialog(
+          shiny::tags$iframe(src = "https://purposeanalytics.ca/contact-form", style = "width: 100%; min-height: 800px", frameBorder="0"),
+          size = "l", easyClose = TRUE
+        )
       )
     )
 

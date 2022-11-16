@@ -67,7 +67,7 @@ p, h1, h2, h3, h4, h5, h6 {
   --bold-weight: 700;
   --main-color: #5FD3BC;
   --secondary-color: #3D3D3D;
-  --tertiary-color: #BFBFBF;
+  --tertiary-color: #447E72;
   --breathing-room: 25px;
   --little-breath: 5px;
 }
@@ -85,6 +85,14 @@ body {
 
 .header {
   font-size: var(--bigger-size);
+}
+
+a {
+  color: var(--main-color);
+}
+
+a:hover {
+  color: var(--tertiary-color);
 }
 
 /* General */
