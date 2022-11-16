@@ -389,8 +389,8 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
     })
 
     # Export  ----
-    mod_download_report_server("pdf", input_aggregate_area(), selected_geographies(), bookmark_query())
-    mod_download_report_server("html", input_aggregate_area(), selected_geographies(), bookmark_query())
+    mod_download_report_server("pdf", input_aggregate_area, selected_geographies, bookmark_query)
+    mod_download_report_server("html", input_aggregate_area, selected_geographies, bookmark_query)
 
     output$download_data <- shiny::downloadHandler(
       filename = function() {

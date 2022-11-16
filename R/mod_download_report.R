@@ -45,9 +45,9 @@ mod_download_report_server <- function(id, aggregate_area, selected_geographies,
 
         # Set up parameters to pass to Rmd document
         params <- list(
-          geo_uid = selected_geographies$geo_uid,
-          geography = aggregate_area,
-          bookmark = bookmark
+          geo_uid = selected_geographies()$geo_uid,
+          geography = aggregate_area(),
+          bookmark = bookmark()
         )
 
         # Knit the document, passing in the `params` list, and eval it in a
