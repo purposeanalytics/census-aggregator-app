@@ -121,7 +121,7 @@ mod_sidebar_ui <- function(id) {
         class = "pa-logo",
         shiny::a(
           href = "https://purposeanalytics.ca/", target = "_blank",
-          shiny::img(src = "www/pa-logo.png", alt = "Purpose Analytics logo", width = "50px")
+          shiny::img(src = "www/pa-logo.png", alt = "Purpose Analytics logo", height = "100%")
         )
       )
     )

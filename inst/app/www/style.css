@@ -120,16 +120,18 @@ table {
 }
 
 .censusagg-sidebar {
-  height: 100vh;
+  height: calc(100vh - 70px);
   padding: 25px;
   position: relative;
   overflow-y: auto;
+  margin-bottom: 70px; /* height + 2*bottom */
 }
 
 .pa-logo { /* TODO */
-  position: absolute;
-  bottom: var(--breathing-room);
+  position: fixed;
+  bottom: 15px;
   right: var(--breathing-room);
+  height: 50px;
 }
 
 /* Inputs */
@@ -260,8 +262,18 @@ button:disabled, .btn.disabled {
 
 @media (max-width: 550px) {
   /* Phones */
-  .mapboxer, .censusagg-map, .censusagg-sidebar {
+  .mapboxer, .censusagg-map {
     height: 50vh !important;
+  }
+
+  .censusagg-sidebar {
+    height: calc(50vh - 50px);
+    margin-bottom: 50px;
+  }
+
+  .pa-logo {
+    height: 30px;
+    bottom: 10px;
   }
 
   .sidebar-header .col-sm-6 {
