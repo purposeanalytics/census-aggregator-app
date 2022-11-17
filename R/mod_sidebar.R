@@ -11,7 +11,7 @@ mod_sidebar_ui <- function(id) {
   ns <- NS(id)
   shiny::div(
     class = "censusagg-sidebar",
-    shinybusy::add_busy_spinner("circle", color = "#447E72", height = "30px", width = "30px"),
+    shinybusy::add_busy_spinner("circle", color = "#447E72", height = "40px", width = "40px", margins = c(60, 30)),
     shiny::div(
       class = "sidebar-header",
       shiny::fluidRow(
@@ -30,7 +30,7 @@ mod_sidebar_ui <- function(id) {
       shiny::p("CensusAggregator makes it easier to retrieve and aggregate common census variables for regions that cover multiple census geographic areas. Follow the steps below to create a custom area on the map and download a summary report, data file, and boundary file for that area. CensusAggregator uses data from the 2021 Canadian census."),
       sidebar_header(
         "Step 1: Choose a geographic unit",
-        tooltip("Census subdivision (CSD) is the general term for municipalities (as determined by provincial/territorial legislation) or areas treated as municipal equivalents for statistical purposes (e.g., Indian reserves, Indian settlements and unorganized territories).<br><br>Census tracts (CTs) are small, relatively stable geographic areas that usually have a population of fewer than 7,500 persons, based on data from the previous Census of Population Program. They are located in census metropolitan areas (CMAs) and in census agglomerations (CAs) that had a core population of 50,000 or more in the previous census.")
+        tooltip("Census tracts (CTs) are small, relatively stable geographic areas that usually have a population of fewer than 7,500 persons, based on data from the previous Census of Population Program. They are located in census metropolitan areas (CMAs) and in census agglomerations (CAs) that had a core population of 50,000 or more in the previous census.<br><br>Census subdivision (CSD) is the general term for municipalities (as determined by provincial/territorial legislation) or areas treated as municipal equivalents for statistical purposes (e.g., Indian reserves, Indian settlements and unorganized territories).")
       ),
       shinyWidgets::prettyRadioButtons(
         ns("aggregate_area"),
@@ -45,7 +45,7 @@ mod_sidebar_ui <- function(id) {
         sidebar_header(
           "Step 2: Choose an area selection method",
           tooltip(shiny::HTML('Use the "Click to select/deselect" option to select one geographic area at a time. Each selected geographic area will be highlighted with a bold outline. This option also permits the selection of non-contiguous areas.<br><br>Use the "Draw a polygon" option to draw a continuous boundary. Each mouse click marks a new point in the boundary. To complete the polygon selection, use a double mouse click for the final point or click on the first point to close the loop. The census geographic areas that overlap with polygon will be selected and highlighted with a bold outline.')),
-          style = "display: inline-block;"
+          style = ""
         ),
       shinyWidgets::prettyRadioButtons(
         ns("selection_tool"),
@@ -60,7 +60,7 @@ mod_sidebar_ui <- function(id) {
         shiny::actionButton(
           ns("reset"),
           "Clear selection",
-          class = "btn-link", style = "margin-top: -25px; margin-bottom: var(--breathing-room);"
+          class = "btn-link", style = "margin-bottom: var(--breathing-room); font-size: var(--base-size);"
         )
       )
       ),
@@ -72,14 +72,14 @@ mod_sidebar_ui <- function(id) {
             circle = FALSE,
             inline = TRUE,
             label = "Download report",
-            mod_download_report_ui(ns("pdf"), "(.pdf)"),
-            mod_download_report_ui(ns("html"), "(.html)")
+            mod_download_report_ui(ns("pdf"), "(pdf)"),
+            mod_download_report_ui(ns("html"), "(html)")
           )
         ),
         shinyjs::disabled(
           shiny::downloadButton(
             ns("download_data"),
-            "Download data (.csv)",
+            "Download data (csv)",
             width = "100%",
             icon = NULL
           )
@@ -87,7 +87,7 @@ mod_sidebar_ui <- function(id) {
         shinyjs::disabled(
           shiny::downloadButton(
             ns("download_boundary"),
-            "Download boundary (.geojson)",
+            "Download boundary (geojson)",
             width = "100%",
             icon = NULL
           )
@@ -152,12 +152,7 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
                 style = "float: right;",
                 shiny::modalButton("Close")
               ),
-              shiny::h1("About", style = "float: left;")
-            )
-          ),
-          shiny::fluidRow(
-            shiny::column(
-              width = 12,
+              shiny::h3("About CensusAggregator"),
               shiny::hr(),
               shiny::includeHTML(app_sys("app/www/about.html"))
             )
@@ -179,7 +174,9 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
             style = "float: right;",
             shiny::modalButton("Close")
           ),
-          shiny::tags$iframe(src = "https://purposeanalytics.ca/contact-form", style = "width: 100%; min-height: 800px", frameBorder = "0")
+          shiny::h3("Contact Us"),
+          shiny::hr(),
+          shiny::includeHTML(app_sys("app/www/contact.html"))
         )
       )
     )

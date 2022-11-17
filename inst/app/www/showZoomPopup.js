@@ -1,7 +1,7 @@
 function showZoomPopup(map) {
   const constZoomPopup = new mapboxgl.Popup({ closeOnClick: false, closeButton: false, maxWidth: 'none' })
     .setLngLat([-96, 37.8]) // Doesn't matter where this is since with CSS it is in top left corner
-    .setHTML('Please zoom in to see geographies.')
+    .setHTML('<i class="fa fa-exclamation-circle" role="presentation" aria-label="share-alt icon"></i> Please zoom in to see census geographic areas.')
     .addTo(map)
 
   constZoomPopup.addClassName('zoom-popup')

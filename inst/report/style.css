@@ -7,8 +7,8 @@
   --smaller-size: 13px;
   --regular-weight: 400;
   --bold-weight: 700;
-  --main-background-color: #61A89A;
-  --main-color: #447E72;
+  --main-background-color: #5FD3BC;
+  --main-color: #349b87;
   --secondary-color: #5FD3BC;
   --tertiary-color: #BFBFBF;
   --breathing-room: 10px
@@ -31,12 +31,13 @@ body {
 .subsection-heading {
   font-weight: var(--bold-weight);
   background-color: white;
-  color: var(--main-color);
+  color: var(--main-background-color);
   padding-top: 0.5rem;
   padding-bottom: 0;
 }
 
 .box {
+  min-height: 106px;
   height: 100%;
   background-color: var(--main-background-color);
   color: white;
@@ -52,11 +53,15 @@ body {
 }
 
 h1 {
-  font-size: 2rem;
+  font-size: 1.5rem;
 }
 
 h2 {
   font-size: 1.25rem;
+}
+
+a {
+  color: var(--secondary-color);
 }
 
 .gt_table {
@@ -67,7 +72,7 @@ h2 {
   display: block;
   width: 100%;
   height: 75px;
-  margin-top: 1rem;
+  margin: 1rem 0;
 }
 
 .print-header .left-logo {
@@ -93,7 +98,6 @@ h2 {
 }
 
 .censusagg-link a {
-  color: var(--secondary-color);
   font-size: var(--bigger-size);
 }
 

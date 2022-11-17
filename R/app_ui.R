@@ -40,11 +40,22 @@ golem_add_external_resources <- function() {
     golem::favicon(),
     golem::bundle_resources(
       path = app_sys("app/www"),
-      app_title = "Census Aggregator"
+      app_title = "CensusAggregator"
     ),
     shinyjs::useShinyjs(),
     bsplus::use_bs_popover(),
-    bsplus::use_bs_tooltip()
+    bsplus::use_bs_tooltip(),
+    shiny::tags$head(HTML("
+      <!-- Google tag (gtag.js) -->
+      <script async src='https://www.googletagmanager.com/gtag/js?id=G-JFNPH9EW2R'></script>
+      <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-JFNPH9EW2R');
+      </script>
+    "))
     # Add here other external resources
     # for example, you can add shinyalert::useShinyalert()
   )

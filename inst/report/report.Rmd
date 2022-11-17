@@ -87,7 +87,7 @@ logo <- function(pagebreak = TRUE) {
     shiny::div(
       class = "right-logo",
       shiny::img(
-        src = system.file("app/www/pa-logo.png", package = "censusaggregatorapp"),
+        src = system.file("app/www/pa-full-logo.png", package = "censusaggregatorapp"),
         alt = "Purpose Analytics logo"
       )
     )
@@ -136,7 +136,7 @@ data <- prepare_data(geography, regions) %>%
 logo(FALSE)
 ```
 
-```{r map, fig.height = 3.25, dpi = 150, fig.alt = "A map showing the outline of the selected geographies."}
+```{r map, fig.height = 3.25, dpi = 150, fig.alt = "Map showing the outline of the selected census geographic areas."}
 boundaries_dataset <- glue::glue("extdata/{geography}")
 
 boundaries_data <- open_dataset(system.file(boundaries_dataset, package = "censusaggregatorapp"))
@@ -153,9 +153,9 @@ region_boundaries <- region_boundaries %>%
 regions_bbox <- region_boundaries %>%
   st_bbox()
 
-# Add 10% buffer to bbox, based on which of height/width is smaller
+# Add 15% buffer to bbox, based on which of height/width is smaller
 smaller_size <- min(regions_bbox$xmax - regions_bbox$xmin, regions_bbox$ymax - regions_bbox$ymin)
-bbox_buffer <- smaller_size * 0.05
+bbox_buffer <- smaller_size * 0.15
 
 regions_bbox[["xmin"]] <- regions_bbox$xmin - bbox_buffer
 regions_bbox[["ymin"]] <- regions_bbox$ymin - bbox_buffer
@@ -167,9 +167,9 @@ all_boundaries_in_bbox <- boundaries_data %>%
   st_crop(regions_bbox)
 
 ggplot() +
-  geom_sf(data = all_boundaries_in_bbox, colour = "grey", fill = NA, size = 0.3) +
-  geom_sf(data = region_boundaries, colour = "black", fill = "white", alpha = 0.75, size = 0.5) +
-  geom_rect(aes(xmin = regions_bbox$xmin, xmax = regions_bbox$xmax, ymin = regions_bbox$ymin, ymax = regions_bbox$ymax), fill = NA, colour = "grey", size = 0.3) +
+  geom_sf(data = all_boundaries_in_bbox, colour = "grey", fill = NA, size = 0.4) +
+  geom_sf(data = region_boundaries, colour = "black", fill = "#5FD3BC", alpha = 0.3, size = 0.7) +
+  geom_rect(aes(xmin = regions_bbox$xmin, xmax = regions_bbox$xmax, ymin = regions_bbox$ymin, ymax = regions_bbox$ymax), fill = NA, colour = "black", size = 0.2) +
   theme_void()
 
 # tmap::tm_shape(all_boundaries_in_bbox) + tmap::tm_polygons(alpha = 0, border.col = "grey") + tmap::tm_shape(region_boundaries) + tmap::tm_polygons(alpha = 0.75, border.col = "black", col = "white") + tmap::tm_layout(frame = FALSE)
@@ -515,7 +515,12 @@ header_and_barchart(
 
 <hr>
 
-<p>Data from CensusAggregator is adapted from Statistics Canada's 2021 Census of Population and may be freely used, reproduced, published, and distributed under the <a href = "https://www.statcan.gc.ca/eng/reference/licence" target = "_blank">Statistics Canada Open Data Licence</a>. Statistics Canada must be acknowledged as the source when using the data; acknowledgment of CensusAggregator is optional. The geographic boundaries have undergone some processing and may differ from the boundary files originally released by Statistics Canada. Statistics Canada randomly rounds to the nearest 0 or 5 - this can impact the precision of percentages shown in CensusAggregator.</p>
+<p>Data from CensusAggregator is adapted from Statistics Canada's 2021 <i>Census of Population</i> and may be freely used, reproduced, published, and distributed under the <a href = "https://www.statcan.gc.ca/eng/reference/licence" target = "_blank">Statistics Canada Open Data Licence</a>. Statistics Canada must be acknowledged as the source when using the data; acknowledgment of CensusAggregator is optional. The geographic boundaries have undergone some processing and may differ from the boundary files originally released by Statistics Canada. To protect privacy, Statistics Canada randomly rounds to the nearest 0 or 5 – this can impact the precision of the percentages shown in CensusAggregator.</p>
+
+<p>CensusAggregator was developed by <a href="https://purposeanalytics.ca" target="_blank">Purpose Analytics</a> in collaboration with <a href="https://sharla.online" target="_blank">Sharla Gelfand</a> and Mountain Math, the creator of <a href="https://censusmapper.ca" target="_blank">CensusMapper</a>.</p>
+
+<br>
+<br>
 
 <div class = "pagebreak"></div>
 
