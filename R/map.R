@@ -19,13 +19,14 @@ add_census_layer <- function(map, geography) {
     add_census_line_layer(geography)
 }
 
+fill_palette <- c("#dbf0ec", "#9de2d4", "#5fd3bc", "#349b87", "#086351")
+
 add_census_fill_layer <- function(map, geography) {
   click_layer_id <- geography_to_layer_id(geography, "fill_click")
   quantiles <- switch(geography,
     csd = censusaggregatorapp::csd_population_density_quantiles,
     ct = censusaggregatorapp::ct_population_density_quantiles
   )
-  palette <- c("#dbf0ec", "#9de2d4", "#5fd3bc", "#349b87", "#086351")
 
   map %>%
     mapboxer::add_layer(
@@ -37,13 +38,13 @@ add_census_fill_layer <- function(map, geography) {
         "paint" = list(
           "fill-color" = list(
               "case",
-              list("<", c("get", "population_density"), quantiles[2]), palette[1],
-              list("<", c("get", "population_density"), quantiles[3]), palette[2],
-              list("<", c("get", "population_density"), quantiles[4]), palette[3],
-              list("<", c("get", "population_density"), quantiles[5]), palette[4],
-              list("<", c("get", "population_density"), quantiles[6]), palette[5],
+              list("<", c("get", "population_density"), quantiles[2]), fill_palette[1],
+              list("<", c("get", "population_density"), quantiles[3]), fill_palette[2],
+              list("<", c("get", "population_density"), quantiles[4]), fill_palette[3],
+              list("<", c("get", "population_density"), quantiles[5]), fill_palette[4],
+              list("<", c("get", "population_density"), quantiles[6]), fill_palette[5],
               # Default - should never come up
-              palette[1]
+              fill_palette[1]
           ),
           "fill-opacity" = 0.75
         ),
