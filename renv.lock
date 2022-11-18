@@ -289,14 +289,14 @@
       "Package": "bslib",
       "Version": "0.4.0.9000",
       "Source": "GitHub",
-      "Remotes": "rstudio/bsicons, ramnathv/htmlwidgets,\n        rstudio/shiny@resize-observer",
       "RemoteType": "github",
+      "Remotes": "rstudio/bsicons, ramnathv/htmlwidgets, rstudio/shiny@resize-observer",
       "RemoteHost": "api.github.com",
       "RemoteRepo": "bslib",
       "RemoteUsername": "rstudio",
       "RemoteRef": "dev",
       "RemoteSha": "6f0ed4d3911f99b5dff8401e93143725709e0823",
-      "Hash": "e620d6c46d0910668d072ec064d399c0",
+      "Hash": "2c9aca484f3bcbac1d5ca22f1ad59501",
       "Requirements": [
         "cachem",
         "htmltools",
@@ -396,7 +396,7 @@
       "RemoteUsername": "purposeanalytics",
       "RemoteRef": "HEAD",
       "RemoteSha": "80d9a0ad93df1d1834bbb3c1eabc3f7171f2ece5",
-      "Hash": "f82ab00415977b010b9a2e087ca95f04",
+      "Hash": "192c183590551f4b11b8acee71171980",
       "Requirements": [
         "cancensus",
         "curl",
@@ -422,14 +422,14 @@
       "Package": "censusaggregatorapp",
       "Version": "0.0.0.9000",
       "Source": "GitHub",
-      "Remotes": "purposeanalytics/census-aggregator-package",
       "RemoteType": "github",
+      "Remotes": "purposeanalytics/census-aggregator-package",
       "RemoteHost": "api.github.com",
       "RemoteRepo": "census-aggregator-app",
       "RemoteUsername": "purposeanalytics",
       "RemoteRef": "HEAD",
       "RemoteSha": "92c78eeb4c9b6638821ba8a28c40b309aad04f9e",
-      "Hash": "cb77efb021d971a24f519fe73e2d4afe",
+      "Hash": "3984cf977e38e9fa156c1e03a8de84c6",
       "Requirements": [
         "arrow",
         "bslib",
@@ -1672,14 +1672,6 @@
         "askpass"
       ]
     },
-    "packrat": {
-      "Package": "packrat",
-      "Version": "0.7.0",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "95e8c3825efcaad09411799da92c0af9",
-      "Requirements": []
-    },
     "pagedown": {
       "Package": "pagedown",
       "Version": "0.19.1",
@@ -2152,22 +2144,6 @@
       "Repository": "CRAN",
       "Hash": "249d8cd1e74a8f6a26194a91b47f21d1",
       "Requirements": []
-    },
-    "rsconnect": {
-      "Package": "rsconnect",
-      "Version": "0.8.25",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "c78e0acc405a6990475f1f9500ebe66c",
-      "Requirements": [
-        "curl",
-        "digest",
-        "jsonlite",
-        "openssl",
-        "packrat",
-        "rstudioapi",
-        "yaml"
-      ]
     },
     "rstudioapi": {
       "Package": "rstudioapi",
