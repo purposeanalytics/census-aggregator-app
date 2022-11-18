@@ -37,7 +37,7 @@ golem_add_external_resources <- function() {
   )
 
   shiny::tags$head(
-    shiny::tags$link(rel = "icon", href = "www/favicon.ico"),
+    shiny::tags$link(rel="icon", type="png", href="https://purposeanalytics.ca/user/themes/purpose-analytics/img/favicon.png"),
     golem::bundle_resources(
       path = app_sys("app/www"),
       app_title = "CensusAggregator"
