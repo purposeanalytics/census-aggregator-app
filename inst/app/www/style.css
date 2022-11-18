@@ -241,6 +241,7 @@ button:disabled, .btn.disabled {
 
 .mapboxgl-popup-content {
   padding: 10px !important;
+  min-width: 240px;
 }
 
 .mapboxgl-popup-anchor-top .mapboxgl-popup-tip,
