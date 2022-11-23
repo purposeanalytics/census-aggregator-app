@@ -1,6 +1,6 @@
 Package: censusaggregatorapp
 Title: Census Aggregator App
-Version: 0.0.0.9000
+Version: 0.1.0
 Authors@R: c(
     person("Sharla", "Gelfand", , "sharla.gelfand@gmail.com", role = c("aut", "cre")),
     person("Purpose Analytics", role = "cph")
