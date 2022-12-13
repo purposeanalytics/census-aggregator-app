@@ -348,6 +348,7 @@ header_and_barchart(
 header_and_barchart(
   subsection_heading("Educational attainment"),
   data[["Educational attainment"]] %>%
+    mutate(label = forcats::fct_inorder(label)) %>%
     inline_barchart()
 )
 ```
@@ -543,7 +544,7 @@ section_heading("Definitions")
 
 cutoff <- censusaggregatorapp::variable_definitions %>%
   mutate(id = row_number()) %>%
-  filter(str_detect(variable_definition, "Language spoken most often at home")) %>%
+  filter(str_detect(variable_definition, "Non-official language spoken at home")) %>%
   pull(id)
 
 definitions_table <- function(data) {
