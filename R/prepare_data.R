@@ -157,6 +157,8 @@ prepare_data <- function(geography, regions) {
       censusaggregate::derive_census_vector_order(by_value = TRUE) %>%
       dplyr::select(.data$label, .data$value, .data$value_proportion) %>%
       dplyr::mutate(parent_label = "Top non-official languages spoken most often at home"),
+    # Educational attainment
+    data_breakdown %>% filter_breakdown("educational_attainment", "Educational attainment"),
     # (Estimated) median household income
     {
       if (length(regions) == 1) {

@@ -272,7 +272,7 @@ header_and_barchart(
 <div class = "pagebreak"></div>
 
 ```{r section-language}
-section_heading("Language")
+section_heading("Language and education")
 ```
 
 ::: {.row .mb-2 .boxes}
@@ -341,6 +341,14 @@ if (is.null(top_languages)) {
 header_and_barchart(
   subsection_heading("Top non-official languages spoken most often at home"),
   top_languages
+)
+```
+
+```{r educational_attainment}
+header_and_barchart(
+  subsection_heading("Educational attainment"),
+  data[["Educational attainment"]] %>%
+    inline_barchart()
 )
 ```
 

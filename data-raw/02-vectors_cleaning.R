@@ -136,7 +136,8 @@ parent_vectors_recoding <- tibble::tribble(
   "Total - Visible minority for the population in private households", "Visible minority population",
   "Total - Immigrant status and period of immigration for the population in private households", "Immigrant status",
   "Total - Ethnic or cultural origin for the population in private households", "Top 10 ethnic or cultural origins",
-  "Total - Indigenous identity for the population in private households", "Indigenous identity"
+  "Total - Indigenous identity for the population in private households", "Indigenous identity",
+  "Total - Highest certificate, diploma or degree for the population aged 15 years and over in private households", "Educational attainment"
 )
 
 breakdown_vectors_recoding <- tribble(
@@ -156,7 +157,10 @@ breakdown_vectors_recoding <- tribble(
   "Two-or-more-person non-census-family households", "2+ persons non census family",
   "One-person households", "1 person",
   "2016 to 2021", "Recent immigrants (2016 to 2021)",
-  "Dwelling provided by the local government, First Nation or Indian band", "Dwelling provided by First Nation or Indian band"
+  "Dwelling provided by the local government, First Nation or Indian band", "Dwelling provided by First Nation or Indian band",
+  "High (secondary) school diploma or equivalency certificate", "High school or equivalent",
+  "Postsecondary certificate, diploma or degree", "Postsecondary",
+  "No certificate, diploma or degree", "No high school or postsecondary"
 )
 
 vectors <- vectors %>%
