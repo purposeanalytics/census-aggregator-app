@@ -68,6 +68,11 @@ a {
   font-size: var(--base-size) !important;
 }
 
+/* Hide PDF definitions table in HTML */
+.definitions-table-pdf {
+  display: none;
+}
+
 .print-header {
   display: block;
   width: 100%;
@@ -111,14 +116,25 @@ a {
     page-break-before: always;
   }
 
-  .definitions-table .gt_table {
-    font-size: var(--smaller-size) !important;
-  }
-
   @page {
     @bottom-center {
       content: counter(page);
     }
+  }
+
+  /* Hide HTML definitions table in print */
+  .definitions-table-html {
+    display: none;
+  }
+
+  /* Show PDF definitions table in print */
+  .definitions-table-pdf {
+    display: flex;
+    display: -webkit-flex
+  }
+
+  .definitions-table-pdf-heading {
+    display: block;
   }
 }
 
