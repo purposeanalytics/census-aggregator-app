@@ -80,8 +80,8 @@ prepare_data <- function(geography, regions) {
           censusaggregate::aggregate_population_density() %>%
           dplyr::select(.data$value)
       }
-    population_density %>%
-      dplyr::mutate(parent_label = "Population density", value = round(.data$value, 1))
+      population_density %>%
+        dplyr::mutate(parent_label = "Population density", value = round(.data$value, 1))
     },
     # Age (5 year buckets)
     data_breakdown %>%
@@ -158,7 +158,19 @@ prepare_data <- function(geography, regions) {
       dplyr::select(.data$label, .data$value, .data$value_proportion) %>%
       dplyr::mutate(parent_label = "Top non-official languages spoken most often at home"),
     # Educational attainment
-    data_breakdown %>% filter_breakdown("educational_attainment", "Educational attainment"),
+    data_breakdown %>%
+      filter_breakdown("educational_attainment", "Educational attainment") %>%
+      dplyr::mutate(label = forcats::fct_relevel(
+        label, "No high school or postsecondary",
+        "High school or equivalent",
+        "Apprenticeship or trades certificate or diploma",
+        "College, CEGEP or other non-university certificate or diploma",
+        "University certificate or diploma below bachelor level",
+        "Bachelor's degree or certificate/diploma above bachelor level",
+        "Graduate or professional degree"
+      )) %>%
+      dplyr::arrange(.data$label),
+
     # (Estimated) median household income
     {
       if (length(regions) == 1) {

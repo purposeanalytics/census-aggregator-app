@@ -395,8 +395,8 @@
       "RemoteRepo": "census-aggregator-package",
       "RemoteUsername": "purposeanalytics",
       "RemoteRef": "HEAD",
-      "RemoteSha": "80d9a0ad93df1d1834bbb3c1eabc3f7171f2ece5",
-      "Hash": "f82ab00415977b010b9a2e087ca95f04",
+      "RemoteSha": "87ff4355b1b41e8fa31224ed6d2da56e1ef6a2a9",
+      "Hash": "ef588dc83517b7354ce6250f948608df",
       "Requirements": [
         "cancensus",
         "curl",
@@ -420,10 +420,10 @@
     },
     "censusaggregatorapp": {
       "Package": "censusaggregatorapp",
-      "Version": "0.1.0",
+      "Version": "0.2.0",
       "Source": "unknown",
       "Remotes": "purposeanalytics/census-aggregator-package",
-      "Hash": "c10c38af6827a7937e25b1858ec29436",
+      "Hash": "cde5c1d2cefe7999b86552ef9bbf37ce",
       "Requirements": [
         "arrow",
         "bslib",

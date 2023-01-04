@@ -19,6 +19,17 @@ with_children_vectors <- vectors %>%
   select(vector) %>%
   mutate(new_vector = "Couples with children")
 
+educational_attainment_vectors <- vectors %>%
+  filter(label_short == "educational_attainment", vector != highest_parent_vector) %>%
+  mutate(new_vector = case_when(
+    label %in% c("Bachelor's degree", "University certificate or diploma above bachelor level") ~ "Bachelor's degree or certificate/diploma above bachelor level",
+    label %in% c("Degree in medicine, dentistry, veterinary medicine or optometry", "Master's degree", "Earned doctorate") ~ "Graduate or professional degree",
+    TRUE ~ label
+  )) %>%
+  select(vector, new_vector)
+
+saveRDS(educational_attainment_vectors, here::here("data-raw", "intermediary", "educational_attainment_vectors_grouped.rds"))
+
 income_vectors <- income_vectors %>%
   mutate(new_vector = case_when(
     label %in% c(
@@ -55,7 +66,8 @@ keep_vectors <- vectors %>%
 collapse_vectors <- bind_rows(
   age_cohort_vectors,
   with_children_vectors,
-  income_vectors
+  income_vectors,
+  educational_attainment_vectors
 )
 
 vectors <- vectors %>%
@@ -158,9 +170,8 @@ breakdown_vectors_recoding <- tribble(
   "One-person households", "1 person",
   "2016 to 2021", "Recent immigrants (2016 to 2021)",
   "Dwelling provided by the local government, First Nation or Indian band", "Dwelling provided by First Nation or Indian band",
-  "High (secondary) school diploma or equivalency certificate", "High school or equivalent",
-  "Postsecondary certificate, diploma or degree", "Postsecondary",
-  "No certificate, diploma or degree", "No high school or postsecondary"
+  "No certificate, diploma or degree", "No high school or postsecondary",
+  "High (secondary) school diploma or equivalency certificate", "High school or equivalent"
 )
 
 vectors <- vectors %>%

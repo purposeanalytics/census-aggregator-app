@@ -10,6 +10,7 @@ dataset <- "CA21"
 vectors_original <- readRDS(here::here("data-raw", "intermediary", "vectors.rds"))
 age_cohort_vectors <- readRDS(here::here("data-raw", "intermediary", "age_cohort_vectors.rds"))
 income_vectors <- readRDS(here::here("data-raw", "intermediary", "income_vectors_grouped.rds"))
+educational_attainment_vectors <- readRDS(here::here("data-raw", "intermediary", "educational_attainment_vectors_grouped.rds"))
 
 ethnic_cultural_origin_vectors <- vectors_original %>%
   filter(
@@ -219,7 +220,8 @@ collapse_vectors <- bind_rows(
   age_cohort_vectors %>%
     select(-label) %>%
     rename(new_vector = group),
-  income_vectors
+  income_vectors,
+  educational_attainment_vectors
 )
 
 csd_values <- csd_values %>%
