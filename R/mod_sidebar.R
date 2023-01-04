@@ -47,22 +47,22 @@ mod_sidebar_ui <- function(id) {
           tooltip(shiny::HTML('Use the "Click to select/deselect" option to select one geographic area at a time. Each selected geographic area will be highlighted with a bold outline. This option also permits the selection of non-contiguous areas.<br><br>Use the "Draw a polygon" option to draw a continuous boundary. Each mouse click marks a new point in the boundary. To complete the polygon selection, use a double mouse click for the final point or click on the first point to close the loop. The census geographic areas that overlap with polygon will be selected and highlighted with a bold outline.')),
           style = ""
         ),
-      shinyWidgets::prettyRadioButtons(
-        ns("selection_tool"),
-        NULL,
-        choices = list(
-          "Click to select/deselect" = "click",
-          "Draw a polygon" = "polygon"
+        shinyWidgets::prettyRadioButtons(
+          ns("selection_tool"),
+          NULL,
+          choices = list(
+            "Click to select/deselect" = "click",
+            "Draw a polygon" = "polygon"
+          ),
+          inline = TRUE
         ),
-        inline = TRUE
-      ),
-      shinyjs::disabled(
-        shiny::actionButton(
-          ns("reset"),
-          "Clear selection",
-          class = "btn-link", style = "margin-bottom: var(--breathing-room); font-size: var(--base-size);"
+        shinyjs::disabled(
+          shiny::actionButton(
+            ns("reset"),
+            "Clear selection",
+            class = "btn-link", style = "margin-bottom: var(--breathing-room); font-size: var(--base-size);"
+          )
         )
-      )
       ),
       sidebar_header("Step 3: Download data"),
       shiny::div(
@@ -398,7 +398,7 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
         data <- prepare_data(input_aggregate_area(), selected_geographies()[["geo_uid"]])
         names(data) <- c("Vector", "Breakdown", "Value", "Proportion")
         data[["Proportion"]] <- round(data[["Proportion"]], digits = 3)
-        write.csv(data, file, na = "", row.names = FALSE)
+        utils::write.csv(data, file, na = "", row.names = FALSE)
       }
     )
 

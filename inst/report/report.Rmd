@@ -17,94 +17,6 @@ knitr::opts_chunk$set(
 )
 ```
 
-```{r html-utils}
-section_heading <- function(title) {
-  htmltools::div(
-    htmltools::hr(),
-    htmltools::div(
-      class = "section-heading",
-      htmltools::h1(title),
-      htmltools::hr()
-    )
-  )
-}
-
-subsection_heading <- function(title, class = NULL) {
-  htmltools::div(
-    class = "subsection-heading",
-    htmltools::h2(title)
-  )
-}
-
-snapshot_card_value <- function(value) {
-  htmltools::div(
-    class = "card-value",
-    value
-  )
-}
-
-snapshot_card <- function(title, value, ..., class = NULL) {
-  htmltools::div(
-    class = paste("box", class),
-    htmltools::div(htmltools::HTML(title)),
-    snapshot_card_value(value),
-    htmltools::div(...)
-  )
-}
-
-header_and_barchart <- function(...) {
-  shiny::column(
-    width = 6,
-    ...
-  )
-}
-
-pull_and_format_value <- function(data, format = "percent", column = "value") {
-  value <- data[[column]]
-
-  if (is.na(value)) {
-    return(htmltools::HTML("&#8212;"))
-  }
-
-  switch(format,
-    percent = scales::percent(value, 0.1),
-    comma = scales::comma(value, 1),
-    comma_decimal = scales::comma(value, 0.1),
-    dollar = scales::dollar(value)
-  )
-}
-
-logo <- function(pagebreak = TRUE) {
-  shiny::div(
-    class = "print-header",
-    shiny::div(
-      class = "left-logo",
-      shiny::img(
-        src = system.file("app/www/logo.png", package = "censusaggregatorapp"),
-        alt = "CensusAggregator logo"
-      )
-    ),
-    shiny::div(
-      class = "right-logo",
-      shiny::img(
-        src = system.file("app/www/pa-full-logo.png", package = "censusaggregatorapp"),
-        alt = "Purpose Analytics logo"
-      )
-    )
-  )
-}
-
-suppressed_note <- function(...) {
-  data <- list(...)
-
-  if (any(data == "&#8212;")) {
-    shiny::div(
-      shiny::HTML("<i>Note: &#8212; indicates data for one or more of the selected areas is not available or is suppressed due to confidentiality.</i>")
-    )
-  }
-}
-```
-
 ```{r packages}
 library(censusaggregate)
 library(dplyr)
@@ -119,6 +31,96 @@ library(sfarrow)
 library(ggplot2)
 library(sf)
 library(forcats)
+library(htmltools)
+library(shiny)
+```
+
+```{r html-utils}
+section_heading <- function(title) {
+  div(
+    hr(),
+    div(
+      class = "section-heading",
+      h1(title),
+      hr()
+    )
+  )
+}
+
+subsection_heading <- function(title, class = NULL) {
+  div(
+    class = "subsection-heading",
+    h2(title)
+  )
+}
+
+snapshot_card_value <- function(value) {
+  div(
+    class = "card-value",
+    value
+  )
+}
+
+snapshot_card <- function(title, value, ..., class = NULL) {
+  div(
+    class = paste("box", class),
+    div(HTML(title)),
+    snapshot_card_value(value),
+    div(...)
+  )
+}
+
+header_and_barchart <- function(...) {
+  column(
+    width = 6,
+    ...
+  )
+}
+
+pull_and_format_value <- function(data, format = "percent", column = "value") {
+  value <- data[[column]]
+
+  if (is.na(value)) {
+    return(HTML("&#8212;"))
+  }
+
+  switch(format,
+    percent = scales::percent(value, 0.1),
+    comma = scales::comma(value, 1),
+    comma_decimal = scales::comma(value, 0.1),
+    dollar = scales::dollar(value)
+  )
+}
+
+logo <- function(pagebreak = TRUE) {
+  div(
+    class = "print-header",
+    div(
+      class = "left-logo",
+      img(
+        src = system.file("app/www/logo.png", package = "censusaggregatorapp"),
+        alt = "CensusAggregator logo"
+      )
+    ),
+    div(
+      class = "right-logo",
+      img(
+        src = system.file("app/www/pa-full-logo.png", package = "censusaggregatorapp"),
+        alt = "Purpose Analytics logo"
+      )
+    )
+  )
+}
+
+suppressed_note <- function(...) {
+  data <- list(...)
+
+  if (any(data == "&#8212;")) {
+    div(
+      HTML("<i>Note: &#8212; indicates data for one or more of the selected areas is not available or is suppressed due to confidentiality.</i>")
+    )
+  }
+}
 ```
 
 ```{r data}
@@ -180,9 +182,9 @@ ggplot() +
 ```
 
 ```{r}
-shiny::div(
+div(
   class = "censusagg-link",
-  shiny::tags$a(href = params$bookmark, "Open in CensusAggregator", target = "_blank")
+  tags$a(href = params$bookmark, "Open in CensusAggregator", target = "_blank")
 )
 ```
 
@@ -207,28 +209,28 @@ population_density <- data[["Population density"]] %>%
 ```
 
 ```{r population}
-shiny::column(
+column(
   width = 3,
   snapshot_card("Population", population)
 )
 ```
 
 ```{r households}
-shiny::column(
+column(
   width = 3,
   snapshot_card("Households", households)
 )
 ```
 
 ```{r population_change}
-shiny::column(
+column(
   width = 3,
   snapshot_card("Population change<br>(2016 to 2021)", population_change)
 )
 ```
 
 ```{r population_density}
-shiny::column(
+column(
   width = 3,
   snapshot_card("Population density<br>(people/km<sup>2</sup>)", population_density)
 )
@@ -272,7 +274,7 @@ header_and_barchart(
 <div class = "pagebreak"></div>
 
 ```{r section-language}
-section_heading("Language")
+section_heading("Language and education")
 ```
 
 ::: {.row .mb-2 .boxes}
@@ -282,7 +284,7 @@ knowledge_of_english <- data[["Knowledge of official languages"]] %>%
   filter(label == "Knowledge of English") %>%
   pull_and_format_value(column = "value_proportion")
 
-shiny::column(
+column(
   width = 3,
   snapshot_card(
     "Knowledge of English", knowledge_of_english
@@ -294,7 +296,7 @@ shiny::column(
 knowledge_of_french <- data[["Knowledge of official languages"]] %>%
   filter(label == "Knowledge of French") %>%
   pull_and_format_value(column = "value_proportion")
-shiny::column(
+column(
   width = 3,
   snapshot_card("Knowledge of French", knowledge_of_french)
 )
@@ -304,7 +306,7 @@ shiny::column(
 english_at_home <- data[["Official languages most often spoken at home"]] %>%
   filter(label == "English") %>%
   pull_and_format_value(column = "value_proportion")
-shiny::column(
+column(
   width = 3,
   snapshot_card("English spoken most often at home", english_at_home)
 )
@@ -314,7 +316,7 @@ shiny::column(
 french_at_home <- data[["Official languages most often spoken at home"]] %>%
   filter(label == "French") %>%
   pull_and_format_value(column = "value_proportion")
-shiny::column(
+column(
   width = 3,
   snapshot_card("French spoken most often at home", french_at_home)
 )
@@ -344,6 +346,15 @@ header_and_barchart(
 )
 ```
 
+```{r educational_attainment}
+header_and_barchart(
+  subsection_heading("Educational attainment"),
+  data[["Educational attainment"]] %>%
+    mutate(label = forcats::fct_inorder(label)) %>%
+    inline_barchart()
+)
+```
+
 :::
 
 ```{r section-income-housing}
@@ -358,7 +369,7 @@ median_income_label <- ifelse(length(regions) == 1, "Median household income", "
 median_income <- data[[median_income_label]] %>%
   pull_and_format_value("dollar")
 
-shiny::column(
+column(
   width = 4,
   snapshot_card(median_income_label, median_income)
 )
@@ -366,7 +377,7 @@ shiny::column(
 
 ```{r lim_at}
 lim_at <- data[["Low-income measure after tax (LIM-AT)"]] %>% pull_and_format_value(column = "value_proportion")
-shiny::column(
+column(
   width = 4,
   snapshot_card("Low income (LIM-AT)", lim_at)
 )
@@ -374,7 +385,7 @@ shiny::column(
 
 ```{r unaffordable_housing}
 unaffordable_housing <- data[["Unaffordable housing"]] %>% pull_and_format_value(column = "value_proportion")
-shiny::column(
+column(
   width = 4,
   snapshot_card("Unaffordable housing", unaffordable_housing)
 )
@@ -439,7 +450,7 @@ visible_minority_summary <- data[["Visible minority population"]] %>%
   filter(label == "Total visible minority population") %>%
   pull_and_format_value(column = "value_proportion")
 
-shiny::column(
+column(
   width = 3,
   snapshot_card("Visible minority", visible_minority_summary)
 )
@@ -454,12 +465,12 @@ immigrant_status_recent <- data[["Immigrant status"]] %>%
   filter(label == "Recent immigrants (2016 to 2021)") %>%
   pull_and_format_value(column = "value_proportion")
 
-shiny::column(
+column(
   width = 3,
   snapshot_card("Total immigrants", immigrant_status_total)
 )
 
-shiny::column(
+column(
   width = 3,
   snapshot_card("Recent immigrants<br>(2016 to 2021)", immigrant_status_recent)
 )
@@ -468,7 +479,7 @@ shiny::column(
 ```{r indigenous-identity}
 indigenous_identity <- data[["Indigenous identity"]] %>%
   pull_and_format_value(column = "value_proportion")
-shiny::column(
+column(
   width = 3,
   snapshot_card(
     "Indigenous identity", indigenous_identity
@@ -528,14 +539,14 @@ header_and_barchart(
 section_heading("Definitions")
 ```
 
-::: {.row .definitions-table}
+::: {.row .definitions-table .definitions-table-html}
 
-```{r variable-definitions}
-# Split into two columns manually, after "Language spoken most often at home" will make it fit on 1 page
+```{r variable-definitions-html}
+# Split into two columns manually, after "High school or equivalent" will make it even
 
 cutoff <- censusaggregatorapp::variable_definitions %>%
   mutate(id = row_number()) %>%
-  filter(str_detect(variable_definition, "Language spoken most often at home")) %>%
+  filter(str_detect(variable_definition, "High school or equivalent")) %>%
   pull(id)
 
 definitions_table <- function(data) {
@@ -551,13 +562,13 @@ definitions_table <- function(data) {
     )
 }
 
-shiny::column(
+column(
   width = 6,
   censusaggregatorapp::variable_definitions %>%
     filter(row_number() <= cutoff) %>%
     definitions_table()
 )
-shiny::column(
+column(
   width = 6,
   censusaggregatorapp::variable_definitions %>%
     filter(row_number() > cutoff) %>%
@@ -566,3 +577,50 @@ shiny::column(
 ```
 
 :::
+
+```{r variable-definitions-pdf}
+# Split into two columns manually, then onto another page
+
+cutoff <- censusaggregatorapp::variable_definitions %>%
+  mutate(id = row_number()) %>%
+  filter(str_detect(variable_definition, "Knowledge of French")) %>%
+  pull(id)
+
+cutoff_2 <- censusaggregatorapp::variable_definitions %>%
+  mutate(id = row_number()) %>%
+  filter(str_detect(variable_definition, "Graduate or professional degree")) %>%
+  pull(id)
+
+div(
+  class = "row definitions-table definitions-table-pdf",
+  column(
+    width = 6,
+    censusaggregatorapp::variable_definitions %>%
+      filter(row_number() <= cutoff) %>%
+      definitions_table()
+  ),
+  column(
+    width = 6,
+    censusaggregatorapp::variable_definitions %>%
+      filter(row_number() > cutoff & row_number() <= cutoff_2) %>%
+      definitions_table()
+  )
+)
+
+
+div(
+  class = "definitions-table-pdf definitions-table-pdf-heading",
+  div(class = "pagebreak"),
+  section_heading("Definitions, continued")
+)
+
+div(
+  class = "row definitions-table definitions-table-pdf",
+  column(
+    width = 6,
+    censusaggregatorapp::variable_definitions %>%
+      filter(row_number() > cutoff_2) %>%
+      definitions_table()
+  )
+)
+```

@@ -8,3 +8,4 @@ dev/
 rsconnect/
 scratch/
 temp/
+*.html
