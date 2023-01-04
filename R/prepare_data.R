@@ -153,7 +153,7 @@ prepare_data <- function(geography, regions) {
       dplyr::filter(!.data$label %in% c("English", "French")) %>%
       dplyr::filter(.data$value > 0) %>%
       dplyr::arrange(-.data$value) %>%
-      head(10) %>%
+      utils::head(10) %>%
       censusaggregate::derive_census_vector_order(by_value = TRUE) %>%
       dplyr::select(.data$label, .data$value, .data$value_proportion) %>%
       dplyr::mutate(parent_label = "Top non-official languages spoken most often at home"),
@@ -161,7 +161,7 @@ prepare_data <- function(geography, regions) {
     data_breakdown %>%
       filter_breakdown("educational_attainment", "Educational attainment") %>%
       dplyr::mutate(label = forcats::fct_relevel(
-        label, "No high school or postsecondary",
+        .data$label, "No high school or postsecondary",
         "High school or equivalent",
         "Apprenticeship or trades certificate or diploma",
         "College, CEGEP or other non-university certificate or diploma",
@@ -192,7 +192,7 @@ prepare_data <- function(geography, regions) {
     data_breakdown %>%
       filter_breakdown("income_buckets", "Total household income ($20,000 buckets)") %>%
       dplyr::mutate(label = forcats::fct_relevel(
-        label, "Under $20,000", "$20,000 to $40,000", "$40,000 to $60,000",
+        .data$label, "Under $20,000", "$20,000 to $40,000", "$40,000 to $60,000",
         "$60,000 to $80,000", "$80,000 to $100,000", "$100,000 and over"
       )) %>%
       dplyr::arrange(.data$label),
@@ -226,7 +226,7 @@ prepare_data <- function(geography, regions) {
       filter_breakdown("ethnic_cultural_origin") %>%
       dplyr::filter(.data$value > 0) %>%
       dplyr::arrange(-.data$value) %>%
-      head(10) %>%
+      utils::head(10) %>%
       censusaggregate::derive_census_vector_order(by_value = TRUE) %>%
       dplyr::select(.data$label, .data$value, .data$value_proportion) %>%
       dplyr::mutate(parent_label = "Top 10 ethnic or cultural origins")

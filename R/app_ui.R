@@ -45,7 +45,7 @@ golem_add_external_resources <- function() {
     shinyjs::useShinyjs(),
     bsplus::use_bs_popover(),
     bsplus::use_bs_tooltip(),
-    shiny::tags$head(HTML("
+    shiny::tags$head(shiny::HTML("
       <!-- Google tag (gtag.js) -->
       <script async src='https://www.googletagmanager.com/gtag/js?id=G-JFNPH9EW2R'></script>
       <script>

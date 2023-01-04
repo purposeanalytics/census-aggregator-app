@@ -398,7 +398,7 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
         data <- prepare_data(input_aggregate_area(), selected_geographies()[["geo_uid"]])
         names(data) <- c("Vector", "Breakdown", "Value", "Proportion")
         data[["Proportion"]] <- round(data[["Proportion"]], digits = 3)
-        write.csv(data, file, na = "", row.names = FALSE)
+        utils::write.csv(data, file, na = "", row.names = FALSE)
       }
     )
 
