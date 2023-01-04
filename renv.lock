@@ -388,15 +388,15 @@
     },
     "censusaggregate": {
       "Package": "censusaggregate",
-      "Version": "0.0.0.9000",
+      "Version": "0.1.1",
       "Source": "GitHub",
       "RemoteType": "github",
       "RemoteHost": "api.github.com",
       "RemoteRepo": "census-aggregator-package",
       "RemoteUsername": "purposeanalytics",
       "RemoteRef": "HEAD",
-      "RemoteSha": "87ff4355b1b41e8fa31224ed6d2da56e1ef6a2a9",
-      "Hash": "ef588dc83517b7354ce6250f948608df",
+      "RemoteSha": "9d6cbd41e9811e5c084c948618b5b19d58898e0d",
+      "Hash": "eb95242d975850eabb58af5fbd6a8826",
       "Requirements": [
         "cancensus",
         "curl",
