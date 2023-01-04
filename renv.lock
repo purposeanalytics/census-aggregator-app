@@ -421,9 +421,15 @@
     "censusaggregatorapp": {
       "Package": "censusaggregatorapp",
       "Version": "0.2.0",
-      "Source": "unknown",
+      "Source": "GitHub",
       "Remotes": "purposeanalytics/census-aggregator-package",
-      "Hash": "cde5c1d2cefe7999b86552ef9bbf37ce",
+      "RemoteType": "github",
+      "RemoteHost": "api.github.com",
+      "RemoteRepo": "census-aggregator-app",
+      "RemoteUsername": "purposeanalytics",
+      "RemoteRef": "HEAD",
+      "RemoteSha": "81cc39cfc6de0751ed8304b3e9913c785458578f",
+      "Hash": "de8b1f5ab080af3e02540c9c6f01d4e2",
       "Requirements": [
         "arrow",
         "bslib",
