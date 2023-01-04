@@ -37,7 +37,7 @@ golem_add_external_resources <- function() {
   )
 
   shiny::tags$head(
-    shiny::tags$link(rel="icon", type="png", href="https://purposeanalytics.ca/user/themes/purpose-analytics/img/favicon.png"),
+    shiny::tags$link(rel = "icon", type = "png", href = "https://purposeanalytics.ca/user/themes/purpose-analytics/img/favicon.png"),
     golem::bundle_resources(
       path = app_sys("app/www"),
       app_title = "CensusAggregator"
@@ -56,7 +56,7 @@ golem_add_external_resources <- function() {
         gtag('config', 'G-JFNPH9EW2R');
       </script>
     ")),
-    shiny::tags$meta(name="description", content="CensusAggregator makes it easier to aggregate and retrieve common census variables for custom regions that span multiple census geographic areas.")
+    shiny::tags$meta(name = "description", content = "CensusAggregator makes it easier to aggregate and retrieve common census variables for custom regions that span multiple census geographic areas.")
     # Add here other external resources
     # for example, you can add shinyalert::useShinyalert()
   )
