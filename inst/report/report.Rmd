@@ -542,11 +542,11 @@ section_heading("Definitions")
 ::: {.row .definitions-table .definitions-table-html}
 
 ```{r variable-definitions-html}
-# Split into two columns manually, after "Language spoken most often at home" will make it fit on 1 page
+# Split into two columns manually, after "High school or equivalent" will make it even
 
 cutoff <- censusaggregatorapp::variable_definitions %>%
   mutate(id = row_number()) %>%
-  filter(str_detect(variable_definition, "Non-official language spoken at home")) %>%
+  filter(str_detect(variable_definition, "High school or equivalent")) %>%
   pull(id)
 
 definitions_table <- function(data) {
@@ -579,7 +579,7 @@ column(
 :::
 
 ```{r variable-definitions-pdf}
-# Split into two columns manually, after "Language spoken most often at home" will make it fit on 1 page
+# Split into two columns manually, then onto another page
 
 cutoff <- censusaggregatorapp::variable_definitions %>%
   mutate(id = row_number()) %>%
@@ -588,7 +588,7 @@ cutoff <- censusaggregatorapp::variable_definitions %>%
 
 cutoff_2 <- censusaggregatorapp::variable_definitions %>%
   mutate(id = row_number()) %>%
-  filter(str_detect(variable_definition, "Shelter cost")) %>%
+  filter(str_detect(variable_definition, "Graduate or professional degree")) %>%
   pull(id)
 
 div(
