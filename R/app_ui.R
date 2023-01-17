@@ -37,7 +37,7 @@ golem_add_external_resources <- function() {
   )
 
   shiny::tags$head(
-    shiny::tags$link(rel="icon", type="png", href="https://purposeanalytics.ca/user/themes/purpose-analytics/img/favicon.png"),
+    shiny::tags$link(rel = "icon", type = "png", href = "https://purposeanalytics.ca/user/themes/purpose-analytics/img/favicon.png"),
     golem::bundle_resources(
       path = app_sys("app/www"),
       app_title = "CensusAggregator"
@@ -45,7 +45,7 @@ golem_add_external_resources <- function() {
     shinyjs::useShinyjs(),
     bsplus::use_bs_popover(),
     bsplus::use_bs_tooltip(),
-    shiny::tags$head(HTML("
+    shiny::tags$head(shiny::HTML("
       <!-- Google tag (gtag.js) -->
       <script async src='https://www.googletagmanager.com/gtag/js?id=G-JFNPH9EW2R'></script>
       <script>
@@ -65,7 +65,8 @@ golem_add_external_resources <- function() {
       <meta property='og:image' content='https://censusaggregator.ca/www/og-image.png' />
       <meta name='twitter:card' content='summary_large_image' />
       <meta name='twitter:site' content='@purposeanalytix' />
-    "))    # Add here other external resources
+    "))
+    # Add here other external resources
     # for example, you can add shinyalert::useShinyalert()
   )
 }

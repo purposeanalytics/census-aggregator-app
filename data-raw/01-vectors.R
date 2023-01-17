@@ -29,9 +29,7 @@ vectors <- tribble(
   "v_CA21_4917", "Total - Ethnic or cultural origin for the population in private households", "ethnic_cultural_origin",
   "v_CA21_4237", "Total - Private households by tenure", "household_tenure",
   "v_CA21_4288", "Total - Owner and tenant households with household total income greater than zero, in non-farm, non-reserve private dwellings by shelter-cost-to-income ratio", "unaffordable_housing",
-  # TODO
-  # "v_CA16_5051", "Total - Highest certificate, diploma or degree for the population aged 15 years and over in private households - 25% sample data", "educational_attainment",
-  # END TODO
+  "v_CA21_5817", "Total - Highest certificate, diploma or degree for the population aged 15 years and over in private households", "educational_attainment",
   "v_CA21_4305", "Total - Owner households in non-farm, non-reserve private dwellings", "shelter_cost_owner",
   "v_CA21_4313", "Total - Tenant households in non-farm, non-reserve private dwellings", "shelter_cost_renter"
 )
@@ -131,7 +129,7 @@ breakdown_labels <- list(
   "knowledge_of_english_french" = c("English only", "English and French", "French only"),
   "immigrant_status" = c("Immigrants", "2016 to 2021"),
   "indigenous_identity" = c("Indigenous identity"),
-  # "educational_attainment" = c("No certificate, diploma or degree", "Secondary (high) school diploma or equivalency certificate", "Postsecondary certificate, diploma or degree"),
+  "educational_attainment" = c("No certificate, diploma or degree", "High (secondary) school diploma or equivalency certificate", "Apprenticeship or trades certificate or diploma", "College, CEGEP or other non-university certificate or diploma", "University certificate or diploma below bachelor level", "Bachelor's degree", "University certificate or diploma above bachelor level", "Degree in medicine, dentistry, veterinary medicine or optometry", "Master's degree", "Earned doctorate"),
   "family_type" = c("Total one-parent families", "in which the parent is a woman+"),
   "couples" = "With children", # Collapse into the one above - couples with children can just be part of family characteristics
   "household_type" = c("One-census-family households without additional persons", "Multigenerational households", "Multiple-census-family households", "One-census-family households with additional persons", "Two-or-more-person non-census-family households", "One-person households"),

@@ -37,14 +37,14 @@ add_census_fill_layer <- function(map, geography) {
         "source-layer" = geography_to_source_layer_id(geography),
         "paint" = list(
           "fill-color" = list(
-              "case",
-              list("<", c("get", "population_density"), quantiles[2]), fill_palette[1],
-              list("<", c("get", "population_density"), quantiles[3]), fill_palette[2],
-              list("<", c("get", "population_density"), quantiles[4]), fill_palette[3],
-              list("<", c("get", "population_density"), quantiles[5]), fill_palette[4],
-              list("<", c("get", "population_density"), quantiles[6]), fill_palette[5],
-              # Default - should never come up
-              fill_palette[1]
+            "case",
+            list("<", c("get", "population_density"), quantiles[2]), fill_palette[1],
+            list("<", c("get", "population_density"), quantiles[3]), fill_palette[2],
+            list("<", c("get", "population_density"), quantiles[4]), fill_palette[3],
+            list("<", c("get", "population_density"), quantiles[5]), fill_palette[4],
+            list("<", c("get", "population_density"), quantiles[6]), fill_palette[5],
+            # Default - should never come up
+            fill_palette[1]
           ),
           "fill-opacity" = 0.75
         ),
