@@ -56,15 +56,23 @@ golem_add_external_resources <- function() {
         gtag('config', 'G-JFNPH9EW2R');
       </script>
     ")),
-    shiny::tags$meta(name="description", content="CensusAggregator makes it easier to aggregate and retrieve common census variables for custom regions that span multiple census geographic areas."),
     shiny::tags$head(HTML("
-      <meta property='og:type' content='article' />
-      <meta property='og:title' content='CensusAggregator' />
-      <meta property='og:description' content='CensusAggregator makes it easier to aggregate and retrieve common census variables for custom regions that span multiple census geographic areas.' />
-      <meta property='og:url' content='https://censusaggregator.ca' />
-      <meta property='og:image' content='https://censusaggregator.ca/www/og-image.png' />
-      <meta name='twitter:card' content='summary_large_image' />
-      <meta name='twitter:site' content='@purposeanalytix' />
+    <meta name='description' content='CensusAggregator makes it easier to aggregate and retrieve common census variables for custom regions that span multiple census geographic areas.'>
+
+    <!-- Facebook Meta Tags -->
+    <meta property='og:url' content='https://censusaggregator.ca'>
+    <meta property='og:type' content='website'>
+    <meta property='og:title' content='CensusAggregator'>
+    <meta property='og:description' content='CensusAggregator makes it easier to aggregate and retrieve common census variables for custom regions that span multiple census geographic areas.'>
+    <meta property='og:image' content='https://purposeanalytics.ca/blog/introducing-censusaggregator/censusaggregator.gif'>
+
+    <!-- Twitter Meta Tags -->
+    <meta name='twitter:card' content='summary_large_image'>
+    <meta property='twitter:domain' content='censusaggregator.ca'>
+    <meta property='twitter:url' content='https://censusaggregator.ca'>
+    <meta name='twitter:title' content='CensusAggregator'>
+    <meta name='twitter:description' content='CensusAggregator makes it easier to aggregate and retrieve common census variables for custom regions that span multiple census geographic areas.'>
+    <meta name='twitter:image' content='https://purposeanalytics.ca/blog/introducing-censusaggregator/censusaggregator.gif'>
     "))
     # Add here other external resources
     # for example, you can add shinyalert::useShinyalert()

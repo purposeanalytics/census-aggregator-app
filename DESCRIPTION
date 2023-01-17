@@ -38,7 +38,8 @@ Imports:
     shinyWidgets,
     stringr,
     tibble,
-    tidyr
+    tidyr,
+    utils
 Remotes:
     purposeanalytics/census-aggregator-package
 Encoding: UTF-8
