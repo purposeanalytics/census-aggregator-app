@@ -58,16 +58,13 @@ golem_add_external_resources <- function() {
     ")),
     shiny::tags$meta(name="description", content="CensusAggregator makes it easier to aggregate and retrieve common census variables for custom regions that span multiple census geographic areas."),
     shiny::tags$head(HTML("
-      <meta name='twitter:card' content='summary_large_image' />
-      <meta name='twitter:site' content='@purposeanalytix' />
-      <meta name='twitter:title' content='CensusAggregator' />
-      <meta name='twitter:description' content='CensusAggregator makes it easier to aggregate and retrieve common census variables for custom regions that span multiple census geographic areas.' />
-      <meta name='twitter:image' content='https://censusaggregator.ca/www/censusaggregator-screenshot.png' />
       <meta property='og:type' content='article' />
       <meta property='og:title' content='CensusAggregator' />
       <meta property='og:description' content='CensusAggregator makes it easier to aggregate and retrieve common census variables for custom regions that span multiple census geographic areas.' />
       <meta property='og:url' content='https://censusaggregator.ca' />
-      <meta property='og:image' content='https://censusaggregator.ca/www/censusaggregator-screenshot.png' />
+      <meta property='og:image' content='https://censusaggregator.ca/www/og-image.png' />
+      <meta name='twitter:card' content='summary_large_image' />
+      <meta name='twitter:site' content='@purposeanalytix' />
     "))    # Add here other external resources
     # for example, you can add shinyalert::useShinyalert()
   )
