@@ -56,7 +56,7 @@ golem_add_external_resources <- function() {
         gtag('config', 'G-JFNPH9EW2R');
       </script>
     ")),
-    shiny::tags$head(HTML("
+    shiny::tags$head(shiny::HTML("
     <meta name='description' content='CensusAggregator makes it easier to aggregate and retrieve common census variables for custom regions that span multiple census geographic areas.'>
 
     <!-- Facebook Meta Tags -->
