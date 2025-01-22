@@ -96,7 +96,7 @@ ct_data_many_2 <- get_census(
 pivot_census_data <- function(data) {
   data %>%
     dplyr::select(
-      geo_uid = .data$GeoUID,
+      all_of(c("geo_uid" = "GeoUID")),
       dplyr::starts_with("v_CA21_")
     ) %>%
     tidyr::pivot_longer(dplyr::starts_with("v_CA21_"), names_to = "vector") %>%
