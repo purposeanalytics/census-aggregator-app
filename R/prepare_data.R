@@ -1,3 +1,9 @@
+if(FALSE){
+
+geography <-'ct'
+regions <- c("2050011.00", "2050012.00", "2050013.00")
+
+}
 #' Prepare data for export/report
 #'
 #' @param geography CT or CSD
@@ -235,7 +241,7 @@ prepare_data <- function(geography, regions) {
   data %>%
     dplyr::rename(breakdown = .data$label) %>%
     dplyr::rename(label = .data$parent_label) %>%
-    dplyr::select(.data$label, .data$breakdown, .data$value, .data$value_proportion)
+    dplyr::select(label, breakdown, value, value_proportion)
 }
 
 filter_breakdown <- function(data, label_short, parent_label = NA, exclude_parent = TRUE, proportion = TRUE) {

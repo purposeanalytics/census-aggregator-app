@@ -14,6 +14,7 @@ app_server <- function(input, output, session) {
     priority = 100,
     {
       map_rendered(TRUE)
+      rlog::log_info("Map Rendered(TRUE)")
     }
   )
 
@@ -63,6 +64,29 @@ app_server <- function(input, output, session) {
       }
     }
   )
+
+  shiny::observeEvent(
+    input$csd_polygon_filter, # Set in JS
+    ignoreNULL = FALSE,
+    {
+      warning("TODO: add it in JS")
+      if (input_aggregate_area() == "riding2023") {
+        if (all(input$riding2023_polygon_filter == "" | is.null(input$riding2023_polygon_filter))) {
+          selected_geographies(
+            tibble::tibble()
+          )
+        } else {
+          selected_geographies(
+            tibble::tibble(geo_uid = unique(input$riding2023_polygon_filter))
+          )
+        }
+      }
+    }
+  )
+
+
+
+
 
   mod_map_server(
     "map", input_aggregate_area, input_selection_tool, selected_geographies, map_rendered, bookmark_bounds
