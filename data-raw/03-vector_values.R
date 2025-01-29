@@ -40,6 +40,12 @@ vectors_many <- vectors_original %>%
   filter(n > 25) %>%
   select(-n)
 
+
+saveRDS(vectors_many, here::here("data-raw", "intermediary", "vectors_many.rds"))
+saveRDS(vectors_few, here::here("data-raw", "intermediary", "vectors_few.rds"))
+saveRDS(language_at_home_vectors, here::here("data-raw", "intermediary", "language_at_home_vectors.rds"))
+saveRDS(ethnic_cultural_origin_vectors, here::here("data-raw", "intermediary", "ethnic_cultural_origin_vectors.rds"))
+
 ## CSD ----
 
 csd_data_few <- get_census(
