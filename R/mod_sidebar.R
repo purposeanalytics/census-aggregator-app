@@ -37,7 +37,8 @@ mod_sidebar_ui <- function(id) {
         NULL,
         choices = list(
           "Census tract" = "ct",
-          "Census subdivision" = "csd"
+          "Census subdivision" = "csd",
+          "Federal riding (2023 order)" = "riding2023"
         ),
         inline = TRUE
       ),
