@@ -1,5 +1,6 @@
 library(tidyverse)
 library(arrow)
+library(sf)
 
 #dev parameters
 overwrite_flag  <- TRUE
@@ -9,11 +10,13 @@ overwrite_flag  <- TRUE
 username <- R.utils::System$getUsername()
 
 #Files to read in
-shapefile_folder <-paste("C:/Users/", username, "/Purpose Analytics/Data - Documents/Elections_Canada/Shapefiles 2023 Representation Order_2024-09-11/")
+shapefile_folder <-paste0("C:/Users/", username, "/Purpose Analytics/Data - Documents/Elections_Canada/Shapefiles 2023 Representation Order_2024-09-11/")
 
-census_profile_folder <-  paste0( 'C:/Users/',username, '/Purpose Analytics/Data - Documents/Statistics_Canada/2021_Census_Profile_FED2023_98-401-X2021029_2025-01-28/')
+Gcensus_profile_folder <-  paste0( 'C:/Users/',username, '/Purpose Analytics/Data - Documents/Statistics_Canada/2021_Census_Profile_FED2023_98-401-X2021029_2025-01-28/')
 census_profile_file <-  paste0( census_profile_folder, '98-401-X2021029_English_CSV_data.csv' )
 census_metadata_file <- paste0(census_profile_folder,  '98-401-X2021029_English_meta.txt')
+
+aligned_vectors_file <-  paste0( 'C:/Users/', R.utils::System$getUsername(), '/Purpose Analytics/Data - Documents/Statistics_Canada/2021_Census_Profile_FED2023_98-401-X2021029_2025-01-28/Metadata_Characteristic_Number_to_cancensus_vector_number_alignment_selected.xlsx')
 
 
 #These are generated in 03-vector-values.R
@@ -50,7 +53,7 @@ census_metadata <- census_metadata |>  slice(1:ftn_row - 1) |>  filter(!is.na(ch
 ####################
 #Align to cancensus CA21 vector numbers
 
-aligned_vector_numbers <- readxl::read_excel( paste0( 'C:/Users/', R.utils::System$getUsername(), '/Purpose Analytics/Data - Documents/Statistics_Canada/2021_Census_Profile_FED2023_98-401-X2021029_2025-01-28/Metadata_Characteristic_Number_to_cancensus_vector_number_alignment_selected.xlsx')) |>
+aligned_vector_numbers <- readxl::read_excel( aligned_vectors_file)|>
   select(metadata_row, metadata_name, vector_number) |>
   mutate(metadata_name  = str_replace_all(metadata_name, "\\s*\\(\\d+\\)","")) |>
   mutate(metadata_name = str_remove(metadata_name, ' - 100% data')) |>
@@ -62,6 +65,15 @@ aligned_vector_numbers <- readxl::read_excel( paste0( 'C:/Users/', R.utils::Syst
 
 #TO CHECK FOR MISALIGNMENTS
 if(FALSE){
+
+full_join_em <-  all_desired_vectors |>  full_join(aligned_vector_numbers)
+
+full_join_em |>  filter(is.na(vector))
+full_join_em |>  filter(is.na(metadata_row))
+
+
+
+
 all_desired_vectors |>  left_join(aligned_vector_numbers) |>
   select(label, metadata_name) |>
   mutate(label = str_remove(label, '^Total - ')) |>
@@ -130,9 +142,8 @@ riding2023 <- census_profile |>  select(DGUID, GEO_NAME) |>  distinct() |>
 
 class(riding2023) <- 'data.frame'
 usethis::use_data(riding2023, overwrite = overwrite_flag)
+#TODO - areas_sq_km and population_density-  to go above where the NA_REAL_ values are
 
-
-#TODO - areas_sq_km and population_density
 
 ################################
 #Riding Population density quintitles
@@ -147,98 +158,118 @@ usethis::use_data(riding2023, overwrite = overwrite_flag)
 
 
 ###################
-#TODO
-# read in shapefiles
-
-shapefile_folder
+# read in shapefiless
+#SEE: load('data-raw/intermediary/csd_before_simplify.rds')
 
 
+fed2023 <- sf::read_sf(paste0(shapefile_folder, "/FED_CA_2023_EN.shp"))
+
+needed_columns <-c("geo_uid","pr_uid","region_name","population","households","area_sq_km","population_density","geometry")
+
+geo_names_from_census_profile <- census_profile |>  select(DGUID,ALT_GEO_CODE ) |>  distinct() |>
+  mutate(ALT_GEO_CODE = as.numeric(ALT_GEO_CODE))
+
+
+
+#simplify shapes
+fed_size <- object.size(fed2023)
+
+fed2023 <- fed2023 |>
+  rename(geo_uid  =FED_NUM,
+         region_name = ED_NAMEE) |>
+  mutate(pr_uid = str_sub(geo_uid, 1,2)) |>
+  left_join(geo_names_from_census_profile, join_by(geo_uid ==ALT_GEO_CODE)) |>
+  select(-geo_uid) |>
+  rename(geo_uid  = DGUID) |>
+  left_join(riding2023) |>
+  select(all_of(needed_columns))
 
 
 
 
+fed2023 <- fed2023 %>%
+ split(.$geo_uid) %>%
+ map_dfr(function(feature) {
+ pts <- npts(feature)
 
-
-
-#TODO simplify shapes
-
-#csd_size <- object.size(csd)
-#csd <- csd %>%
-# split(.$geo_uid) %>%
-# map_dfr(function(feature) {
-# pts <- npts(feature)
-#
-#   if (pts > 10000) {
-#      ms_simplify(feature, keep = 0.1, keep_shapes = TRUE)
-#    } else if (pts > 5000) {
-#      ms_simplify(feature, keep = 0.3, keep_shapes = TRUE)
-#    } else if (pts > 500) {
-#      ms_simplify(feature, keep = 0.5, keep_shapes = TRUE)
-#    } else {
-#      feature
-#    }
-#  })
+   if (pts > 10000) {
+      ms_simplify(feature, keep = 0.1, keep_shapes = TRUE)
+    } else if (pts > 5000) {
+      ms_simplify(feature, keep = 0.3, keep_shapes = TRUE)
+    } else if (pts > 500) {
+      ms_simplify(feature, keep = 0.5, keep_shapes = TRUE)
+    } else {
+      feature
+    }
+  })
 
 
 #make valid
-#st_make_valid()
 
-#csd <- csd %>%
-#  st_make_valid()
+fed2023  <- fed2023 %>%
+  st_make_valid()
 
 # Size after:
-#csd_simplified_size <- object.size(csd)
+fed2023_simplified_size <- object.size(fed2023)
 
-#as.numeric(csd_simplified_size) / as.numeric(csd_size)
+as.numeric(fed2023_simplified_size) / as.numeric(fed_size)
 
-
-
-
-
-####################
 
 
 
 ############### Arrow file for geograpy in app
-#TODO
-#ct_geometry %>%
-#  group_by(cd_uid) %>%
-#  write_sf_dataset(dir,
-#                   format = "parquet",
-#                   hive_style = FALSE
- # )
-#
+# Write arrow dataset, partitioned by province, for getting geometry / boundary export in app
+fed_geometry <- fed2023 %>%
+  select(geo_uid, pr_uid)
 
-#Simple feature collection with 6100 features and 2 fields
-#Geometry type: MULTIPOLYGON
-#Dimension:     XY
-#Bounding box:  xmin: -124.6993 ymin: 41.90973 xmax: -52.61938 ymax: 60.00006
-#Geodetic CRS:  WGS 84
-#First 10 features:
-#    geo_uid cd_uid                       geometry
-#1  0010001.00   1001 MULTIPOLYGON (((-52.7279 47...
-#2  0010002.00   1001 MULTIPOLYGON (((-52.7182 47...
-#3  0010003.01   1001 MULTIPOLYGON (((-52.73801 4...
-#4  0010003.02   1001 MULTIPOLYGON (((-52.74572 4.
-
-######################
-#And to upload to mapbox:
-# TODO
-#ct_upload <- ct_upload %>%
-# select(-cd_uid)
-#
-#pload_tiles(
-# input = ct_upload,
-# username = "purposeanalytics",
-# tileset_id = "2021_ct",
-# tileset_name = "2021_census_ct",
-# multipart = TRUE
-#
-
-##########
+dir <- "inst/extdata/riding2023_values/"
+if (dir.exists(dir)) {
+  fs::dir_delete(dir)
+}
+fs::dir_create(dir)
 
 
+fed_geometry %>%
+  group_by(pr_uid) %>%
+  write_sf_dataset(dir,
+                   format = "parquet",
+                   hive_style = FALSE
+  )
 
+# Create formatted version of values, round original population density
+fed2023 <- fed2023 %>%
+  mutate(
+    across(c(population, households), .fns = list(fmt = scales::comma)),
+    across(c(area_sq_km, population_density), .fns = list(fmt = ~ scales::comma(.x, accuracy = 0.1))),
+    population_density = round(population_density, digits = 1)
+  )
 
+# Remove original values (except population density)
+fed2023 <- fed2023 %>%
+  select(-population, -households, -area_sq_km)
+
+# Now to upload to mapbox
+
+fed2023_upload <- fed2023 %>%
+  select(-pr_uid)
+
+# Optimizing as per recommendations in https://docs.mapbox.com/help/troubleshooting/uploads/#troubleshooting
+# Since the processing takes >1 hour, it times out
+
+# Reproject to Web Mercator (EPSG:3857)
+# If not in this format, then Mapbox will reproject on upload, which takes time and can contribute to timing out
+
+fed2023_upload <- fed2023_upload %>%
+  st_transform(3857)
+
+# Upload
+#TODO SETUP UP MAPBOX LAYER
+#upload_tiles(
+#  input = csd_upload,
+#  username = "purposeanalytics",
+#  tileset_id = "2021_csd",
+#  tileset_name = "2021_census_csd",
+#  multipart = TRUE
+#)
 
 
