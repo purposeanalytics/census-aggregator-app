@@ -382,3 +382,11 @@ riding2023 <- fed2023 %>%
 
 usethis::use_data(riding2023, overwrite = TRUE)
 
+
+if(FALSE){
+
+ sf::st_write(fed2023, "../Federal_Ridings.shp")
+
+}
+
+
