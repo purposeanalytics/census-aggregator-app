@@ -1,6 +1,11 @@
 library(tidyverse)
 library(arrow)
 library(sf)
+library(sfarrow)
+library(mapview)
+library(rmapshaper)
+library(mapboxapi)
+
 
 #dev parameters
 overwrite_flag  <- TRUE
@@ -27,7 +32,7 @@ census_metadata_file <- paste0(census_profile_folder, '98-401-X2021029_English_m
 
 aligned_vectors_file <-  paste0(
   'C:/Users/',
-  R.utils::System$getUsername(),
+  username,
   '/Purpose Analytics/Data - Documents/Statistics_Canada/2021_Census_Profile_FED2023_98-401-X2021029_2025-01-28/Metadata_Characteristic_Number_to_cancensus_vector_number_alignment_selected.xlsx'
 )
 
@@ -118,7 +123,7 @@ census_profile <- census_profile_raw |>
   filter(!is.na(value))
 
 
-
+rm(census_profile_raw)
 
 
 #######vector values
@@ -166,40 +171,59 @@ needed_columns <- c(
 
 canada_sf <- sf::read_sf('C:/Users/DanielSimeone/Purpose Analytics/Data - Documents/Statistics_Canada/2021_Census_Boundary_Province_lpr_000b21a_20250206/lpr_000b21a_e.shp')
 
+canada_sf_summarized <- summarize(canada_sf)
+rm(canada_sf)
+
+ridings_intersected <- fed2023|> st_intersection(canada_sf_summarized)
+
+rm(canada_sf_summarized)
+saveRDS(ridings_intersected, here::here("data-raw", "intermediary", "ridings_before_simplify.rds"))
+
+ridings_geometry_types <- map(ridings_intersected$geometry,function(x){
+  sf::st_geometry_type(x)
+})
 
 
-ridings_intersected <- map(
-  fed2023$geo_uid,
-  function(x){
-  rlog::log_info(paste("Processing", x))
-  the_riding <-  fed2023 |>  filter(geo_uid ==  x)
-  the_riding_province <- the_riding$pr_uid
-  the_province <- canada_sf |>  filter(PRUID == the_riding_province)
-  intersected <- sf::st_intersection(the_riding$geometry, the_province$geometry)
-
-  sf::st_set_geometry(the_riding, intersected)
-  })
-
-ridings_intersected_sf <- sf::st_sf(data.table::rbindlist( ridings_intersected, ignore.attr = TRUE))
+ridings_geom_type_df <- tibble(geo_type =c(unlist(ridings_geometry_types))) |>
+  rowid_to_column() |>
+  filter(geo_type =='GEOMETRYCOLLECTION')
 
 
+geom_collection_rows <- ridings_intersected |>
+  slice(ridings_geom_type_df$rowid)
 
-ggplot() +
-  geom_sf(data = ridings_intersected[[1]])
 
-stop()
+# Loop through each feature in the collection
+for (i in seq(1, nrow(geom_collection_rows))) {
+  print(i)
+  # Extract the geometry
+  geom <- st_geometry(geom_collection_rows |>  slice(i) )
+
+  # Check if the geometry is a GEOMETRYCOLLECTION
+  if (st_geometry_type(geom[[1]]) == "GEOMETRYCOLLECTION") {
+    # Extract the individual geometries
+    components <- st_collection_extract(geom[[1]], "POLYGON")
+
+    # Combine the polygons into a MULTIPOLYGON
+    geom_multipolygons <- st_multipolygon((components))
+
+    # Add the MULTIPOLYGON to the list
+    geom_collection_rows$geometry[[i]] <- geom_multipolygons
+  }
+}
+
+
+walk(geom_collection_rows$geo_uid,
+    function(x){
+ridings_intersected <<- ridings_intersected |>
+  mutate(geometry = if_else(geo_uid ==x, geom_collection_rows |>  filter(geo_uid ==x) |>  select(geometry) |>  pull(), geometry))
+      }
+)
 
 #########################simplify shapes
-fed_size <- object.size(fed2023)
+fed_size <- object.size(ridings_intersected)
 
-
-  left_join(riding2023) |>
-  select(all_of(needed_columns))
-
-
-
-
-fed2023 <- fed2023 %>%
+fed2023 <- ridings_intersected %>%
   split(.$geo_uid) %>%
   map_dfr(function(feature) {
     pts <- npts(feature)
@@ -215,7 +239,8 @@ fed2023 <- fed2023 %>%
     }
   })
 
-
+rm(geom_collection_rows)
+rm(ridings_intersected)
 #make valid
 
 fed2023  <- fed2023 %>%
@@ -227,16 +252,17 @@ fed2023_simplified_size <- object.size(fed2023)
 as.numeric(fed2023_simplified_size) / as.numeric(fed_size)
 
 
+fed2023 <- fed2023 |>
+  mutate(SHAPE_AREA = sf::st_area(geometry,))
 
 
 
 
-
-
-
-
-
-
+land_area_of_ridings <- tibble(geo_uid =  fed2023$geo_uid,
+                               riding_name = fed2023$region_name,
+                               area  = fed2023$SHAPE_AREA) |>
+                                               mutate(area_sq_km = as.numeric(area/1000000)) |>
+  select(geo_uid, area_sq_km)
 
 
 
@@ -257,10 +283,9 @@ population_households <- census_profile |>
 
 riding2023 <- census_profile |>  select(DGUID, GEO_NAME) |>  distinct() |>
   rename('geo_uid' = 'DGUID') |>
+  left_join(land_area_of_ridings) |>
   mutate(
-    pr_uid = str_sub(geo_uid, 10, 11),
-    area_sq_km  = NA_real_,
-    population_density = NA_real_
+    pr_uid = str_sub(geo_uid, 10, 11)
   ) |>
   select(any_of(
     c(
@@ -271,22 +296,26 @@ riding2023 <- census_profile |>  select(DGUID, GEO_NAME) |>  distinct() |>
       "area_sq_km",
       "population_density"
     )
-  )) |>  left_join(population_households)
+  )) |>  left_join(population_households) |>
+  mutate(population_density = population/area_sq_km)
 
 class(riding2023) <- 'data.frame'
 usethis::use_data(riding2023, overwrite = overwrite_flag)
-#TODO - areas_sq_km and population_density-  to go above where the NA_REAL_ values are
+rm(census_profile)
 
+fed2023 <- fed2023  |> left_join(riding2023)
 
 ################################
 #Riding Population density quintitles
-#TODO
 
-
-#usethis::use_data(riding2023_population_density_quintiles)
-#usethis::use_data(riding2023_quantiles_text)
-#SEE: load('data/csd_quantiles_text.rda')
-#     load('data/csd_population_density_quantiles.rda')
+ load('data/csd_quantiles_text.rda')
+ load('data/csd_population_density_quantiles.rda')
+ riding2023_population_density_quintiles <- csd_population_density_quantiles
+ riding2023_quantiles_text <- csd_quantiles_text
+usethis::use_data(riding2023_population_density_quintiles)
+usethis::use_data(riding2023_quantiles_text)
+rm(csd_population_density_quantiles)
+rm(csd_quantiles_text)
 ###############a
 
 
@@ -308,7 +337,7 @@ fed_geometry %>%
   write_sf_dataset(dir, format = "parquet", hive_style = FALSE)
 
 # Create formatted version of values, round original population density
-fed2023 <- fed2023 %>%
+fed2023_upload <- fed2023 %>%
   mutate(
     across(c(population, households), .fns = list(fmt = scales::comma)),
     across(
@@ -319,12 +348,12 @@ fed2023 <- fed2023 %>%
   )
 
 # Remove original values (except population density)
-fed2023 <- fed2023 %>%
+fed2023_upload <- fed2023_upload %>%
   select(-population, -households, -area_sq_km)
 
 # Now to upload to mapbox
 
-fed2023_upload <- fed2023 %>%
+fed2023_upload <- fed2023_upload %>%
   select(-pr_uid)
 
 # Optimizing as per recommendations in https://docs.mapbox.com/help/troubleshooting/uploads/#troubleshooting
@@ -336,12 +365,21 @@ fed2023_upload <- fed2023 %>%
 fed2023_upload <- fed2023_upload %>%
   st_transform(3857)
 
+
 # Upload
-#TODO SETUP UP MAPBOX LAYER
-#upload_tiles(
-#  input = csd_upload,
-#  username = "purposeanalytics",
-#  tileset_id = "2021_csd",
-#  tileset_name = "2021_census_csd",
-#  multipart = TRUE
-#)
+if(FALSE){
+upload_tiles(
+  input = fed2023_upload,
+  username = "purposeanalytics",
+  tileset_id = "2023_ridings",
+  tileset_name = "2023_census_csd",
+  multipart = TRUE
+)
+}
+
+riding2023 <- fed2023 %>%
+  st_set_geometry(NULL) %>%
+  select(all_of(c("geo_uid",            "population",         "households",         "area_sq_km",         "population_density")))
+
+usethis::use_data(riding2023, overwrite = TRUE)
+
