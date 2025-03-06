@@ -177,7 +177,6 @@ rm(canada_sf)
 ridings_intersected <- fed2023|> st_intersection(canada_sf_summarized)
 
 rm(canada_sf_summarized)
-saveRDS(ridings_intersected, here::here("data-raw", "intermediary", "ridings_before_simplify.rds"))
 
 ridings_geometry_types <- map(ridings_intersected$geometry,function(x){
   sf::st_geometry_type(x)
