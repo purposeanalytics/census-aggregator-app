@@ -114,6 +114,10 @@ mod_map_server <- function(id, input_aggregate_area, input_selection_tool, selec
               layer_id = "ct_line_click",
               filter = list("in", "geo_uid", "")
             ) %>%
+            mapboxer::set_filter(
+              layer_id = "ridings_line_click",
+              filter = filter_list
+            ) |>
             hide_census_layers("ct") |>
             hide_census_layers("ridings")   ,
           ct = mapboxer::mapboxer_proxy(ns("map")) %>%
@@ -126,19 +130,27 @@ mod_map_server <- function(id, input_aggregate_area, input_selection_tool, selec
               layer_id = "csd_line_click",
               filter = list("in", "geo_uid", "")
             ) %>%
+            mapboxer::set_filter(
+              layer_id = "ridings_line_click",
+              filter = filter_list
+            ) |>
             hide_census_layers("csd") |>
             hide_census_layers("ridings")   ,
 
           ridings= mapboxer::mapboxer_proxy(ns("map")) %>%
             show_census_layers("ridings") %>%
             mapboxer::set_filter(
-              layer_id = "ridings_line_click",
+              layer_id = "ct_line_click",
               filter = filter_list
             ) %>%
             mapboxer::set_filter(
-              layer_id = "ridings_line_click",
+              layer_id = "csd_line_click",
               filter = list("in", "geo_uid", "")
             ) %>%
+            mapboxer::set_filter(
+              layer_id = "ridings_line_click",
+              filter = filter_list
+            ) |>
             hide_census_layers("csd") |>
             hide_census_layers("ct")
 
