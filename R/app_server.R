@@ -66,18 +66,18 @@ app_server <- function(input, output, session) {
   )
 
   shiny::observeEvent(
-    input$csd_polygon_filter, # Set in JS
+    input$ridings_polygon_filter, # Set in JS
     ignoreNULL = FALSE,
     {
-      warning("TODO: add it in JS")
-      if (input_aggregate_area() == "riding2023") {
-        if (all(input$riding2023_polygon_filter == "" | is.null(input$riding2023_polygon_filter))) {
+      rlog::log_info(paste("Ridings polygon filter",input$ridings_polygon_filter))
+      if (input_aggregate_area() == "ridings") {
+        if (all(input$ridings_polygon_filter == "" | is.null(input$ridings_polygon_filter))) {
           selected_geographies(
             tibble::tibble()
           )
         } else {
           selected_geographies(
-            tibble::tibble(geo_uid = unique(input$riding2023_polygon_filter))
+            tibble::tibble(geo_uid = unique(input$ridings_polygon_filter))
           )
         }
       }

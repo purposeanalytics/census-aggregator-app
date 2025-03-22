@@ -6,8 +6,8 @@ output:
     theme:
       version: 4
 params:
-  geo_uid: !r c("5750001.00")
-  geography: "ct"
+  geo_uid: !r c("2023A000411002")
+  geography: "ridings"
   bookmark: "https://censusaggregator.ca/"
 ---
 
@@ -145,6 +145,10 @@ boundaries_data <- open_dataset(system.file(boundaries_dataset, package = "censu
 boundaries_data <- boundaries_data %>%
   read_sf_dataset()
 
+if(geography =='region'){
+ boundaries_data <- st_make_valid(boundaries_data) 
+}
+
 # Limit to regions, combine boundaries
 region_boundaries <- boundaries_data %>%
   filter(geo_uid %in% regions)
@@ -165,8 +169,14 @@ regions_bbox[["xmax"]] <- regions_bbox$xmax + bbox_buffer
 regions_bbox[["ymax"]] <- regions_bbox$ymax + bbox_buffer
 
 # Get all boundaries within bbox
+if(geography!='ridings'){
 all_boundaries_in_bbox <- boundaries_data %>%
   st_crop(regions_bbox)
+} else if(geography =='ridings'){
+all_boundaries_in_bbox <- boundaries_data %>%  sf::st_transform(crs = 3857) |>    st_crop(st_transform(regions_bbox, crs = 3857))  |> 
+st_transform(crs = 4326)
+}
+
 
 ggplot() +
   geom_sf(data = all_boundaries_in_bbox, colour = "grey", fill = NA, size = 0.4) +
@@ -197,11 +207,13 @@ population <- data[["Population, 2021"]] %>%
 households <- data[["Households"]] %>%
   pull_and_format_value("comma")
 
+if(geography!='ridings'){
 population_change <- data[["Population change, 2016 to 2021"]] %>%
   pull_and_format_value()
 
 if (!str_starts(population_change, "-")) {
   population_change <- paste0("+", population_change)
+}
 }
 
 population_density <- data[["Population density"]] %>%
@@ -223,10 +235,12 @@ column(
 ```
 
 ```{r population_change}
+if(geography!='ridings'){
 column(
   width = 3,
   snapshot_card("Population change<br>(2016 to 2021)", population_change)
 )
+}
 ```
 
 ```{r population_density}
@@ -238,7 +252,13 @@ column(
 :::
 
 ```{r}
+if(geography!='ridings'){
 suppressed_note(population, households, population_change, population_density)
+} else {
+suppressed_note(population, households,  population_density)
+}
+
+
 ```
 
 ```{r section-age-households-families}

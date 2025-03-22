@@ -188,4 +188,6 @@ vectors <- vectors %>%
 vectors <- vectors %>%
   distinct()
 
+vectors <- vectors |> slice(1, .by = 'vector')# not sure why, but couples with children and bachelor's degree or cert are duplicated
+
 usethis::use_data(vectors, overwrite = TRUE)

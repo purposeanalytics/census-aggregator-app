@@ -3,6 +3,7 @@ function highlightGeographyOnHover(map) {
 
   highlightSpecificGeographyOnHover(map, hoveredGeoUid, "csd")
   highlightSpecificGeographyOnHover(map, hoveredGeoUid, "ct")
+  highlightSpecificGeographyOnHover(map, hoveredGeoUid, "ridings")
 
 }
 

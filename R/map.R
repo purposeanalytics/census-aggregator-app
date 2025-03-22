@@ -3,7 +3,8 @@ map <- function() {
     mapboxer::set_view_state(-79.38, 43.8, zoom = 10) %>%
     mapboxer::add_navigation_control(showCompass = FALSE, pos = "top-right") %>%
     add_census_layer("ct") %>%
-    add_census_layer("csd")
+    add_census_layer("csd")  %>%
+    add_census_layer("ridings")
 }
 
 add_census_layer <- function(map, geography) {
@@ -25,7 +26,8 @@ add_census_fill_layer <- function(map, geography) {
   click_layer_id <- geography_to_layer_id(geography, "fill_click")
   quantiles <- switch(geography,
     csd = censusaggregatorapp::csd_population_density_quantiles,
-    ct = censusaggregatorapp::ct_population_density_quantiles
+    ct = censusaggregatorapp::ct_population_density_quantiles,
+    ridings = censusaggregatorapp::ridings_population_density_quintiles
   )
 
   map %>%
@@ -60,6 +62,11 @@ add_census_line_layer <- function(map, geography) {
   line_layer_id <- geography_to_layer_id(geography, "line")
   click_layer_id <- geography_to_layer_id(geography, "line_click")
   hover_layer_id <- geography_to_layer_id(geography, "line_hover")
+
+ rlog::log_info(paste("line layer id" ,  line_layer_id))
+ rlog::log_info(paste("click layer id" ,  click_layer_id))
+ rlog::log_info(paste("line layer id" ,  hover_layer_id))
+
 
   map %>%
     mapboxer::add_layer(

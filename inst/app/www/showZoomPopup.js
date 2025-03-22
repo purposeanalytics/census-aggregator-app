@@ -18,6 +18,7 @@ function showZoomPopup(map) {
 
     ctFeatures = map.queryRenderedFeatures({ layers: ['ct_fill_click'] });
     csdFeatures = map.queryRenderedFeatures({ layers: ['csd_fill_click'] });
+    csdFeatures = map.queryRenderedFeatures({ layers: ['ridings_fill_click'] });
 
     if (ctFeatures.length == 0 & csdFeatures.length == 0) {
       zoomPopup.style.display = '';

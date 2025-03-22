@@ -11,7 +11,8 @@ mod_map_ui <- function(id) {
     class = "censusagg-map",
     mapboxer::mapboxerOutput(ns("map"), height = "100vh"),
     population_density_legend("ct", ns, display = "block"),
-    population_density_legend("csd", ns)
+    population_density_legend("csd", ns),
+    population_density_legend("ridings", ns)
   )
 }
 
@@ -26,8 +27,10 @@ mod_map_server <- function(id, input_aggregate_area, input_selection_tool, selec
       map() %>%
         add_census_tooltips("csd") %>%
         add_census_tooltips("ct") %>%
+        add_census_tooltips("ridings") %>%
         show_census_layers("ct") %>%
         hide_census_layers("csd") %>%
+        hide_census_layers("ridings") %>%
         htmlwidgets::onRender("
     function() {
 
@@ -76,30 +79,29 @@ mod_map_server <- function(id, input_aggregate_area, input_selection_tool, selec
         # Only run these once the map has been rendered for the first time
         shiny::req(map_rendered())
         shiny::req(input_aggregate_area())
-
+        rlog::log_info(paste("Input Aggregate Areas is", input_aggregate_area() ))
         # Change which legend is shown
         if (input_aggregate_area() == "csd") {
           shinyjs::show("csd-legend")
-          shinyjs::hide("riding2023-legend")
+          shinyjs::hide("ridings-legend")
           shinyjs::hide("ct-legend")
         } else if (input_aggregate_area() == "ct") {
           shinyjs::hide("csd-legend")
-          shinyjs::hide("riding2023-legend")
+          shinyjs::hide("ridings-legend")
           shinyjs::show("ct-legend")
-        } else if (input_aggregate_area() =='riding2023'){
+        } else if (input_aggregate_area() =='ridings'){
           shinyjs::hide("csd-legend")
           shinyjs::hide("ct-legend")
-          shinyjs::show("riding2023-legend")
+          shinyjs::show("ridings-legend")
         }
-
-     warning("TOOD: NEED TO CREATE riding2023-legend")
-
 
 
         filter_list <- append(
           list("in", "geo_uid"),
           as.list(selected_geographies()[["geo_uid"]])
         )
+
+    rlog::log_info(paste("Filter list is", dput(filter_list)))
 
         switch(input_aggregate_area(),
           csd = mapboxer::mapboxer_proxy(ns("map")) %>%
@@ -113,7 +115,7 @@ mod_map_server <- function(id, input_aggregate_area, input_selection_tool, selec
               filter = list("in", "geo_uid", "")
             ) %>%
             hide_census_layers("ct") |>
-            hide_census_layers("riding2023")   ,
+            hide_census_layers("ridings")   ,
           ct = mapboxer::mapboxer_proxy(ns("map")) %>%
             show_census_layers("ct") %>%
             mapboxer::set_filter(
@@ -125,16 +127,16 @@ mod_map_server <- function(id, input_aggregate_area, input_selection_tool, selec
               filter = list("in", "geo_uid", "")
             ) %>%
             hide_census_layers("csd") |>
-            hide_census_layers("riding2023")   ,
+            hide_census_layers("ridings")   ,
 
-          riding2023= mapboxer::mapboxer_proxy(ns("map")) %>%
-            show_census_layers("riding2023") %>%
+          ridings= mapboxer::mapboxer_proxy(ns("map")) %>%
+            show_census_layers("ridings") %>%
             mapboxer::set_filter(
-              layer_id = "riding2023_line_click",
+              layer_id = "ridings_line_click",
               filter = filter_list
             ) %>%
             mapboxer::set_filter(
-              layer_id = "riding2023_line_click",
+              layer_id = "ridings_line_click",
               filter = list("in", "geo_uid", "")
             ) %>%
             hide_census_layers("csd") |>
@@ -144,7 +146,6 @@ mod_map_server <- function(id, input_aggregate_area, input_selection_tool, selec
           mapboxer::update_mapboxer()
       }
     )
-warning("TODO: mabox layer above for riding 2023")
     # Reset geographies clicked when aggregate_area input changes ----
     shiny::observeEvent(
       input_aggregate_area(),
@@ -166,9 +167,12 @@ warning("TODO: mabox layer above for riding 2023")
 
         if (input_selection_tool() == "click") {
 
+
+
           # Check if clicked area is already in selected geographies
           # If it is, clicking again should *deselect* it - remove from the existing tibble
           clicked_id <- input$map_onclick$props$geo_uid
+         rlog::log_info(paste("Selection tool click:", clicked_id))
 
           if (clicked_id %in% selected_geographies()[["geo_uid"]]) {
             selected_geographies(
@@ -177,6 +181,7 @@ warning("TODO: mabox layer above for riding 2023")
             )
           } else {
             # Otherwise, set current value of selected_geographies to be existing tibble, plus new geographies
+            rlog::log_info(paste("Selected geographies is:", clicked_id))
             selected_geographies(
               selected_geographies() %>%
                 dplyr::bind_rows(dplyr::tibble(geo_uid = clicked_id))
@@ -202,6 +207,7 @@ warning("TODO: mabox layer above for riding 2023")
       ignoreInit = FALSE,
       {
         shiny::req(map_rendered())
+        rlog::log_info("Aggregate area event, clear drawn polygon")
         session$sendCustomMessage("aggregate_area", input_aggregate_area())
       }
     )
@@ -211,7 +217,8 @@ warning("TODO: mabox layer above for riding 2023")
 population_density_legend <- function(geography, ns, display = "none") {
   legend_text <- switch(geography,
     "csd" = censusaggregatorapp::csd_quantiles_text,
-    ct = censusaggregatorapp::ct_quantiles_text
+    "ct" = censusaggregatorapp::ct_quantiles_text,
+    "ridings" = censusaggregatorapp::ridings_quantiles_text
   )
 
   shiny::div(

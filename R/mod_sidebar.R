@@ -38,7 +38,7 @@ mod_sidebar_ui <- function(id) {
         choices = list(
           "Census tract" = "ct",
           "Census subdivision" = "csd",
-          "Federal riding (2023 order)" = "riding2023"
+          "Federal riding (2023 order)" = "ridings"
         ),
         inline = TRUE
       ),
@@ -315,13 +315,15 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
 
         summary_statistics_source <- switch(input_aggregate_area(),
           "csd" = censusaggregatorapp::csd,
-          "ct" = censusaggregatorapp::ct
+          "ct" = censusaggregatorapp::ct,
+          "ridings" = censusaggregatorapp::ridings
         )
 
         summary_statistics <- summary_statistics_source %>%
           dplyr::inner_join(selected_geographies(), by = "geo_uid") %>%
           dplyr::select(.data$population, .data$households, .data$area_sq_km, .data$population_density) %>%
           dplyr::mutate(n = dplyr::n())
+
 
         if (nrow(selected_geographies()) > 1) {
           summary_statistics <- summary_statistics %>%
@@ -342,7 +344,8 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
 
         n_units <- switch(input_aggregate_area(),
           csd = "Census Subdivision",
-          ct = "Census Tract"
+          ct = "Census Tract",
+          ridings = "Federal riding"
         )
 
         n_units <- ifelse(nrow(selected_geographies()) > 1,
