@@ -525,10 +525,11 @@ fed2023_upload <- fed2023_upload %>%
 # If not in this format, then Mapbox will reproject on upload, which takes time and can contribute to timing out
 
 fed2023_upload <- fed2023_upload %>%
-  st_transform(3857)
+  st_transform(3857) |>
+  select(-prov, -prov_group)
 
 
-test_upload <- fed2023_upload |>  filter(prov_group =='pe') |>select(-prov, -prov_group)
+#test_upload <- fed2023_upload |>  filter(prov_group =='pe') |>select(-prov, -prov_group)
 
 
 # Upload
