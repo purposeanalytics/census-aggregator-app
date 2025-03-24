@@ -34,6 +34,7 @@ app_server <- function(input, output, session) {
     ignoreNULL = FALSE,
     {
       if (input_aggregate_area() == "ct") {
+        rlog::log_info("ct polygon filter")
         if (all(input$ct_polygon_filter == "") | is.null(input$ct_polygon_filter)) {
           selected_geographies(
             tibble::tibble()
@@ -52,6 +53,7 @@ app_server <- function(input, output, session) {
     ignoreNULL = FALSE,
     {
       if (input_aggregate_area() == "csd") {
+        rlog::log_info("csd polygon filter")
         if (all(input$csd_polygon_filter == "" | is.null(input$csd_polygon_filter))) {
           selected_geographies(
             tibble::tibble()
@@ -69,8 +71,8 @@ app_server <- function(input, output, session) {
     input$ridings_polygon_filter, # Set in JS
     ignoreNULL = FALSE,
     {
-      rlog::log_info(paste("Ridings polygon filter",input$ridings_polygon_filter))
       if (input_aggregate_area() == "ridings") {
+      rlog::log_info(paste("Ridings polygon filter",input$ridings_polygon_filter))
         if (all(input$ridings_polygon_filter == "" | is.null(input$ridings_polygon_filter))) {
           selected_geographies(
             tibble::tibble()

@@ -551,7 +551,8 @@ upload_tiles(
 
 riding <- fed2023 %>%
   st_set_geometry(NULL) %>%
-  select(all_of(c("geo_uid",            "population",         "households",         "area_sq_km",         "population_density")))
+  select(all_of(c("geo_uid",            "population",         "households",         "area_sq_km",         "population_density"))) |>
+  distinct()
 
 usethis::use_data(ridings, overwrite = TRUE)
 

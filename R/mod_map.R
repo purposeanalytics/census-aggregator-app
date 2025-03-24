@@ -60,6 +60,7 @@ mod_map_server <- function(id, input_aggregate_area, input_selection_tool, selec
     shiny::observeEvent(
       bookmark_bounds(),
       {
+        rlog::log_info("Observe bookmark_bounds")
         mapboxer::mapboxer_proxy(ns("map")) %>%
           mapboxer::fit_bounds(bookmark_bounds()) %>%
           mapboxer::update_mapboxer()
@@ -77,6 +78,7 @@ mod_map_server <- function(id, input_aggregate_area, input_selection_tool, selec
       {
 
         # Only run these once the map has been rendered for the first time
+        rlog::log_info("observe event input_aggreatetarea and seleccted geographies")
         shiny::req(map_rendered())
         shiny::req(input_aggregate_area())
         rlog::log_info(paste("Input Aggregate Areas is", input_aggregate_area() ))
