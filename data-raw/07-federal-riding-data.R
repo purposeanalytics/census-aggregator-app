@@ -539,12 +539,12 @@ if(FALSE){
 access_token <-   Sys.getenv('MAPBOX_SECRET_TOKEN')
 
 upload_tiles(
-  input = fed2023_upload,
+  input = test_upload,
   access_token = access_token,
   username = "purposeanalytics",
   tileset_id = "2021_ridings",
   tileset_name = "2021_census_ridings",
-  multipart=TRUE
+  multipart =FALSE
 )
 
 }
