@@ -412,9 +412,11 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
       },
       content = function(file) {
         shiny::req(nrow(selected_geographies()) > 0)
-        dataset <- arrow::open_dataset(app_sys(glue::glue("extdata/{input$aggregate_area}")))
 
-        query <- dplyr::filter(dataset, .data$geo_uid %in% selected_geographies()[["geo_uid"]])
+        dataset_path <- app_sys(glue::glue("extdata/{input$aggregate_area}"))
+        dataset <- arrow::open_dataset(dataset_path)
+        sg <- selected_geographies()
+        query <- dplyr::filter(dataset, geo_uid %in% sg$geo_uid)
 
         sfarrow::read_sf_dataset(query) %>%
           sf::st_union() %>%
