@@ -27,8 +27,10 @@ add_census_fill_layer <- function(map, geography) {
   quantiles <- switch(geography,
     csd = censusaggregatorapp::csd_population_density_quantiles,
     ct = censusaggregatorapp::ct_population_density_quantiles,
-    ridings = censusaggregatorapp::ridings_population_density_quintiles
+    ridings = censusaggregatorapp::ridings_population_density_quantiles
   )
+
+  fill_opacity <- ifelse(geography == "ridings", 0.75/1.5, 0.75)
 
   map %>%
     mapboxer::add_layer(
@@ -48,7 +50,7 @@ add_census_fill_layer <- function(map, geography) {
             # Default - should never come up
             fill_palette[1]
           ),
-          "fill-opacity" = 0.75
+          "fill-opacity" = fill_opacity
         ),
         layout = list(
           "visibility" = "none"
@@ -67,6 +69,7 @@ add_census_line_layer <- function(map, geography) {
  rlog::log_info(paste("click layer id" ,  click_layer_id))
  rlog::log_info(paste("line layer id" ,  hover_layer_id))
 
+ line_opacity <- ifelse(geography == "ridings", 0.25/1.5, 0.25)
 
   map %>%
     mapboxer::add_layer(
@@ -78,7 +81,7 @@ add_census_line_layer <- function(map, geography) {
         paint = list(
           "line-color" = "white",
           "line-width" = 1,
-          "line-opacity" = 0.25
+          "line-opacity" = line_opacity
         ),
         layout = list(
           "visibility" = "none"

@@ -134,7 +134,7 @@ upload_tiles(
 
 csd <- csd %>%
   st_set_geometry(NULL) %>%
-  select(-region_name, -tidyselect::ends_with("fmt"))
+  select(-tidyselect::ends_with("fmt"))
 
 usethis::use_data(csd, overwrite = TRUE)
 

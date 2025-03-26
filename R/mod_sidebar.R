@@ -30,23 +30,30 @@ mod_sidebar_ui <- function(id) {
       shiny::p("CensusAggregator makes it easier to aggregate and retrieve common census variables for custom regions that span multiple census geographic areas. Follow the steps below to create a custom area on the map and download a summary report, data file, and boundary file for that area. CensusAggregator uses data from the 2021 Canadian census."),
       sidebar_header(
         "Step 1: Choose a geographic unit",
-        tooltip("Census tracts (CTs) are small, relatively stable geographic areas that usually have a population of fewer than 7,500 persons, based on data from the previous Census of Population Program. They are located in census metropolitan areas (CMAs) and in census agglomerations (CAs) that had a core population of 50,000 or more in the previous census.<br><br>Census subdivision (CSD) is the general term for municipalities (as determined by provincial/territorial legislation) or areas treated as municipal equivalents for statistical purposes (e.g., Indian reserves, Indian settlements and unorganized territories).")
+        bslib::tooltip(bsicons::bs_icon("info-circle", class = "help-icon"),
+        HTML("Census tracts (CTs) are small, relatively stable geographic areas that usually have a population of fewer than 7,500 persons, based on data from the previous Census of Population Program. They are located in census metropolitan areas (CMAs) and in census agglomerations (CAs) that had a core population of 50,000 or more in the previous census.
+                <br><br>Census subdivision (CSD) is the general term for municipalities (as determined by provincial/territorial legislation) or areas treated as municipal equivalents for statistical purposes (e.g., Indian reserves, Indian settlements and unorganized territories).
+                <br><br>Federal electoral districts (FED) portray the geographic areas represented by members of the House of Commons. The federal electoral district boundaries are redistributed every 10 years to reflect changes in Canada's population. The latest Representation Order was proclaimed in 2023 with 343 federal electoral districts."),
+        placement = "auto",
+        style = "display: inline-block;")
       ),
       shinyWidgets::prettyRadioButtons(
         ns("aggregate_area"),
         NULL,
         choices = list(
-          "Census tract" = "ct",
-          "Census subdivision" = "csd",
-          "Federal riding (2023 order)" = "ridings"
+          "Census Tract" = "ct",
+          "Census Subdivision" = "csd",
+          "Federal Electoral District" = "ridings"
         ),
         inline = TRUE
       ),
       shiny::div(
         sidebar_header(
           "Step 2: Choose an area selection method",
-          tooltip(shiny::HTML('Use the "Click to select/deselect" option to select one geographic area at a time. Each selected geographic area will be highlighted with a bold outline. This option also permits the selection of non-contiguous areas.<br><br>Use the "Draw a polygon" option to draw a continuous boundary. Each mouse click marks a new point in the boundary. To complete the polygon selection, use a double mouse click for the final point or click on the first point to close the loop. The census geographic areas that overlap with polygon will be selected and highlighted with a bold outline.')),
-          style = ""
+          bslib::tooltip(bsicons::bs_icon("info-circle", class = "help-icon"),
+                         HTML('Use the "Click to select/deselect" option to select one geographic area at a time. Each selected geographic area will be highlighted with a bold outline. This option also permits the selection of non-contiguous areas.<br><br>Use the "Draw a polygon" option to draw a continuous boundary. Each mouse click marks a new point in the boundary. To complete the polygon selection, use a double mouse click for the final point or click on the first point to close the loop. The census geographic areas that overlap with polygon will be selected and highlighted with a bold outline.'),
+                         placement = "auto",
+                         style = "display: inline-block;")
         ),
         shinyWidgets::prettyRadioButtons(
           ns("selection_tool"),
@@ -68,19 +75,24 @@ mod_sidebar_ui <- function(id) {
       sidebar_header("Step 3: Download data"),
       shiny::div(
         shinyjs::disabled(
-          shinyWidgets::dropdownButton(
-            inputId = ns("download_report"),
-            circle = FALSE,
-            inline = TRUE,
-            label = "Download report",
-            mod_download_report_ui(ns("pdf"), "(pdf)"),
-            mod_download_report_ui(ns("html"), "(html)")
+          shiny::actionButton(
+            ns("view_data"),
+            "View Data",
+            icon = NULL
+          )
+        ),
+        shinyjs::disabled(
+          shiny::downloadButton(
+            ns("download_report"),
+            "Download PDF",
+            width = "100%",
+            icon = NULL
           )
         ),
         shinyjs::disabled(
           shiny::downloadButton(
             ns("download_data"),
-            "Download data (csv)",
+            "Download CSV",
             width = "100%",
             icon = NULL
           )
@@ -88,7 +100,7 @@ mod_sidebar_ui <- function(id) {
         shinyjs::disabled(
           shiny::downloadButton(
             ns("download_boundary"),
-            "Download boundary (geojson)",
+            "Download GEOJSON",
             width = "100%",
             icon = NULL
           )
@@ -293,6 +305,7 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
         # Disable buttons
         shinyjs::disable("reset")
         shinyjs::disable("share")
+        shinyjs::disable("view_data")
         shinyjs::disable("download_report")
         shinyjs::disable("download_data")
         shinyjs::disable("download_boundary")
@@ -309,6 +322,7 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
         # Enable buttons
         shinyjs::enable("reset")
         shinyjs::enable("share")
+        shinyjs::enable("view_data")
         shinyjs::enable("download_report")
         shinyjs::enable("download_data")
         shinyjs::enable("download_boundary")
@@ -345,7 +359,7 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
         n_units <- switch(input_aggregate_area(),
           csd = "Census Subdivision",
           ct = "Census Tract",
-          ridings = "Federal riding"
+          ridings = "Federal Electoral District"
         )
 
         n_units <- ifelse(nrow(selected_geographies()) > 1,
@@ -390,8 +404,57 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
     })
 
     # Export  ----
-    mod_download_report_server("pdf", input_aggregate_area, selected_geographies, bookmark_query)
-    mod_download_report_server("html", input_aggregate_area, selected_geographies, bookmark_query)
+
+    shiny::observeEvent(input$view_data, {
+      mod_display_stats_in_modal_server("display_stats_in_modal_1", input_aggregate_area, selected_geographies, bookmark_query)
+    })
+
+    output$download_report <- shiny::downloadHandler(
+
+      filename = function() {
+        "CensusAggregator Data.pdf"
+      },
+
+
+      content = function(file) {
+
+
+        shinyjs::runjs("document.getElementById('sidebar-download_report').innerText = 'Processing...';")
+        shinyjs::disable("download_report")
+
+        # Move to tempdir to save files
+        original_wd <- setwd(tempdir())
+
+        # Go back to working directory after function
+        on.exit(setwd(original_wd))
+
+        temp_template <- "report.Rmd"
+        file.copy(app_sys("report/style.css"), "style.css", overwrite = TRUE)
+        file.copy(app_sys("report/report.Rmd"), temp_template, overwrite = TRUE)
+
+        # Set up parameters to pass to Rmd document
+        params <- list(
+          geo_uid = selected_geographies()$geo_uid,
+          geography = input_aggregate_area(),
+          bookmark = bookmark_query()
+        )
+
+        # Knit the document, passing in the `params` list, and eval it in a
+        # child of the global environment (this isolates the code in the document
+        # from the code in this app).
+        rmarkdown::render(temp_template,
+                          output_file = "CensusAggregator Report.html",
+                          params = params,
+                          envir = new.env(parent = globalenv()),
+                          quiet = TRUE
+        )
+
+        print_report(input = "CensusAggregator Report.html", output = file)
+
+        shinyjs::runjs("document.getElementById('sidebar-download_report').innerText = 'Download PDF';")
+        shinyjs::enable("download_report")
+      }
+    )
 
     output$download_data <- shiny::downloadHandler(
       filename = function() {
@@ -433,6 +496,46 @@ sidebar_header <- function(..., style = NULL) {
 }
 
 tooltip <- function(content) {
-  shiny::icon("question-circle", `data-html` = "true", style = "color: lightgrey;") %>%
-    bsplus::bs_embed_popover(title = NULL, content = content, placement = "right", container = "body", trigger = "hover")
+  bsicons::bs_icon("question-circle", `data-html` = "true", style = "color: lightgrey;") # %>%
+    # bsplus::bs_embed_popover(title = NULL, content = content, placement = "bottom", container = "body")
+}
+
+print_report <- function(input = "inst/report/report.html", output = "report.pdf") {
+  pagedown::chrome_print(
+    input,
+    output = output,
+    options = list(
+      displayHeaderFooter = TRUE,
+      footerTemplate = format(
+        shiny::div(
+          style = "width: 100%; font-size: 10pt; font-family: 'Lato'; float: right; text-align: right; padding-right: 2.1cm; padding-bottom: 0.5cm;",
+          shiny::span(class = "pageNumber")
+        ),
+        indent = FALSE
+      ),
+      headerTemplate = format(shiny::div(), indent = FALSE),
+      marginTop = 0.5,
+      marginBottom = 0.75
+    ),
+    extra_args = chrome_extra_args(),
+    verbose = FALSE
+  )
+}
+
+# Via: https://github.com/RLesur/chrome_print_shiny
+#' Return Chrome CLI arguments
+#'
+#' This is a helper function which returns arguments to be passed to Chrome. This function includes Chrome arguments for running on Shinyapps or just for when you need them in general - e.g. we are running this app in a Docker container, but not on shinyapps
+#'
+#' @param default_args Arguments to be used in any circumstances.
+#'
+#' @return A character vector with CLI arguments to be passed to Chrome.
+#' @noRd
+chrome_extra_args <- function(default_args = c("--disable-gpu")) {
+  args <- c(
+    default_args,
+    "--no-sandbox", # required because we are in a container
+    "--disable-dev-shm-usage" # in case of low available memory
+  )
+  args
 }

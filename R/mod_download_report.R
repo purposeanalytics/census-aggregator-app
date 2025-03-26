@@ -9,12 +9,8 @@
 #' @importFrom shiny NS tagList
 mod_download_report_ui <- function(id, label) {
   ns <- NS(id)
+  tagList(
 
-  shiny::downloadButton(
-    ns("export_data"),
-    label,
-    width = "100%",
-    icon = NULL
   )
 }
 
@@ -27,7 +23,7 @@ mod_download_report_server <- function(id, aggregate_area, selected_geographies,
 
     type <- ifelse(stringr::str_ends(id, "pdf"), "pdf", "html")
 
-    output$export_data <- shiny::downloadHandler(
+    output$download_report <- shiny::downloadHandler(
       filename = function() {
         glue::glue("CensusAggregator Report.{type}")
       },

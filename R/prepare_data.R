@@ -1,6 +1,6 @@
 if(FALSE){
-library(tidyverse)
-library(censusaggregate)
+# library(tidyverse)
+# library(censusaggregate)
 geography <-'ridings'
 regions <- c("2023A000411004", "2023A000411001")
 dataset <-'extdata/ridings_values/'
