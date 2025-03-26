@@ -311,20 +311,6 @@ fed2023_unsimplified <- federal_ridings_clipped_sf |>
   select(-SHAPE_AREA, -REP_ORDER, -SHAPE_LEN, -ED_NAMEF)
 
 
-needed_columns <- c(
-  "geo_uid",
-  "pr_uid",
-  "region_name",
-  "population",
-  "households",
-  "area_sq_km",
-  "population_density",
-  "geometry"
-)
-
-##STILL NEED THESE
-setdiff(needed_columns, names(fed2023_unsimplified))
-
 # THIS MAY BE NEEDED IF ANY OF THE RIDINGS END UP AS TYPE GEOMETRYCOLLECTION
 #
 # ridings_geometry_types <- map(fed2023$geometry,function(x){
@@ -392,13 +378,6 @@ fed2023_unsimplified <- fed2023_unsimplified |>
 
 fed2023_split <-  fed2023_unsimplified %>% split(.$prov_group)
 
-map(fed2023_split, function(feature) {
-  pts <- npts(feature)
-  rlog::log_info(paste("Processing", unique(feature$prov_group), "Num points", pts))
-  pts
-})
-
-
 fed2023 <-  map(fed2023_split, function(feature) {
     pts <- npts(feature)
     rlog::log_info(paste("Processing", unique(feature$prov_group), "Num points", pts))
@@ -443,7 +422,7 @@ population_households <- census_profile |>
 land_area_of_ridings <- fed2023 |>  st_drop_geometry() |> select(geo_uid, area_sq_km)
 
 
-riding2023 <- census_profile |>  select(DGUID, GEO_NAME) |>  distinct() |>
+riding2023 <- census_profile |>  select(DGUID, GEO_NAME) |>  distinct() |> filter(!is.na(GEO_NAME)) |>
   rename('geo_uid' = 'DGUID') |>
   left_join(land_area_of_ridings) |>
   mutate(
