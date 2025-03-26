@@ -19,6 +19,9 @@ with_children_vectors <- vectors %>%
   select(vector) %>%
   mutate(new_vector = "Couples with children")
 
+saveRDS(with_children_vectors, here::here("data-raw", "intermediary", "with_children_vectors.rds"))
+
+
 educational_attainment_vectors <- vectors %>%
   filter(label_short == "educational_attainment", vector != highest_parent_vector) %>%
   mutate(new_vector = case_when(
