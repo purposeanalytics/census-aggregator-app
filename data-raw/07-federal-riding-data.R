@@ -273,6 +273,28 @@ census_profile <- census_profile |> filter(!vector_number %in% educational_attai
 
 census_profile <- census_profile  |> bind_rows(educational_attainment_profile_form)
 
+########## couples with children
+
+
+with_children_vectors <- readRDS(here::here("data-raw", "intermediary", "with_children_vectors.rds")) |>
+  mutate(vector_number = as.numeric(str_remove(vector, "v_CA21_")))
+
+
+with_children_profile_form <- census_profile  |>  filter(vector_number %in% with_children_vectors$vector_number) |>
+  mutate(value = C1_COUNT_TOTAL) |>
+  select(CHARACTERISTIC_ID, CHARACTERISTIC_NAME, value, vector_number, DGUID,label, details) |>
+  left_join(with_children_vectors) |>
+  group_by(DGUID,new_vector) |>
+  summarise(value = sum(value, na.rm = TRUE), .groups = 'drop') |>
+  rename(vector = new_vector) |>
+  mutate(label_short= 'couples')
+
+census_profile <- census_profile |> filter(!vector_number %in% with_children_vectors$vector_number)
+
+census_profile <- census_profile  |> bind_rows(with_children_profile_form)
+
+
+
 
 ##################################
 ##################################
@@ -282,6 +304,13 @@ rm(census_profile_raw)
 
 #######vector values
 #SEE: arrow::read_parquet('inst/extdata/ct_values/id=00/part-0.parquet')
+#
+#   arrow::read_parquet('inst/extdata/csd_values/id=10/part-0.parquet')
+#   load('data/vectors.rda')
+
+#
+#
+
 fs::dir_delete("inst/extdata/ridings_values/")
 census_profile |>
   select(DGUID, vector, value) |>
