@@ -342,9 +342,13 @@ bslib-tooltip {
 }
 
 /* Cursor on disabled buttons */
-button:disabled, .btn.disabled {
+a[disabled], button:disabled, .btn.disabled {
   cursor: not-allowed;
   pointer-events: all !important;
+  color: var(--bs-btn-disabled-color);
+  background-color: var(--bs-btn-disabled-bg);
+  border-color: var(--bs-btn-disabled-border-color);
+  opacity: var(--bs-btn-disabled-opacity);
 }
 
 /* Style secondary buttons (link style) to have no background colour, no outline, no padding */
