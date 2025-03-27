@@ -9,7 +9,12 @@ app_ui <- function(request) {
     # shiny::div(
     # style = "display: flex;",
     bslib::page_fluid(
-      theme = bslib::bs_theme(version = 4),
+      theme = bslib::bs_theme(version = 5) |>
+        bslib::bs_add_variables("tooltip-max-width" = "360px",
+                                "tooltip-bg" = "white",
+                                "tooltip-color" = "#1D1F21",
+                                "tooltip-opacity" = 1
+                                ),
       shiny::fluidRow(
         shiny::div(
           class = "col-sm-8 censusagg-col",
@@ -43,8 +48,6 @@ golem_add_external_resources <- function() {
       app_title = "CensusAggregator"
     ),
     shinyjs::useShinyjs(),
-    bsplus::use_bs_popover(),
-    bsplus::use_bs_tooltip(),
     shiny::tags$head(shiny::HTML("
       <!-- Google tag (gtag.js) -->
       <script async src='https://www.googletagmanager.com/gtag/js?id=G-JFNPH9EW2R'></script>

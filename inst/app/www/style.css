@@ -66,11 +66,12 @@ p, h1, h2, h3, h4, h5, h6 {
   --regular-weight: 400;
   --bold-weight: 700;
   --main-color: #5FD3BC;
+  --main-background-color: #5FD3BC;
   --secondary-color: #3D3D3D;
   --tertiary-color: #447E72;
   --breathing-room: 25px;
   --little-breath: 4px;
-  --radio-button-color: #6c757d;
+  --radio-button-color: #6c757d
 }
 
 /* ------  Header and font styles ------ */
@@ -118,6 +119,7 @@ table {
 
 .censusagg-map {
   height: 100vh;
+  position: relative;
 }
 
 .censusagg-sidebar {
@@ -135,6 +137,132 @@ table {
   height: 50px;
 }
 
+bslib-tooltip {
+}
+
+.tooltip-inner {
+  box-shadow: 0px 0px 3px #aaaaaa;
+  text-align: left;
+}
+
+.help-icon {
+  color: #aaaaaa;
+  margin-bottom: -2px;
+}
+
+.modal {
+
+  .close-modal-button .btn {
+    border: 0px none;
+    float: right;
+    color: #cccccc;
+    padding: 10px 20px;
+    margin-right: -20px;
+  }
+
+  .close-modal-button .btn:hover {
+    background: none;
+    color: #000000;
+  }
+
+  --bs-modal-margin: 50px;
+
+  .title {
+    display: none;
+  }
+
+  .section-heading hr {
+    border-top: 2px solid var(--main-background-color);
+  }
+
+  .subsection-heading {
+    font-weight: var(--bold-weight);
+    background-color: white;
+    color: var(--main-background-color);
+    padding-top: 0.5rem;
+    padding-bottom: 0;
+  }
+
+  .box {
+    min-height: 106px;
+    height: 100%;
+    background-color: var(--main-background-color);
+    color: white;
+    padding: 0.5rem;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .card-value {
+    margin-top: auto;
+    font-size: 2rem;
+    font-weight: bold;
+  }
+
+  h1 {
+    font-size: 1.5rem;
+  }
+
+  .title-heading {
+    margin-top: 0.5em;
+  }
+
+  h2 {
+    font-size: 1.5rem;
+  }
+
+  h3 {
+    font-size: 1.25rem;
+  }
+
+  a {
+    color: var(--main-color);
+  }
+
+  .gt_table {
+    font-size: var(--base-size) !important;
+  }
+
+  /* Hide PDF definitions table in HTML */
+  .definitions-table-pdf {
+    display: none;
+  }
+
+  .print-header {
+    display: block;
+    width: 100%;
+    height: 75px;
+    margin: 1rem 0;
+  }
+
+  .print-header .left-logo {
+    float: left;
+    text-align: left;
+    max-width: 75%;
+    height: 100%;
+  }
+
+  .print-header .right-logo {
+    float: right;
+    text-align: right;
+    max-width: 25%;
+    height: 100%;
+  }
+
+  .print-header img {
+    height: 100%;
+  }
+
+  .censusagg-link {
+    margin-bottom: 0.5rem;
+  }
+
+  .censusagg-link a {
+    font-size: var(--bigger-size);
+  }
+
+}
+
 /* Inputs */
 
 /* Radio buttons */
@@ -148,6 +276,10 @@ table {
 .shiny-input-radiogroup > .control-label {
   font-size: var(--bigger-size);
   font-weight: var(--bold-weight);
+}
+
+.pretty {
+  margin-bottom: 0.6em;
 }
 
 /* Radio button choices */
@@ -164,6 +296,10 @@ table {
   margin-bottom: 0;
   margin-right: var(--little-breath);
   float: left;
+}
+
+#sidebar-reset {
+  margin-top: -4px;
 }
 
 /* Spacing for share button */
@@ -256,6 +392,13 @@ button:disabled, .btn.disabled {
   display: none !important;
 }
 
+.js-plotly-plot .plotly .mapboxgl-map {
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 370px !important;
+}
+
 /* Legend */
 
 .map-overlay {
@@ -328,4 +471,5 @@ button:disabled, .btn.disabled {
     left: unset !important;
   }
 }
+
 

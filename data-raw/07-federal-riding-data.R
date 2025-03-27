@@ -1,4 +1,5 @@
 library(tidyverse)
+library(purrr)
 library(arrow)
 library(sf)
 library(sfarrow)
@@ -407,7 +408,7 @@ fed2023_unsimplified <- fed2023_unsimplified |>
 
 fed2023_split <-  fed2023_unsimplified %>% split(.$prov_group)
 
-fed2023 <-  map(fed2023_split, function(feature) {
+fed2023 <- map(fed2023_split, function(feature) {
     pts <- npts(feature)
     rlog::log_info(paste("Processing", unique(feature$prov_group), "Num points", pts))
 
@@ -451,8 +452,9 @@ population_households <- census_profile |>
 land_area_of_ridings <- fed2023 |>  st_drop_geometry() |> select(geo_uid, area_sq_km)
 
 
-riding2023 <- census_profile |>  select(DGUID, GEO_NAME) |>  distinct() |> filter(!is.na(GEO_NAME)) |>
-  rename('geo_uid' = 'DGUID') |>
+riding2023 <- census_profile |>  select(DGUID, GEO_NAME) |>  distinct() |>
+  rename(geo_uid = DGUID,
+         geo_name = GEO_NAME) |>
   left_join(land_area_of_ridings) |>
   mutate(
     pr_uid = str_sub(geo_uid, 10, 11)
@@ -460,6 +462,7 @@ riding2023 <- census_profile |>  select(DGUID, GEO_NAME) |>  distinct() |> filte
   select(any_of(
     c(
       "geo_uid"  ,
+      "geo_name",
       "pr_uid",
       "population",
       "households",
@@ -480,9 +483,9 @@ fed2023 <- fed2023  |> left_join(ridings)
 
  load('data/csd_quantiles_text.rda')
  load('data/csd_population_density_quantiles.rda')
- ridings_population_density_quintiles <- csd_population_density_quantiles
+ ridings_population_density_quantiles <- csd_population_density_quantiles
  ridings_quantiles_text <- csd_quantiles_text
-usethis::use_data(ridings_population_density_quintiles, overwrite = TRUE)
+usethis::use_data(ridings_population_density_quantiles, overwrite = TRUE)
 usethis::use_data(ridings_quantiles_text, overwrite = TRUE)
 rm(csd_population_density_quantiles)
 rm(csd_quantiles_text)
@@ -559,9 +562,16 @@ upload_tiles(
 
 riding <- fed2023 %>%
   st_set_geometry(NULL) %>%
-  select(all_of(c("geo_uid",            "population",         "households",         "area_sq_km",         "population_density"))) |>
-  distinct()
+  select(all_of(c("geo_uid",
+                  "geo_name",
+                  "population",
+                  "households",
+                  "area_sq_km",
+                  "population_density"))) |>
+  distinct() |>
+  filter(!is.na(geo_name))
 
+ridings <- riding
 usethis::use_data(ridings, overwrite = TRUE)
 
 
