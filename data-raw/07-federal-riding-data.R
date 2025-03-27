@@ -7,6 +7,12 @@ library(mapview)
 library(rmapshaper)
 library(mapboxapi)
 library(cancensus)
+if(FALSE){
+ usethis::edit_r_environ(scope ='project')
+#MAPBOX_SECRET_TOKEN=
+#MAPBOX_API_TOKEN=
+#GITHUB_PAT=
+}
 
 
 #dev parameters
