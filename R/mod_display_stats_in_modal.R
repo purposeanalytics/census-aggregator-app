@@ -33,7 +33,6 @@ mod_display_stats_in_modal_server <- function(id, aggregate_area, selected_geogr
         split(.$label) %>%
         purrr::map(~ .x %>%
                      dplyr::select(-label) %>%
-
                      dplyr::rename(label = breakdown))
 
       ##
@@ -404,7 +403,7 @@ mod_display_stats_in_modal_server <- function(id, aggregate_area, selected_geogr
       )
 
       # insert into html template
-      htmlTemplate("inst/report/template.html",
+      htmlTemplate(system.file("report/template.html", package = "censusaggregatorapp"),
                    modal_close = modal_close,
                    title = title,
                    fig = fig,

@@ -14,10 +14,10 @@
 "csd_quantiles_text"
 
 #' Breaks for riding population density used in map
-"riding_population_density_quantiles"
+"ridings_population_density_quantiles"
 
 #' Legend for breaks for riding population density used in map
-"riding_quantiles_text"
+"ridings_quantiles_text"
 
 #' Variable definitions
 "variable_definitions"

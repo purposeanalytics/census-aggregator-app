@@ -499,7 +499,6 @@ sidebar_header <- function(..., style = NULL) {
 
 tooltip <- function(content) {
   bsicons::bs_icon("question-circle", `data-html` = "true", style = "color: lightgrey;") # %>%
-    # bsplus::bs_embed_popover(title = NULL, content = content, placement = "bottom", container = "body")
 }
 
 print_report <- function(input = "inst/report/report.html", output = "report.pdf") {
