@@ -14,6 +14,7 @@ Imports:
     arrow,
     bsicons,
     bslib,
+    censusaggregate,
     config (>= 0.3.1),
     curl,
     dplyr,
