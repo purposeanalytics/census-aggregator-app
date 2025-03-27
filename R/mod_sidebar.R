@@ -40,11 +40,12 @@ mod_sidebar_ui <- function(id) {
       shinyWidgets::prettyRadioButtons(
         ns("aggregate_area"),
         NULL,
-        choices = list(
-          "Census Tract" = "ct",
-          "Census Subdivision" = "csd",
-          "Federal Electoral District" = "ridings"
+        choiceNames = list(
+          HTML("Census Tract"),
+          HTML("Census Subdivision"),
+          HTML("<span class='badge'>New!</span>Federal Electoral District")
         ),
+        choiceValues = c("ct", "csd", "ridings"),
         inline = TRUE
       ),
       shiny::div(
@@ -72,7 +73,7 @@ mod_sidebar_ui <- function(id) {
           )
         )
       ),
-      sidebar_header("Step 3: Download data"),
+      sidebar_header("Step 3: Explore data"),
       shiny::div(
         shinyjs::disabled(
           shiny::actionButton(

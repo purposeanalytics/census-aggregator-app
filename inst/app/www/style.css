@@ -150,6 +150,12 @@ bslib-tooltip {
   margin-bottom: -2px;
 }
 
+.badge {
+  background-color: #5FD3BC;
+  display: inherit;
+  margin-right: 4px;
+}
+
 .modal {
 
   .close-modal-button .btn {
