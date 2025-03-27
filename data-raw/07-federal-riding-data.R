@@ -274,6 +274,28 @@ census_profile <- census_profile |> filter(!vector_number %in% educational_attai
 
 census_profile <- census_profile  |> bind_rows(educational_attainment_profile_form)
 
+########## couples with children
+
+
+with_children_vectors <- readRDS(here::here("data-raw", "intermediary", "with_children_vectors.rds")) |>
+  mutate(vector_number = as.numeric(str_remove(vector, "v_CA21_")))
+
+
+with_children_profile_form <- census_profile  |>  filter(vector_number %in% with_children_vectors$vector_number) |>
+  mutate(value = C1_COUNT_TOTAL) |>
+  select(CHARACTERISTIC_ID, CHARACTERISTIC_NAME, value, vector_number, DGUID,label, details) |>
+  left_join(with_children_vectors) |>
+  group_by(DGUID,new_vector) |>
+  summarise(value = sum(value, na.rm = TRUE), .groups = 'drop') |>
+  rename(vector = new_vector) |>
+  mutate(label_short= 'couples')
+
+census_profile <- census_profile |> filter(!vector_number %in% with_children_vectors$vector_number)
+
+census_profile <- census_profile  |> bind_rows(with_children_profile_form)
+
+
+
 
 ##################################
 ##################################
@@ -283,6 +305,13 @@ rm(census_profile_raw)
 
 #######vector values
 #SEE: arrow::read_parquet('inst/extdata/ct_values/id=00/part-0.parquet')
+#
+#   arrow::read_parquet('inst/extdata/csd_values/id=10/part-0.parquet')
+#   load('data/vectors.rda')
+
+#
+#
+
 fs::dir_delete("inst/extdata/ridings_values/")
 census_profile |>
   select(DGUID, vector, value) |>
@@ -311,20 +340,6 @@ fed2023_unsimplified <- federal_ridings_clipped_sf |>
   rename(geo_uid  = DGUID) |>
   select(-SHAPE_AREA, -REP_ORDER, -SHAPE_LEN, -ED_NAMEF)
 
-
-needed_columns <- c(
-  "geo_uid",
-  "pr_uid",
-  "region_name",
-  "population",
-  "households",
-  "area_sq_km",
-  "population_density",
-  "geometry"
-)
-
-##STILL NEED THESE
-setdiff(needed_columns, names(fed2023_unsimplified))
 
 # THIS MAY BE NEEDED IF ANY OF THE RIDINGS END UP AS TYPE GEOMETRYCOLLECTION
 #
@@ -392,13 +407,6 @@ fed2023_unsimplified <- fed2023_unsimplified |>
 
 
 fed2023_split <-  fed2023_unsimplified %>% split(.$prov_group)
-
-map(fed2023_split, function(feature) {
-  pts <- npts(feature)
-  rlog::log_info(paste("Processing", unique(feature$prov_group), "Num points", pts))
-  pts
-})
-
 
 fed2023 <- map(fed2023_split, function(feature) {
     pts <- npts(feature)
