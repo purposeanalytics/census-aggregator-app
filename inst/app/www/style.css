@@ -145,6 +145,8 @@ bslib-tooltip {
 .tooltip-inner {
   border: 1px solid #cccccc;
   box-shadow: 0px 0px 3px #cccccc;
+  -moz-box-shadow: 0px 0px 3px #cccccc;
+  -webkit-box-shadow: 0px 0px 3px #cccccc;
   text-align: left;
   font-family: var(--font) !important;
 }
@@ -349,7 +351,6 @@ bslib-tooltip {
 .dropdown-menu {
   width: 98% !important;
   min-width: 0 !important;
-  max-height: 320px !important;
 }
 /* Polygon drawing */
 

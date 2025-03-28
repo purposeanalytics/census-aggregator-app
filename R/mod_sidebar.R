@@ -429,9 +429,8 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
 
       content = function(file) {
 
-
+        shinyjs::disable(ns("download_report"))
         shinyjs::runjs("document.getElementById('sidebar-download_report').innerText = 'Processing...';")
-        shinyjs::disable("download_report")
 
         # Move to tempdir to save files
         original_wd <- setwd(tempdir())
@@ -463,7 +462,7 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
         print_report(input = "CensusAggregator Report.html", output = file)
 
         shinyjs::runjs("document.getElementById('sidebar-download_report').innerText = 'Download PDF';")
-        shinyjs::enable("download_report")
+        shinyjs::enable(ns("download_report"))
       }
     )
 
