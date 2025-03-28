@@ -22,8 +22,6 @@ mod_display_stats_in_modal_server <- function(id, aggregate_area, selected_geogr
 
     output$html_output <- renderUI({
 
-      source("R/utils_report_helpers.R")
-
       ##
       # prep data ----
       regions <- selected_geographies()$geo_uid
@@ -161,8 +159,10 @@ mod_display_stats_in_modal_server <- function(id, aggregate_area, selected_geogr
       # Limit to regions, combine boundaries
       region_boundaries <- boundaries_data %>%
         dplyr::filter(geo_uid %in% regions)
-      region_boundaries <- region_boundaries %>%
-        sf::st_union()
+      region_boundaries <- region_boundaries |>
+        sf::st_transform(3587) %>%
+        sf::st_union()|>
+        sf::st_transform(4326)
 
       # Get bounding box
       regions_bbox <- region_boundaries %>%
@@ -190,7 +190,8 @@ mod_display_stats_in_modal_server <- function(id, aggregate_area, selected_geogr
           type = "scattermapbox",
           mode = "lines",
           fillcolor = fill_colour,
-          line = list(width = 1, color = "black")
+          line = list(width = 1, color = "black"),
+          hoverinfo = "none"
           )|>
         plotly::layout(
           mapbox = list(

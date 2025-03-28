@@ -7,6 +7,13 @@
 #' @noRd
 #'
 #' @importFrom shiny NS tagList
+
+cities <- data.frame(
+  city = c("Toronto", "Vancouver", "Montreal"),
+  province = c("Ontario", "British Columbia", "Quebec"),
+  lat = c(43.65107, 49.28273, 45.50169),
+  lon = c(-79.347015, -123.120735, -73.567253)
+)
 mod_sidebar_ui <- function(id) {
   ns <- NS(id)
   shiny::div(
@@ -43,7 +50,7 @@ mod_sidebar_ui <- function(id) {
         choiceNames = list(
           HTML("Census Tract"),
           HTML("Census Subdivision"),
-          HTML("<span class='badge'>New!</span>Federal Electoral District")
+          HTML("Federal Electoral District <span class='badge'>New!</span>")
         ),
         choiceValues = c("ct", "csd", "ridings"),
         inline = TRUE
@@ -249,12 +256,15 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
 
               input_aggregate_area(bookmark_aggregate_area())
 
-              # Get bounds of selected area to fly map to
-              dataset <- arrow::open_dataset(app_sys(glue::glue("extdata/{bookmark_aggregate_area()}")))
 
-              query <- dplyr::filter(dataset, .data$geo_uid %in% selected_geographies()[["geo_uid"]])
+              # Get bounds of selected area to fly map to
+              dataset <- arrow::open_dataset(app_sys(glue::glue("extdata/{bookmark_aggregate_area()}"))) |>
+                dplyr::collect() |>
+                sf::st_as_sf()
+
+              query <<- dplyr::filter(dataset, geo_uid %in% selected_geographies()[["geo_uid"]])
               bookmark_bounds(
-                sfarrow::read_sf_dataset(query) %>%
+                query |>
                   sf::st_bbox()
               )
             }
@@ -407,7 +417,7 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
     # Export  ----
 
     shiny::observeEvent(input$view_data, {
-      mod_display_stats_in_modal_server("display_stats_in_modal_1", input_aggregate_area, selected_geographies, bookmark_query)
+        mod_display_stats_in_modal_server("display_stats_in_modal_1", input_aggregate_area, selected_geographies, bookmark_query)
     })
 
     output$download_report <- shiny::downloadHandler(

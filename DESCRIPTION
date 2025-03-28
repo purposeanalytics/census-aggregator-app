@@ -42,6 +42,8 @@ Imports:
     tibble,
     tidyr,
     utils
+Suggests: 
+    ggspatial
 Remotes:
     purposeanalytics/census-aggregator-package
 Encoding: UTF-8

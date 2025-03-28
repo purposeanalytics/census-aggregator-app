@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap');
+
 /* ------ CSS reset ------ */
 /* From from https://www.joshwcomeau.com/css/custom-css-reset/ */
 
@@ -56,10 +58,8 @@ p, h1, h2, h3, h4, h5, h6 {
 
 /* ------ App Styles ------ */
 
-@import url('https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap');
-
 :root {
-  --font: "Lato", Sans-Serif;
+  --font: "Lato", sans-serif;
   --base-size: 14px;
   --bigger-size: 16px;
   --smaller-size: 12px;
@@ -113,6 +113,7 @@ a:hover {
 }
 
 table {
+  font-family: var(--font) !important;
   color: var(--secondary-color);
   padding-left: 17px;
 }
@@ -138,11 +139,19 @@ table {
 }
 
 bslib-tooltip {
+  cursor: pointer;
 }
 
 .tooltip-inner {
-  box-shadow: 0px 0px 3px #aaaaaa;
+  border: 1px solid #cccccc;
+  box-shadow: 0px 0px 3px #cccccc;
   text-align: left;
+  font-family: var(--font) !important;
+}
+
+.tooltip .tooltip-arrow::before {
+  border-left-color: #cccccc !important;
+  border-width: calc(var(--bs-tooltip-arrow-width)* .7) 0 calc(var(--bs-tooltip-arrow-width)* .7) var(--bs-tooltip-arrow-height) !important;
 }
 
 .help-icon {
@@ -153,7 +162,7 @@ bslib-tooltip {
 .badge {
   background-color: #5FD3BC;
   display: inherit;
-  margin-right: 4px;
+  margin-left: 1px;
 }
 
 .modal {
@@ -340,6 +349,7 @@ bslib-tooltip {
 .dropdown-menu {
   width: 98% !important;
   min-width: 0 !important;
+  max-height: 320px !important;
 }
 /* Polygon drawing */
 
@@ -411,22 +421,25 @@ a[disabled], button:disabled, .btn.disabled {
 
 /* Legend */
 
-.map-overlay {
+.map-overlay-container {
   position: absolute;
   top: 10px;
   right: 30px;
-  background: #fff;
-  margin-right: 20px;
-  overflow: auto;
   border-radius: 3px;
+  font: 12px/20px Helvetica Neue,Arial,Helvetica,sans-serif;
+}
+
+.map-overlay {
+  margin-right: 20px;
+  border-radius: 3px;
+  min-width: 240px;
 }
 
 .legend {
-  font: 12px/20px Helvetica Neue,Arial,Helvetica,sans-serif;
   padding: 10px;
   line-height: 1.3rem;
-  min-width: 240px;
-  margin-bottom: 30px;
+  background: #fff;
+  margin-bottom: 20px;
   -moz-box-shadow: 0 0 2px rgba(0,0,0,.1);
   -webkit-box-shadow: 0 0 2px rgba(0,0,0,.1);
   box-shadow: 0 0 0 2px rgba(0,0,0,.1);
@@ -438,6 +451,27 @@ a[disabled], button:disabled, .btn.disabled {
   width: 10px;
   height: 10px;
   margin-right: 5px;
+}
+
+#select-municipality {
+  font-weight: bold;
+  width: 240px;
+}
+
+#select-municipality .btn {
+  font-size: 0.9em;
+  -moz-box-shadow: 0 0 2px rgba(0,0,0,.1);
+  -webkit-box-shadow: 0 0 2px rgba(0,0,0,.1);
+  box-shadow: 0 0 0 2px rgba(0,0,0,.1);
+  padding: 0.55em 9px;
+}
+
+#select-municipality #map-select_municipality-label {
+  margin-bottom: .25rem;
+}
+
+#select-municipality .dropdown-menu {
+  font-size: 0.95em;
 }
 
 /* Media queries - default is desktop */

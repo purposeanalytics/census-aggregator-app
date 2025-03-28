@@ -1,4 +1,4 @@
-#' report-helpers
+#' title-heading
 #'
 #' @description A utils function
 #'
@@ -14,6 +14,14 @@ title_heading <- function(title) {
     )
   )
 }
+
+#' section-heading
+#'
+#' @description A utils function
+#'
+#' @return The return value, if any, from executing the utility.
+#'
+#' @noRd
 section_heading <- function(title) {
   div(
     hr(),
@@ -25,6 +33,13 @@ section_heading <- function(title) {
   )
 }
 
+#' subsection-heading
+#'
+#' @description A utils function
+#'
+#' @return The return value, if any, from executing the utility.
+#'
+#' @noRd
 subsection_heading <- function(title, class = NULL) {
   div(
     class = "subsection-heading",
@@ -32,6 +47,14 @@ subsection_heading <- function(title, class = NULL) {
   )
 }
 
+
+#' snapshot-card-value
+#'
+#' @description A utils function
+#'
+#' @return The return value, if any, from executing the utility.
+#'
+#' @noRd
 snapshot_card_value <- function(value) {
   div(
     class = "card-value",
@@ -39,6 +62,13 @@ snapshot_card_value <- function(value) {
   )
 }
 
+#' snapshot-card
+#'
+#' @description A utils function
+#'
+#' @return The return value, if any, from executing the utility.
+#'
+#' @noRd
 snapshot_card <- function(title, value, ..., class = NULL) {
   div(
     class = paste("box", class),
@@ -48,6 +78,13 @@ snapshot_card <- function(title, value, ..., class = NULL) {
   )
 }
 
+#' header-and_barchart
+#'
+#' @description A utils function
+#'
+#' @return The return value, if any, from executing the utility.
+#'
+#' @noRd
 header_and_barchart <- function(...) {
   column(
     width = 6,
@@ -55,6 +92,14 @@ header_and_barchart <- function(...) {
   )
 }
 
+
+#' pull-and-format-value
+#'
+#' @description A utils function
+#'
+#' @return The return value, if any, from executing the utility.
+#'
+#' @noRd
 pull_and_format_value <- function(data, format = "percent", column = "value") {
   value <- data[[column]]
 
@@ -70,6 +115,14 @@ pull_and_format_value <- function(data, format = "percent", column = "value") {
   )
 }
 
+
+#' logo
+#'
+#' @description A utils function
+#'
+#' @return The return value, if any, from executing the utility.
+#'
+#' @noRd
 logo <- function(pagebreak = TRUE) {
   div(
     class = "print-header",
@@ -90,6 +143,14 @@ logo <- function(pagebreak = TRUE) {
   )
 }
 
+
+#' suppressed-note
+#'
+#' @description A utils function
+#'
+#' @return The return value, if any, from executing the utility.
+#'
+#' @noRd
 suppressed_note <- function(...) {
   data <- list(...)
 

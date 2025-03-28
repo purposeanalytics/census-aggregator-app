@@ -10,9 +10,21 @@ mod_map_ui <- function(id) {
   shiny::div(
     class = "censusagg-map",
     mapboxer::mapboxerOutput(ns("map"), height = "100vh"),
-    population_density_legend("ct", ns, display = "block"),
-    population_density_legend("csd", ns),
-    population_density_legend("ridings", ns)
+    div(class = "map-overlay-container",
+      population_density_legend("ct", ns, display = "block"),
+      population_density_legend("csd", ns),
+      population_density_legend("ridings", ns),
+      div(id = "select-municipality",
+          class = "map-overlay",
+        shinyWidgets::pickerInput(
+          ns("select_municipality"),
+          label = "Jump to:",
+          choices = municipalities$city_province,
+          selected = "Ottawa, ON",
+          options = list(`live-search` = TRUE)
+        )
+      )
+    )
   )
 }
 
@@ -55,6 +67,30 @@ mod_map_server <- function(id, input_aggregate_area, input_selection_tool, selec
     polygonDrawControl(map);
 }")
     )
+
+    shiny::observeEvent(
+      input$select_municipality,
+      ignoreInit = FALSE,
+      priority = 300,{
+
+        rlog::log_info(paste(input$select_municipality, "selected"))
+        selected_municipality <- municipalities |>
+          dplyr::filter(city_province == input$select_municipality)
+
+        zoom_out <- 0.2
+
+        mapboxer::mapboxer_proxy(ns("map")) %>%
+          mapboxer::fit_bounds(
+            c(selected_municipality$longitude - zoom_out,
+              selected_municipality$latitude - zoom_out,
+              selected_municipality$longitude + zoom_out,
+              selected_municipality$latitude + zoom_out)
+          ) %>%
+          mapboxer::update_mapboxer()
+
+      }
+    )
+
 
     # Use bounds from any bookmarking to fit the bounds of the map ----
     shiny::observeEvent(

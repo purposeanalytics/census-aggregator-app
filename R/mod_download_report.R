@@ -91,28 +91,11 @@ print_report <- function(input = "inst/report/report.html", output = "report.pdf
       marginTop = 0.5,
       marginBottom = 0.75
     ),
-    extra_args = chrome_extra_args(),
+    extra_args = chrome_extra_args(c("--headless", "--disable-gpu", "--no-sandbox", "--disable-dev-shm-usage")),
     verbose = FALSE
   )
 }
 
-# Via: https://github.com/RLesur/chrome_print_shiny
-#' Return Chrome CLI arguments
-#'
-#' This is a helper function which returns arguments to be passed to Chrome. This function includes Chrome arguments for running on Shinyapps or just for when you need them in general - e.g. we are running this app in a Docker container, but not on shinyapps
-#'
-#' @param default_args Arguments to be used in any circumstances.
-#'
-#' @return A character vector with CLI arguments to be passed to Chrome.
-#' @noRd
-chrome_extra_args <- function(default_args = c("--disable-gpu")) {
-  args <- c(
-    default_args,
-    "--no-sandbox", # required because we are in a container
-    "--disable-dev-shm-usage" # in case of low available memory
-  )
-  args
-}
 
 ## To be copied in the UI
 # mod_sidebar_ui("sidebar_1")

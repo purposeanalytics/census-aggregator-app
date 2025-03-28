@@ -1,6 +1,15 @@
 map <- function() {
+
+  selected_municipality <- municipalities |>
+    dplyr::filter(city_province == "Ottawa, ON")
+
   mapboxer::mapboxer(style = "mapbox://styles/purposeanalytics/cl6mafpzk002r14pdbda7la8r") %>%
-    mapboxer::set_view_state(-79.38, 43.8, zoom = 10) %>%
+    mapboxer::set_view_state(selected_municipality$longitude, selected_municipality$latitude, zoom = 9) %>%
+    mapboxer::fit_bounds(
+      c(selected_municipality$longitude - 0.2,
+        selected_municipality$latitude - 0.2,
+        selected_municipality$longitude + 0.2,
+        selected_municipality$latitude + 0.2)) |>
     mapboxer::add_navigation_control(showCompass = FALSE, pos = "top-right") %>%
     add_census_layer("ct") %>%
     add_census_layer("csd")  %>%
