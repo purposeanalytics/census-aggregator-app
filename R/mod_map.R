@@ -11,8 +11,8 @@ mod_map_ui <- function(id) {
     class = "censusagg-map",
     mapboxer::mapboxerOutput(ns("map"), height = "100vh"),
     div(class = "map-overlay-container",
-      population_density_legend("ct", ns, display = "block"),
-      population_density_legend("csd", ns),
+      population_density_legend("ct", ns),
+      population_density_legend("csd", ns, display = "block"),
       population_density_legend("ridings", ns),
       div(id = "select-municipality",
           class = "map-overlay",
@@ -40,8 +40,9 @@ mod_map_server <- function(id, input_aggregate_area, input_selection_tool, selec
         add_census_tooltips("csd") %>%
         add_census_tooltips("ct") %>%
         add_census_tooltips("ridings") %>%
-        show_census_layers("ct") %>%
-        hide_census_layers("csd") %>%
+        # initiate with "csd" showing
+        show_census_layers("csd") %>%
+        hide_census_layers("ct") %>%
         hide_census_layers("ridings") %>%
         htmlwidgets::onRender("
     function() {
@@ -65,6 +66,7 @@ mod_map_server <- function(id, input_aggregate_area, input_selection_tool, selec
 
     // Polygon draw and associated controls
     polygonDrawControl(map);
+
 }")
     )
 
@@ -77,7 +79,7 @@ mod_map_server <- function(id, input_aggregate_area, input_selection_tool, selec
         selected_municipality <- municipalities |>
           dplyr::filter(city_province == input$select_municipality)
 
-        zoom_out <- 0.2
+        zoom_out <- 0.7
 
         mapboxer::mapboxer_proxy(ns("map")) %>%
           mapboxer::fit_bounds(

@@ -159,20 +159,6 @@ mod_display_stats_in_modal_server <- function(id, aggregate_area, selected_geogr
       # Limit to regions, combine boundaries
       region_boundaries <- boundaries_data %>%
         dplyr::filter(geo_uid %in% regions)
-      region_boundaries <- region_boundaries |>
-        sf::st_transform(3587) %>%
-        sf::st_union()|>
-        sf::st_transform(4326)
-
-      # Get bounding box
-      regions_bbox <- region_boundaries %>%
-        sf::st_bbox()
-
-      map_centre <- list(lon = (regions_bbox$xmin + regions_bbox$xmax) / 2, lat = (regions_bbox$ymin + regions_bbox$ymax) / 2)
-
-      zoom_level <- max(1, 8 - log(max(regions_bbox$xmax - regions_bbox$xmin, regions_bbox$ymax -  regions_bbox$ymin)))
-
-      fill_colour <- ifelse(geography == "ridings", "rgba(95, 211, 188, 0.3)", "rgba(95, 211, 188, 0.6)")
 
       modal_close <- div(
         class = "close-modal-button",
@@ -182,24 +168,20 @@ mod_display_stats_in_modal_server <- function(id, aggregate_area, selected_geogr
       ##
       # Assemble report components ----
 
-      # Create the interactive map
-      fig <- plotly::plot_ly() |>
-        plotly::add_sf(
-          data = boundaries_data %>%
-            dplyr::filter(geo_uid %in% regions),
-          type = "scattermapbox",
-          mode = "lines",
-          fillcolor = fill_colour,
-          line = list(width = 1, color = "black"),
-          hoverinfo = "none"
-          )|>
-        plotly::layout(
-          mapbox = list(
-            style = "mapbox://styles/purposeanalytics/cl6mafpzk002r14pdbda7la8r",
-            center = map_centre,
-            zoom = zoom_level
-          )) |>
-        plotly::config(mapboxAccessToken = Sys.getenv("MAPBOX_API_TOKEN"), displayModeBar = FALSE)
+      fig <- mapgl::mapboxgl(
+        style = "mapbox://styles/purposeanalytics/cl6mafpzk002r14pdbda7la8r",
+        access_token = Sys.getenv("MAPBOX_API_TOKEN"),
+        #bounds = region_boundaries_buffer,
+        height = "400px"
+      ) |>
+        mapgl::fit_bounds(region_boundaries, padding = list(top = 24, bottom = 24, left = 24, right = 24)) |>
+        mapgl::add_fill_layer(
+          id = "selected_area",
+          source = region_boundaries |> sf::st_as_sf(),
+          fill_color = "#5FD3BC",
+          fill_outline_color = "black",
+          fill_opacity = fill_opacity
+        )
 
       title <- if (length(regions) == 1 & geography == "ridings") {
         div(title_heading(paste("Federal Electoral District:", ridings |> dplyr::filter(geo_uid == regions) |> dplyr::pull(geo_name))))

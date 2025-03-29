@@ -7,13 +7,6 @@
 #' @noRd
 #'
 #' @importFrom shiny NS tagList
-
-cities <- data.frame(
-  city = c("Toronto", "Vancouver", "Montreal"),
-  province = c("Ontario", "British Columbia", "Quebec"),
-  lat = c(43.65107, 49.28273, 45.50169),
-  lon = c(-79.347015, -123.120735, -73.567253)
-)
 mod_sidebar_ui <- function(id) {
   ns <- NS(id)
   shiny::div(
@@ -53,6 +46,7 @@ mod_sidebar_ui <- function(id) {
           HTML("Federal Electoral District <span class='badge'>New!</span>")
         ),
         choiceValues = c("ct", "csd", "ridings"),
+        selected = "csd",
         inline = TRUE
       ),
       shiny::div(
@@ -204,7 +198,7 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
 
     # Set up bookmarking ----
     bookmark_query <- shiny::reactive(
-      bookmark_query <- construct_bookmark(input, session, exclude = c("selection_tool", "export_data", "bookmark_selections", "export_geography", "export_boundary_bttn", "reset", "share", "download_report", "about", "contact", "download_report_state"), selected_geographies())
+      bookmark_query <- construct_bookmark(input, session, exclude = c("selection_tool", "export_data", "bookmark_selections", "export_geography", "export_boundary_bttn", "reset", "share", "download_report", "about", "contact", "download_report_state", "municipalities"), selected_geographies())
     )
 
     shiny::observeEvent(input$share, {
@@ -426,43 +420,8 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
         "CensusAggregator Data.pdf"
       },
 
-
       content = function(file) {
-
-        shinyjs::disable(ns("download_report"))
-        shinyjs::runjs("document.getElementById('sidebar-download_report').innerText = 'Processing...';")
-
-        # Move to tempdir to save files
-        original_wd <- setwd(tempdir())
-
-        # Go back to working directory after function
-        on.exit(setwd(original_wd))
-
-        temp_template <- "report.Rmd"
-        file.copy(app_sys("report/style.css"), "style.css", overwrite = TRUE)
-        file.copy(app_sys("report/report.Rmd"), temp_template, overwrite = TRUE)
-
-        # Set up parameters to pass to Rmd document
-        params <- list(
-          geo_uid = selected_geographies()$geo_uid,
-          geography = input_aggregate_area(),
-          bookmark = bookmark_query()
-        )
-
-        # Knit the document, passing in the `params` list, and eval it in a
-        # child of the global environment (this isolates the code in the document
-        # from the code in this app).
-        rmarkdown::render(temp_template,
-                          output_file = "CensusAggregator Report.html",
-                          params = params,
-                          envir = new.env(parent = globalenv()),
-                          quiet = TRUE
-        )
-
-        print_report(input = "CensusAggregator Report.html", output = file)
-
-        shinyjs::runjs("document.getElementById('sidebar-download_report').innerText = 'Download PDF';")
-        shinyjs::enable(ns("download_report"))
+        generate_pdf_report(file, ns, selected_geographies, input_aggregate_area, bookmark_query)
       }
     )
 
@@ -511,42 +470,3 @@ tooltip <- function(content) {
   bsicons::bs_icon("question-circle", `data-html` = "true", style = "color: lightgrey;") # %>%
 }
 
-print_report <- function(input = "inst/report/report.html", output = "report.pdf") {
-  pagedown::chrome_print(
-    input,
-    output = output,
-    options = list(
-      displayHeaderFooter = TRUE,
-      footerTemplate = format(
-        shiny::div(
-          style = "width: 100%; font-size: 10pt; font-family: 'Lato'; float: right; text-align: right; padding-right: 2.1cm; padding-bottom: 0.5cm;",
-          shiny::span(class = "pageNumber")
-        ),
-        indent = FALSE
-      ),
-      headerTemplate = format(shiny::div(), indent = FALSE),
-      marginTop = 0.5,
-      marginBottom = 0.75
-    ),
-    extra_args = chrome_extra_args(),
-    verbose = FALSE
-  )
-}
-
-# Via: https://github.com/RLesur/chrome_print_shiny
-#' Return Chrome CLI arguments
-#'
-#' This is a helper function which returns arguments to be passed to Chrome. This function includes Chrome arguments for running on Shinyapps or just for when you need them in general - e.g. we are running this app in a Docker container, but not on shinyapps
-#'
-#' @param default_args Arguments to be used in any circumstances.
-#'
-#' @return A character vector with CLI arguments to be passed to Chrome.
-#' @noRd
-chrome_extra_args <- function(default_args = c("--disable-gpu")) {
-  args <- c(
-    default_args,
-    "--no-sandbox", # required because we are in a container
-    "--disable-dev-shm-usage" # in case of low available memory
-  )
-  args
-}

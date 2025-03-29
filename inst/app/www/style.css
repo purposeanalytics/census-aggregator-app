@@ -278,6 +278,10 @@ bslib-tooltip {
     font-size: var(--bigger-size);
   }
 
+  #modal-fig {
+    margin-bottom: 24px;
+  }
+
 }
 
 /* Inputs */
@@ -361,7 +365,7 @@ bslib-tooltip {
 /* Cursor on disabled buttons */
 a[disabled], button:disabled, .btn.disabled {
   cursor: not-allowed;
-  pointer-events: all !important;
+  pointer-events: none;
   color: var(--bs-btn-disabled-color);
   background-color: var(--bs-btn-disabled-bg);
   border-color: var(--bs-btn-disabled-border-color);
@@ -413,12 +417,6 @@ a[disabled], button:disabled, .btn.disabled {
   display: none !important;
 }
 
-.js-plotly-plot .plotly .mapboxgl-map {
-  top: 0 !important;
-  left: 0 !important;
-  width: 100% !important;
-  height: 370px !important;
-}
 
 /* Legend */
 
