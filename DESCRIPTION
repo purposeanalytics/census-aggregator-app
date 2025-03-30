@@ -35,13 +35,13 @@ Imports:
     sf,
     sfarrow,
     shiny (>= 1.6.0),
-    shinybusy,
     shinyjs,
     shinyWidgets,
     stringr,
     tibble,
     tidyr,
-    utils
+    utils,
+    waiter
 Suggests: 
     ggspatial
 Remotes:

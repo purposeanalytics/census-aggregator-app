@@ -160,13 +160,13 @@ mod_display_stats_in_modal_server <- function(id, aggregate_area, selected_geogr
       region_boundaries <- boundaries_data %>%
         dplyr::filter(geo_uid %in% regions)
 
+      ##
+      # Assemble report components ----
+
       modal_close <- div(
         class = "close-modal-button",
         modalButton(icon = shiny::icon("x"), label = NULL)
       )
-
-      ##
-      # Assemble report components ----
 
       fig <- mapgl::mapboxgl(
         style = "mapbox://styles/purposeanalytics/cl6mafpzk002r14pdbda7la8r",
@@ -399,9 +399,9 @@ mod_display_stats_in_modal_server <- function(id, aggregate_area, selected_geogr
         size = "xl",
         uiOutput(session$ns("html_output")),
         easyClose = TRUE,
-        footer = NULL
+        footer = NULL,
+        style = "padding: 2rem",
       ))
-
 
   })
 }

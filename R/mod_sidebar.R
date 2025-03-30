@@ -9,9 +9,12 @@
 #' @importFrom shiny NS tagList
 mod_sidebar_ui <- function(id) {
   ns <- NS(id)
+
   shiny::div(
     class = "censusagg-sidebar",
-    shinybusy::add_busy_spinner("circle", color = "#447E72", height = "40px", width = "40px", margins = c(60, 30)),
+
+    waiter::use_waiter(),
+
     shiny::div(
       class = "sidebar-header",
       shiny::fluidRow(
@@ -27,7 +30,7 @@ mod_sidebar_ui <- function(id) {
         )
       ),
       breathe(),
-      shiny::p("CensusAggregator makes it easier to aggregate and retrieve common census variables for custom regions that span multiple census geographic areas. Follow the steps below to create a custom area on the map and download a summary report, data file, and boundary file for that area. CensusAggregator uses data from the 2021 Canadian census."),
+      shiny::p("CensusAggregator makes it easy to create custom geographic regions and aggregate common census variables for those areas. Follow the steps below to build a custom area using the map and then explore the data as a report, in tabular format, or download the boundary file. CensusAggregator uses data from the 2021 Canadian census."),
       sidebar_header(
         "Step 1: Choose a geographic unit",
         bslib::tooltip(bsicons::bs_icon("info-circle", class = "help-icon"),
@@ -70,11 +73,45 @@ mod_sidebar_ui <- function(id) {
           shiny::actionButton(
             ns("reset"),
             "Clear selection",
-            class = "btn-link", style = "margin-bottom: var(--breathing-room); font-size: var(--base-size);"
+            class = "btn-link",
+            icon = shiny::icon("circle-xmark")
           )
         )
       ),
-      sidebar_header("Step 3: Explore data"),
+      shiny::div(
+        shiny::fluidRow(
+          shiny::column(
+            width = 8,
+            shiny::div(style="display: inline-block;",
+              sidebar_header("Step 3: Explore data"),
+            ),
+            shiny::div(style="display: inline-block;",
+              shinyjs::disabled(
+                shiny::actionButton(
+                  ns("share"),
+                  "Share",
+                  class = "btn-link",
+                  icon = shiny::icon("share-alt")
+                ) |>
+                  bslib::popover(
+                    shiny::div(
+                      shiny::div(
+                        class = "input-field",
+                        textInput(ns("share_link"), "Share this link:", value = "https://example.com")
+                      ),
+                      shiny::actionButton(
+                        ns("copy_link"),
+                        "Copy to clipboard",
+                        class = "btn-link"
+                      )
+                    ),
+                  placement = "bottom"
+                )
+              )
+            ),
+          )
+        )
+      ),
       shiny::div(
         shinyjs::disabled(
           shiny::actionButton(
@@ -102,7 +139,7 @@ mod_sidebar_ui <- function(id) {
         shinyjs::disabled(
           shiny::downloadButton(
             ns("download_boundary"),
-            "Download GEOJSON",
+            "Download GEOJSON boundary",
             width = "100%",
             icon = NULL
           )
@@ -114,20 +151,6 @@ mod_sidebar_ui <- function(id) {
           shiny::column(
             width = 8,
             sidebar_header("Summary of selected area")
-          ),
-          shiny::column(
-            width = 4,
-            shiny::div(
-              style = "text-align: right;",
-              shinyjs::disabled(
-                shiny::actionButton(
-                  ns("share"),
-                  "Share",
-                  class = "btn-link",
-                  icon = shiny::icon("share-alt")
-                )
-              )
-            )
           )
         ),
         gt::gt_output(ns("summary_statistics"))
@@ -150,6 +173,11 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
+    modal_close <- div(
+      class = "close-modal-button",
+      modalButton(icon = shiny::icon("x"), label = NULL)
+    )
+
     # About ----
 
     shiny::observeEvent(
@@ -160,18 +188,10 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
           easyClose = TRUE,
           footer = NULL,
           style = "padding: 2rem",
-          shiny::fluidRow(
-            shiny::column(
-              width = 12,
-              shiny::div(
-                style = "float: right;",
-                shiny::modalButton("Close")
-              ),
-              shiny::h3("About CensusAggregator"),
-              shiny::hr(),
-              shiny::includeHTML(app_sys("app/www/about.html"))
-            )
-          )
+          modal_close,
+          shiny::h2("About CensusAggregator"),
+          shiny::hr(),
+          shiny::includeHTML(app_sys("app/www/about.html"))
         )
       )
     )
@@ -185,11 +205,9 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
           size = "l",
           easyClose = TRUE,
           footer = NULL,
-          shiny::div(
-            style = "float: right;",
-            shiny::modalButton("Close")
-          ),
-          shiny::h3("Contact Us"),
+          style = "padding: 2rem",
+          modal_close,
+          shiny::h2("Contact Us"),
           shiny::hr(),
           shiny::includeHTML(app_sys("app/www/contact.html"))
         )
@@ -198,12 +216,29 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
 
     # Set up bookmarking ----
     bookmark_query <- shiny::reactive(
-      bookmark_query <- construct_bookmark(input, session, exclude = c("selection_tool", "export_data", "bookmark_selections", "export_geography", "export_boundary_bttn", "reset", "share", "download_report", "about", "contact", "download_report_state", "municipalities"), selected_geographies())
+      bookmark_query <- construct_bookmark(input, session, exclude = c("selection_tool", "export_data", "bookmark_selections", "export_geography", "export_boundary_bttn", "reset", "share", "download_report", "about", "contact", "download_report_state", "municipalities", "view_data", "share_link", "copy_link"), selected_geographies())
     )
 
     shiny::observeEvent(input$share, {
-      shiny::showModal(shiny::urlModal(bookmark_query(), "Share link"))
+      updateTextInput(session, "share_link", value = bookmark_query())
+
     })
+
+    shiny::observeEvent(input$copy_link, {
+      session$sendCustomMessage("texToClipboard", bookmark_query())
+      updateTextInput(session, "share_link", value = bookmark_query())
+      shinyjs::runjs("
+        var notification = document.getElementById('sidebar-copy_link');
+        notification.innerHTML = 'Copied!';
+        shinyjs.show('notification');
+        setTimeout(function() {
+          notification.innerHTML = 'Copy to clipboard';
+          shinyjs.hide('notification');
+        }, 3000);
+    ")
+
+    })
+
 
     # Observe any bookmarking to update inputs with ----
     bookmark_aggregate_area <- shiny::reactiveVal()
@@ -327,10 +362,15 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
         # Enable buttons
         shinyjs::enable("reset")
         shinyjs::enable("share")
+        shinyjs::enable("share_link")
+        shinyjs::enable("copy_link")
+        shinyjs::enable(selector = "button")
         shinyjs::enable("view_data")
         shinyjs::enable("download_report")
         shinyjs::enable("download_data")
         shinyjs::enable("download_boundary")
+
+        updateTextInput(session, "share_link", value = bookmark_query())
 
         summary_statistics_source <- switch(input_aggregate_area(),
           "csd" = censusaggregatorapp::csd,
@@ -411,7 +451,9 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
     # Export  ----
 
     shiny::observeEvent(input$view_data, {
+
         mod_display_stats_in_modal_server("display_stats_in_modal_1", input_aggregate_area, selected_geographies, bookmark_query)
+
     })
 
     output$download_report <- shiny::downloadHandler(
@@ -421,7 +463,9 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
       },
 
       content = function(file) {
+
         generate_pdf_report(file, ns, selected_geographies, input_aggregate_area, bookmark_query)
+
       }
     )
 

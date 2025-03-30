@@ -100,7 +100,7 @@ mod_map_server <- function(id, input_aggregate_area, input_selection_tool, selec
       {
         rlog::log_info("Observe bookmark_bounds")
         mapboxer::mapboxer_proxy(ns("map")) %>%
-          mapboxer::fit_bounds(bookmark_bounds()) %>%
+          mapboxer::fit_bounds(bookmark_bounds(), padding = list(top = 96, bottom = 96, left = 96, right = 96)) %>%
           mapboxer::update_mapboxer()
       }
     )

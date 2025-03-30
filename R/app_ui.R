@@ -15,6 +15,7 @@ app_ui <- function(request) {
                                 "tooltip-color" = "#1D1F21",
                                 "tooltip-opacity" = 1
                                 ),
+      waiter::use_waiter(),
       shiny::fluidRow(
         shiny::div(
           class = "col-sm-8 censusagg-col",
@@ -76,6 +77,19 @@ golem_add_external_resources <- function() {
     <meta name='twitter:title' content='CensusAggregator'>
     <meta name='twitter:description' content='CensusAggregator makes it easier to aggregate and retrieve common census variables for custom regions that span multiple census geographic areas.'>
     <meta name='twitter:image' content='https://purposeanalytics.ca/blog/introducing-censusaggregator/censusaggregator.gif'>
+    ")),
+    tags$script("
+            Shiny.addCustomMessageHandler('texToClipboard', function (texToClipboard) {
+                navigator.clipboard.writeText(texToClipboard);
+            });
+        "),
+    # select entire link when clicking within textInput
+    tags$script(HTML("
+      $(document).ready(function() {
+        $('#sidebar-share_link').click(function() {
+          $(this).select();
+        });
+      });
     "))
     # Add here other external resources
     # for example, you can add shinyalert::useShinyalert()
