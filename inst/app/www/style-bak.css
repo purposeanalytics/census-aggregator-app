@@ -1,85 +1,85 @@
 @import url('https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap');
 
 /* ------ CSS reset ------ */
-/* From from https://www.joshwcomeau.com/css/custom-css-reset/ */
+  /* From from https://www.joshwcomeau.com/css/custom-css-reset/ */
 
-/*
+  /*
   1. Use a more-intuitive box-sizing model.
 */
-*, *::before, *::after {
-  box-sizing: border-box;
-}
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
 /*
   2. Remove default margin
 */
-* {
-  margin: 0;
-}
+  * {
+    margin: 0;
+  }
 /*
   3. Allow percentage-based heights in the application
 */
-html, body {
-  height: 100%;
-}
+  html, body {
+    height: 100%;
+  }
 /*
   Typographic tweaks!
   4. Add accessible line-height
-  5. Improve text rendering
+5. Improve text rendering
 */
-body {
-  line-height: 1.5;
-  -webkit-font-smoothing: antialiased;
-}
+  body {
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
 /*
   6. Improve media defaults
 */
-img, picture, video, canvas, svg {
-  display: block;
-  max-width: 100%;
-}
+  img, picture, video, canvas, svg {
+    display: block;
+    max-width: 100%;
+  }
 /*
   7. Remove built-in form typography styles
 */
-input, button, textarea, select {
-  font: inherit;
-}
+  input, button, textarea, select {
+    font: inherit;
+  }
 /*
   8. Avoid text overflows
 */
-p, h1, h2, h3, h4, h5, h6 {
-  overflow-wrap: break-word;
-}
+  p, h1, h2, h3, h4, h5, h6 {
+    overflow-wrap: break-word;
+  }
 /*
   9. Create a root stacking context
 */
-#root, #__next {
+  #root, #__next {
   isolation: isolate;
 }
 
 /* ------ App Styles ------ */
 
-:root {
-  --font: "Lato", sans-serif;
-  --base-size: 14px;
-  --bigger-size: 16px;
-  --smaller-size: 12px;
-  --regular-weight: 400;
-  --bold-weight: 700;
-  --main-color: #5FD3BC;
-  --main-background-color: #5FD3BC;
-  --secondary-color: #3D3D3D;
-  --tertiary-color: #447E72;
-  --breathing-room: 25px;
-  --little-breath: 4px;
-  --radio-button-color: #6c757d;
-}
+  :root {
+    --font: "Lato", sans-serif;
+    --base-size: 14px;
+    --bigger-size: 16px;
+    --smaller-size: 12px;
+    --regular-weight: 400;
+    --bold-weight: 700;
+    --main-color: #5FD3BC;
+      --main-background-color: #5FD3BC;
+      --secondary-color: #3D3D3D;
+      --tertiary-color: #447E72;
+      --breathing-room: 25px;
+    --little-breath: 4px;
+  }
 
 /* ------  Header and font styles ------ */
 
-body {
-  font-family: var(--font);
-  font-weight: var(--regular-weight);
-}
+
+  body {
+    font-family: var(--font);
+    font-weight: var(--regular-weight);
+  }
 
 .shiny-options-group, .btn-default {
   font-size: var(--base-size);
@@ -99,10 +99,10 @@ a:hover {
 
 /* General */
 
-.censusagg-col {
-  padding-left: 0;
-  padding-right: 0;
-}
+  .censusagg-col {
+    padding-left: 0;
+    padding-right: 0;
+  }
 
 .breathe {
   margin-bottom: var(--breathing-room);
@@ -132,7 +132,7 @@ table {
 }
 
 .pa-logo { /* TODO */
-  position: fixed;
+    position: fixed;
   bottom: 15px;
   right: var(--breathing-room);
   height: 50px;
@@ -142,56 +142,48 @@ bslib-tooltip {
   cursor: pointer;
 }
 
-.tooltip {
-  background-color: #fff; /* White background like popovers */
-  border: 1px solid rgba(0, 0, 0, 0.2); /* Border similar to popovers */
-  border-radius: 0.5rem; /* Rounded corners */
-  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15); /* Box shadow for depth */
-  padding: 0.5rem; /* Padding inside the tooltip */
-  max-width: 400px; /* Max width similar to popovers */
-}
-
-.tooltip .tooltip-inner {
-  color: #212529; /* Text color */
-  padding: 0.5rem; /* Inner padding */
-}
-
-.tooltip .arrow::before {
-  border-width: 0.5rem; /* Arrow size */
-  border-color: rgba(0, 0, 0, 0.2); /* Arrow color */
-}
-
-.popover, .popover .form-control, .popover .btn-link, .popover .btn-link:hover, .popover .btn-link:focus{
-  font-size: 0.8rem;
+.tooltip-inner {
+  text-align: left;
+  font-family: var(--font) !important;
 }
 
 .help-icon {
   color: #aaaaaa;
-  margin-bottom: -2px;
+    margin-bottom: -2px;
 }
 
 .badge {
   background-color: #5FD3BC;
-  display: inherit;
+    display: inherit;
   margin-left: 1px;
 }
 
+
 .modal {
+
+  --bs-modal-margin: 50px;
+
+  .modal-body {
+    padding: 0 1.5rem;
+  }
 
   .close-modal-button .btn {
     border: 0px none;
     float: right;
     color: #cccccc;
-    padding: 10px 20px;
+      padding: 10px 20px;
+    margin-top: -10px;
     margin-right: -20px;
+  }
+
+  .btn.main-color {
+    font-size: 1em;
   }
 
   .close-modal-button .btn:hover {
     background: none;
     color: #000000;
   }
-
-  --bs-modal-margin: 50px;
 
   .title {
     display: none;
@@ -229,10 +221,6 @@ bslib-tooltip {
     font-size: 1.5rem;
   }
 
-  .title-heading {
-    margin-top: 0.5em;
-  }
-
   h2 {
     font-size: 1.5rem;
   }
@@ -250,9 +238,9 @@ bslib-tooltip {
   }
 
   /* Hide PDF definitions table in HTML */
-  .definitions-table-pdf {
-    display: none;
-  }
+    .definitions-table-pdf {
+      display: none;
+    }
 
   .print-header {
     display: block;
@@ -288,53 +276,47 @@ bslib-tooltip {
   }
 
   #modal-fig {
-    margin-bottom: 24px;
-  }
+  margin-bottom: 24px;
+}
 
 }
 
 /* Inputs */
 
-/* Radio buttons */
+  /* Radio buttons */
 
-.shiny-input-radiogroup {
-  margin-bottom: var(--breathing-room);
-}
+  .shiny-input-radiogroup {
+    margin-bottom: var(--breathing-room);
+  }
 
 /* Radio button label */
 
-.shiny-input-radiogroup > .control-label {
-  font-size: var(--bigger-size);
-  font-weight: var(--bold-weight);
-}
+  .shiny-input-radiogroup > .control-label {
+    font-size: var(--bigger-size);
+    font-weight: var(--bold-weight);
+  }
 
 .pretty {
-  margin-right: 0;
   margin-bottom: 0.6em;
 }
 
 /* Radio button choices */
-.shiny-input-radiogroup > .shiny-options-group {
-  color: var(--secondary-color);
-}
-
-.input-field .form-group {
-  margin-bottom: 0.5em;
-}
+  .shiny-input-radiogroup > .shiny-options-group {
+    color: var(--secondary-color);
+  }
 
 .pretty input:checked ~ .state.p-primary label:after, .pretty.p-toggle .state.p-primary label:after {
   background-color: var(--radio-button-color) !important;
 }
 
 /* Position clear selection button */
-#sidebar-selection_tool {
+  #sidebar-selection_tool {
   margin-bottom: 0;
-  margin-right: 1em;
   float: left;
 }
 
 #sidebar-reset {
-  margin-top: -9px;
+margin-top: -3px;
 }
 
 #sidebar-share {
@@ -342,20 +324,19 @@ bslib-tooltip {
   margin-top: 3px;
 }
 
-
 /* Spacing for share button */
-.fa, .fas {
-  padding: 0 3px !important;
-}
+  .fa, .fas {
+    padding: 0 3px !important;
+  }
 
 /* Buttons */
 
-.bttn-bordered.bttn-md {
-  font-size: var(--bigger-size);
-  font-weight: var(--bold-weight);
-  margin-bottom: var(--breathing-room);
-  width: 50%;
-}
+  .bttn-bordered.bttn-md {
+    font-size: var(--bigger-size);
+    font-weight: var(--bold-weight);
+    margin-bottom: var(--breathing-room);
+    width: 50%;
+  }
 
 .bttn-bordered.bttn-primary {
   color: var(--secondary-color);
@@ -378,23 +359,23 @@ bslib-tooltip {
 }
 /* Polygon drawing */
 
-.mapbox-gl-draw_polygon.active {
-  background-color: rgba(0,0,0,0.3);
-}
+  .mapbox-gl-draw_polygon.active {
+    background-color: rgba(0,0,0,0.3);
+  }
 
 /* Cursor on disabled buttons */
-a[disabled], button:disabled, .btn.disabled {
-  cursor: not-allowed;
-  pointer-events: none;
-  color: var(--bs-btn-disabled-color);
-  background-color: var(--bs-btn-disabled-bg);
-  border-color: var(--bs-btn-disabled-border-color);
-  opacity: var(--bs-btn-disabled-opacity);
-}
+  a[disabled], button:disabled, .btn.disabled {
+    cursor: not-allowed;
+    pointer-events: none;
+    color: var(--bs-btn-disabled-color);
+    background-color: var(--bs-btn-disabled-bg);
+    border-color: #aaaaaa;
+      opacity: var(--bs-btn-disabled-opacity);
+  }
 
 /* Style secondary buttons (link style) to have no background colour, no outline, no padding */
-/* Just link a link! */
-.btn-link, .btn-link:disabled, .btn-link:hover, .btn-link:active, .btn-link:focus,
+  /* Just link a link! */
+  .btn-link, .btn-link:disabled, .btn-link:hover, .btn-link:active, .btn-link:focus,
 .shiny-download-link.btn-link, .shiny-download-link.btn-link:disabled,
 .shiny-download-link.btn-link:hover, .shiny-download-link.btn-link:active,
 .shiny-download-link.btn-link:focus {
@@ -407,22 +388,18 @@ a[disabled], button:disabled, .btn.disabled {
 
 /* Tooltip positioning - top left instead of following mouse */
 
-.mapboxgl-symbol {
-  pointer-events: none
-}
-
-.mapboxgl-popup {
-  transform: none !important;
-  min-width: 240px;
-  bottom: 30px !important;
-  right: 50px !important;
-  top: unset !important;
-  left: unset !important;
-  border-radius: 3px;
-  -moz-box-shadow: 0 0 2px rgba(0,0,0,.1);
-  -webkit-box-shadow: 0 0 2px rgba(0,0,0,.1);
-  box-shadow: 0 0 0 2px rgba(0,0,0,.1);
-}
+  .mapboxgl-popup {
+    transform: none !important;
+    min-width: 240px;
+    bottom: 30px !important;
+    right: 50px !important;
+    top: unset !important;
+    left: unset !important;
+    border-radius: 3px;
+    -moz-box-shadow: 0 0 2px rgba(0,0,0,.1);
+    -webkit-box-shadow: 0 0 2px rgba(0,0,0,.1);
+    box-shadow: 0 0 0 2px rgba(0,0,0,.1);
+  }
 
 .mapboxgl-popup-content {
   padding: 10px !important;
@@ -444,13 +421,13 @@ a[disabled], button:disabled, .btn.disabled {
 
 /* Legend */
 
-.map-overlay-container {
-  position: absolute;
-  top: 10px;
-  right: 30px;
-  border-radius: 3px;
-  font: 12px/20px Helvetica Neue,Arial,Helvetica,sans-serif;
-}
+  .map-overlay-container {
+    position: absolute;
+    top: 10px;
+    right: 30px;
+    border-radius: 3px;
+    font: 12px/20px Helvetica Neue,Arial,Helvetica,sans-serif;
+  }
 
 .map-overlay {
   margin-right: 20px;
@@ -462,7 +439,7 @@ a[disabled], button:disabled, .btn.disabled {
   padding: 10px;
   line-height: 1.3rem;
   background: #fff;
-  margin-bottom: 20px;
+    margin-bottom: 20px;
   -moz-box-shadow: 0 0 2px rgba(0,0,0,.1);
   -webkit-box-shadow: 0 0 2px rgba(0,0,0,.1);
   box-shadow: 0 0 0 2px rgba(0,0,0,.1);
@@ -477,32 +454,31 @@ a[disabled], button:disabled, .btn.disabled {
 }
 
 #select-municipality {
-  font-weight: bold;
-  width: 240px;
+font-weight: bold;
+width: 240px;
 }
 
 #select-municipality .btn {
-  font-size: 0.9em;
-  -moz-box-shadow: 0 0 2px rgba(0,0,0,.1);
-  -webkit-box-shadow: 0 0 2px rgba(0,0,0,.1);
-  box-shadow: 0 0 0 2px rgba(0,0,0,.1);
-  padding: 0.55em 9px;
+font-size: 0.9em;
+-moz-box-shadow: 0 0 2px rgba(0,0,0,.1);
+-webkit-box-shadow: 0 0 2px rgba(0,0,0,.1);
+box-shadow: 0 0 0 2px rgba(0,0,0,.1);
+padding: 0.55em 9px;
 }
 
 #select-municipality #map-select_municipality-label {
-  margin-bottom: .25rem;
-  text-shadow: 0px 0px 3px white;
+margin-bottom: .25rem;
 }
 
 #select-municipality .dropdown-menu {
-  font-size: 0.95em;
+font-size: 0.95em;
 }
 
 /* Media queries - default is desktop */
 
-@media (max-width: 1500px) {
-  /* Laptop */
-}
+  @media (max-width: 1500px) {
+    /* Laptop */
+  }
 
 @media (max-width: 1100px) {
   /* Tablets */
@@ -510,9 +486,9 @@ a[disabled], button:disabled, .btn.disabled {
 
 @media (max-width: 550px) {
   /* Phones */
-  .mapboxer, .censusagg-map {
-    height: 50vh !important;
-  }
+    .mapboxer, .censusagg-map {
+      height: 50vh !important;
+    }
 
   .censusagg-sidebar {
     height: calc(50vh - 50px);
@@ -539,3 +515,5 @@ a[disabled], button:disabled, .btn.disabled {
     left: unset !important;
   }
 }
+
+

@@ -73,7 +73,7 @@ add_census_line_layer <- function(map, geography) {
  rlog::log_info(paste("click layer id" ,  click_layer_id))
  rlog::log_info(paste("line layer id" ,  hover_layer_id))
 
- line_opacity <- ifelse(geography == "ridings", 0.25/1.5, 0.25)
+ line_opacity <- ifelse(geography == "ridings", 0.25/2, 0.25)
 
   map %>%
     mapboxer::add_layer(
@@ -189,4 +189,61 @@ add_census_tooltips <- function(map, geography) {
 
   map %>%
     mapboxer::add_tooltips(geography_to_layer_id(geography, "fill_click"), tooltip_text)
+}
+
+add_place_names <- function(map){
+
+  map %>%
+    mapboxer::add_source(
+      id = "mapbox-streets",
+      source = mapboxer::mapbox_source(
+        type = "vector",
+        url = "mapbox://mapbox.mapbox-streets-v8"
+      )
+      )%>%
+    mapboxer::add_layer(
+      list(
+        id = "place-labels",
+        type = "symbol",
+        source = "mapbox-streets",
+        "source-layer" = "place_label",
+        filter = list(
+          "all",
+          list(
+            "<=", list("get", "filterrank"), 3
+          ),
+          list("!=", list("get", "class"), "country"),
+          list("==", list("get", "iso_3166_1"), "CA"),
+          list("!=", list("get", "class"), "state"),
+          list(">", list("zoom"), 4)  # Adjust zoom level as needed
+        ),
+                layout = list(
+          "text-field" = "{name}",
+          "text-font" = c("DIN Pro Medium", "Arial Unicode MS Bold"),
+          "text-size" = list(
+            "interpolate",
+            list("linear"),
+            list("get", "symbolrank"),
+            5, 20,
+            10, 12
+          )
+        ),
+        paint = list(
+          "text-color" = "#555555",
+          "text-opacity" = list(
+            "interpolate",
+            list("linear"),
+            list("get", "symbolrank"),
+            3, 0.95,  # Fully opaque for highest rank
+            10, 0.65  # Semi-transparent for lowest rank
+          ),
+          "text-halo-color" = "rgba(132, 219, 202, 0.3)",  # Outline color
+          "text-halo-width" = 1  # Outline width
+        ),
+        layout = list(
+          "visibility" = "none"
+        )
+      )
+    )
+
 }

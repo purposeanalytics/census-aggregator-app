@@ -139,7 +139,7 @@ mod_sidebar_ui <- function(id) {
         shinyjs::disabled(
           shiny::downloadButton(
             ns("download_boundary"),
-            "Download GEOJSON boundary",
+            "Download GeoJSON boundary",
             width = "100%",
             icon = NULL
           )

@@ -60,6 +60,18 @@ golem_add_external_resources <- function() {
         gtag('config', 'G-JFNPH9EW2R');
       </script>
     ")),
+    shiny::tags$head(
+      shiny::tags$link(rel = 'stylesheet', type = 'text/css', href = 'www/layers-control-1.0.0/layers-control.css'),
+      shiny::tags$script(src='www/freehand-mode-1.0.0/freehand-mode.js'),
+      shiny::tags$script(src='www/mapbogl-binding-0.2.1/mapboxgl.js'),
+      shiny::tags$link(rel = 'stylesheet', type = 'text/css', href = 'www/mapbox-gl-draw-1.4.3/mapbox-gl-draw.css'),
+      shiny::tags$script(src='www/mapbox-gl-draw-1.4.3/mapbox-gl-draw.js'),
+      shiny::tags$link(rel = 'stylesheet', type = 'text/css', href = 'www/mapbox-gl-geocoder-5.0.0/mapbox-gl-geocoder.css'),
+      shiny::tags$script(src='www/mapbox-gl-geocoder-5.0.0/mapbox-gl-geocoder.min.js'),
+      shiny::tags$script(src='www/mapbox-gl-globe-minimap-1.2.1/bundle.js'),
+      shiny::tags$link(rel = 'stylesheet', type = 'text/css', href = 'www/mapbox-gl-1.11.0/mapbox-gl.css'),
+      shiny::tags$script(src='www/mapbox-gl-1.11.0/mapbox-gl.js')
+    ),
     shiny::tags$head(shiny::HTML("
     <meta name='description' content='CensusAggregator makes it easier to aggregate and retrieve common census variables for custom regions that span multiple census geographic areas.'>
 

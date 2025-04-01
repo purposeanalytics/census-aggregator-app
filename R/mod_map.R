@@ -67,7 +67,8 @@ mod_map_server <- function(id, input_aggregate_area, input_selection_tool, selec
     // Polygon draw and associated controls
     polygonDrawControl(map);
 
-}")
+}") |>
+      add_place_names()
     )
 
     shiny::observeEvent(
@@ -220,24 +221,28 @@ mod_map_server <- function(id, input_aggregate_area, input_selection_tool, selec
         if (input_selection_tool() == "click") {
 
 
-
           # Check if clicked area is already in selected geographies
           # If it is, clicking again should *deselect* it - remove from the existing tibble
           clicked_id <- input$map_onclick$props$geo_uid
          rlog::log_info(paste("Selection tool click:", clicked_id))
 
-          if (clicked_id %in% selected_geographies()[["geo_uid"]]) {
-            selected_geographies(
-              selected_geographies() %>%
-                dplyr::filter(.data$geo_uid != clicked_id)
-            )
+         if (!is.null(clicked_id) && length(clicked_id) > 0) {
+
+            if (clicked_id %in% selected_geographies()[["geo_uid"]]) {
+              selected_geographies(
+                selected_geographies() %>%
+                  dplyr::filter(.data$geo_uid != clicked_id)
+              )
+            } else {
+              # Otherwise, set current value of selected_geographies to be existing tibble, plus new geographies
+              rlog::log_info(paste("Selected geographies is:", clicked_id))
+              selected_geographies(
+                selected_geographies() %>%
+                  dplyr::bind_rows(dplyr::tibble(geo_uid = clicked_id))
+              )
+            }
           } else {
-            # Otherwise, set current value of selected_geographies to be existing tibble, plus new geographies
-            rlog::log_info(paste("Selected geographies is:", clicked_id))
-            selected_geographies(
-              selected_geographies() %>%
-                dplyr::bind_rows(dplyr::tibble(geo_uid = clicked_id))
-            )
+            rlog::log_info("No valid geo_uid found in map click.")
           }
         }
       }
