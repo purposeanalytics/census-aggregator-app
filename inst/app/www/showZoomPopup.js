@@ -18,8 +18,9 @@ function showZoomPopup(map) {
 
     ctFeatures = map.queryRenderedFeatures({ layers: ['ct_fill_click'] });
     csdFeatures = map.queryRenderedFeatures({ layers: ['csd_fill_click'] });
+    ridingFeatures = map.queryRenderedFeatures({ layers: ['ridings_fill_click'] });
 
-    if (ctFeatures.length == 0 & csdFeatures.length == 0) {
+    if (ctFeatures.length == 0 & csdFeatures.length == 0 & csdFeatures.length == 0) {
       zoomPopup.style.display = '';
     } else {
       zoomPopup.style.display = 'none';
@@ -35,6 +36,8 @@ function showZoomPopup(map) {
     if (curZoom < 6 & message == 'ct') {
       zoomPopup.style.display = '';
     } else if (curZoom < 5 & message == 'csd') {
+      zoomPopup.style.display = '';
+    } else if (curZoom < 5 & message == 'ridings') {
       zoomPopup.style.display = '';
     } else {
       zoomPopup.style.display = 'none';

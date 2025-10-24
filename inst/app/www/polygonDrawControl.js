@@ -43,6 +43,11 @@ function polygonDrawControl(map) {
       map.on('draw.update', (e) => getFeaturesFromPolygon(e, map, 'ct'));
       map.on('draw.delete', (e) => clearFeatures(e, 'ct'));
       map.on('draw.modechange', (e) => clearPolygonAndFeatures(e, map, 'ct', draw));
+
+      map.on('draw.create', (e) => getFeaturesFromPolygon(e, map, 'ridings'));
+      map.on('draw.update', (e) => getFeaturesFromPolygon(e, map, 'ridings'));
+      map.on('draw.delete', (e) => clearFeatures(e, 'ridings'));
+      map.on('draw.modechange', (e) => clearPolygonAndFeatures(e, map, 'ridings', draw));
     }
 
     // Remove drawing control and set to false if the selection tool is click

@@ -1,11 +1,25 @@
+if(FALSE){
+# library(tidyverse)
+# library(censusaggregate)
+geography <-'ridings'
+regions <- c("2023A000411004", "2023A000411001")
+dataset <-'extdata/ridings_values/'
+
+geography <-'ct'
+regions <-'3100001.01'
+dataset <-'inst/extdata/ct_values/'
+
+
+}
 #' Prepare data for export/report
 #'
-#' @param geography CT or CSD
+#' @param geography CT or CSD or ridings
 #' @param regions Vector of geo_uids
 #'
 #' @export
 prepare_data <- function(geography, regions) {
-
+ #rlog::log_info(paste("Prepare data geo: ", geography))
+ #rlog::log_info(paste("Prepare data regions: ", regions))
   # Select and open dataset
   dataset <- glue::glue("extdata/{geography}_values")
 
@@ -13,26 +27,44 @@ prepare_data <- function(geography, regions) {
 
   vectors_data <- data %>%
     # Filter for regions
-    dplyr::filter(.data$geo_uid %in% regions) %>%
-    dplyr::select(-.data$id) %>%
+    dplyr::filter(geo_uid %in% regions) %>%
+    dplyr::select(-id) %>%
     dplyr::collect()
+
+
 
   # Expand to have all vectors for all regions
   vectors_data <- vectors_data %>%
     dplyr::mutate(geo_uid = forcats::fct_expand(.data$geo_uid, regions))
 
+
   metadata <- switch(geography,
     "csd" = censusaggregatorapp::csd,
-    "ct" = censusaggregatorapp::ct
+    "ct" = censusaggregatorapp::ct,
+    "ridings" = censusaggregatorapp::ridings
   ) %>%
-    dplyr::filter(.data$geo_uid %in% regions)
+    dplyr::filter(geo_uid %in% regions) |>  dplyr::distinct()
 
-  vectors_data <- vectors_data %>%
+
+
+
+  vectors_data <- vectors_data |> dplyr::distinct() |>
     dplyr::left_join(metadata, by = "geo_uid")
 
   vectors_data <- vectors_data %>%
     dplyr::left_join(censusaggregatorapp::vectors, by = "vector") %>%
     censusaggregate::derive_aggregation_type()
+
+
+
+  if(FALSE){
+  warning("TEMP TO SEE IF IT WORKS")
+  vectors_data <- vectors_data |>  filter(!is.na(aggregation))
+### Locate missing aggregation types
+missing_vector_info <-  vectors_data |> filter(is.na(aggregation)) |>
+      select(vector) |>
+      dplyr::distinct()
+  }
 
   # Aggregate vectors - treat land area separately (used for population density), population 2016 separately (user for population change, median total income separately (used for median income if only 1 region selected)
   vectors_data_filtered <- vectors_data %>%
@@ -43,9 +75,9 @@ prepare_data <- function(geography, regions) {
     censusaggregate::aggregate_census_vectors() %>%
     dplyr::distinct() %>%
     dplyr::left_join(censusaggregatorapp::vectors, by = c("highest_parent_vector", "vector", "type", "label", "units", "parent_vector", "aggregation", "details")) %>%
-    dplyr::select(.data$highest_parent_vector, .data$vector, .data$label, .data$label_short, .data$value, .data$value_proportion) %>%
-    dplyr::group_by(.data$highest_parent_vector) %>%
-    tidyr::fill(.data$label_short, .direction = "updown") %>%
+    dplyr::select(highest_parent_vector, vector, label, label_short, value, value_proportion) %>%
+    dplyr::group_by(highest_parent_vector) %>%
+    tidyr::fill(label_short, .direction = "updown") %>%
     dplyr::ungroup() %>%
     dplyr::distinct()
 
@@ -56,43 +88,44 @@ prepare_data <- function(geography, regions) {
       dplyr::mutate(label = NA),
     # Households
     metadata %>%
-      dplyr::select(.data$geo_uid, .data$households) %>%
+      dplyr::select(geo_uid, households) %>%
       dplyr::distinct() %>%
-      dplyr::summarise(value = sum(.data$households)) %>%
+      dplyr::summarise(value = sum(households)) %>%
       dplyr::mutate(
         parent_label = "Households"
       ),
     # Population change (2016 to 2021)
+    if(geography!='ridings'){
     vectors_data %>%
       censusaggregate::aggregate_population_change() %>%
-      dplyr::select(.data$label, .data$value) %>%
-      dplyr::mutate(parent_label = "Population change, 2016 to 2021", label = NA, value = round(.data$value, 3)),
+      dplyr::select(label, value) %>%
+      dplyr::mutate(parent_label = "Population change, 2016 to 2021", label = NA, value = round(value, 3))} else {NULL},
     # Population density
     # Use actual population density vector if there is only one
     {
       if (length(regions) == 1) {
         population_density <- vectors_data %>%
-          dplyr::filter(.data$label == "Population density per square kilometre") %>%
-          dplyr::select(.data$value)
+          dplyr::filter(label == "Population density per square kilometre") %>%
+          dplyr::select(value)
       } else {
         population_density <- vectors_data %>%
-          dplyr::filter(.data$label %in% c("Population, 2021", "Land area in square kilometres")) %>%
+          dplyr::filter(label %in% c("Population, 2021", "Land area in square kilometres")) %>%
           censusaggregate::aggregate_population_density() %>%
-          dplyr::select(.data$value)
+          dplyr::select(value)
       }
       population_density %>%
-        dplyr::mutate(parent_label = "Population density", value = round(.data$value, 1))
+        dplyr::mutate(parent_label = "Population density", value = round(value, 1))
     },
     # Age (5 year buckets)
     data_breakdown %>%
-      dplyr::filter(.data$label_short == "age", .data$vector != .data$highest_parent_vector) %>%
-      tidyr::separate(.data$label,
+      dplyr::filter(label_short == "age", vector != highest_parent_vector) %>%
+      tidyr::separate(label,
         into = c("min", "max"),
         sep = " to ", remove = FALSE, convert = TRUE, fill = "right"
       ) %>%
-      dplyr::arrange(.data$max) %>%
-      dplyr::select(-.data$min, -.data$max) %>%
-      dplyr::select(.data$label, .data$value, .data$value_proportion) %>%
+      dplyr::arrange(max) %>%
+      dplyr::select(-min, -max) %>%
+      dplyr::select(label, value, value_proportion) %>%
       dplyr::mutate(parent_label = "Age (5 year groups)"),
     # Age (cohorts)
     data_breakdown %>%
@@ -107,14 +140,14 @@ prepare_data <- function(geography, regions) {
     data_breakdown %>%
       filter_breakdown("household_type", "Household type") %>%
       dplyr::mutate(label = forcats::fct_relevel(
-        .data$label, "1 person",
+        label, "1 person",
         "2+ persons non census family",
         "1 census family, no additional persons",
         "1 census family, + additional persons",
         "Multiple census families",
         "Multigen. households"
       )) %>%
-      dplyr::arrange(.data$label),
+      dplyr::arrange(label),
     # Knowledge of English
     data_breakdown %>%
       filter_breakdown("knowledge_of_english_french", "Knowledge of official languages") %>%
@@ -144,24 +177,24 @@ prepare_data <- function(geography, regions) {
     # Non-official language spoken at home
     data_breakdown %>%
       dplyr::filter(
-        .data$label_short == "language_at_home",
-        .data$vector != .data$highest_parent_vector
+        label_short == "language_at_home",
+        vector != highest_parent_vector
       ) %>%
       dplyr::inner_join(censusaggregatorapp::vectors %>%
-        dplyr::filter(.data$label_short == "language_at_home", stringr::str_detect(.data$details, "Single")) %>%
-        dplyr::select(.data$vector), by = "vector") %>%
-      dplyr::filter(!.data$label %in% c("English", "French")) %>%
-      dplyr::filter(.data$value > 0) %>%
-      dplyr::arrange(-.data$value) %>%
+        dplyr::filter(label_short == "language_at_home", stringr::str_detect(details, "Single")) %>%
+        dplyr::select(vector), by = "vector") %>%
+      dplyr::filter(!label %in% c("English", "French")) %>%
+      dplyr::filter(value > 0) %>%
+      dplyr::arrange(-value) %>%
       utils::head(10) %>%
       censusaggregate::derive_census_vector_order(by_value = TRUE) %>%
-      dplyr::select(.data$label, .data$value, .data$value_proportion) %>%
+      dplyr::select(label, value, value_proportion) %>%
       dplyr::mutate(parent_label = "Top non-official languages spoken most often at home"),
     # Educational attainment
     data_breakdown %>%
       filter_breakdown("educational_attainment", "Educational attainment") %>%
       dplyr::mutate(label = forcats::fct_relevel(
-        .data$label, "No high school or postsecondary",
+        label, "No high school or postsecondary",
         "High school or equivalent",
         "Apprenticeship or trades certificate or diploma",
         "College, CEGEP or other non-university certificate or diploma",
@@ -169,18 +202,18 @@ prepare_data <- function(geography, regions) {
         "Bachelor's degree or certificate/diploma above bachelor level",
         "Graduate or professional degree"
       )) %>%
-      dplyr::arrange(.data$label),
+      dplyr::arrange(label),
 
     # (Estimated) median household income
     {
       if (length(regions) == 1) {
         median_income <- vectors_data %>%
-          dplyr::filter(.data$vector == "v_CA21_906") %>%
-          dplyr::select(.data$value)
+          dplyr::filter(vector == "v_CA21_906") %>%
+          dplyr::select(value)
         median_income_label <- "Median household income"
       } else {
         median_income <- data_breakdown %>%
-          dplyr::filter(.data$label_short == "income") %>%
+          dplyr::filter(label_short == "income") %>%
           censusaggregate::aggregate_estimated_median_income()
         median_income_label <- "Estimated median household income"
       }
@@ -192,10 +225,10 @@ prepare_data <- function(geography, regions) {
     data_breakdown %>%
       filter_breakdown("income_buckets", "Total household income ($20,000 buckets)") %>%
       dplyr::mutate(label = forcats::fct_relevel(
-        .data$label, "Under $20,000", "$20,000 to $40,000", "$40,000 to $60,000",
+        label, "Under $20,000", "$20,000 to $40,000", "$40,000 to $60,000",
         "$60,000 to $80,000", "$80,000 to $100,000", "$100,000 and over"
       )) %>%
-      dplyr::arrange(.data$label),
+      dplyr::arrange(label),
     # Original breakdowns
     data_breakdown %>%
       filter_breakdown("income", "Total household income (original buckets)"),
@@ -208,7 +241,7 @@ prepare_data <- function(geography, regions) {
     # Average shelter cost
     data_breakdown %>%
       filter_breakdown(c("shelter_cost_renter", "shelter_cost_owner"), "Average shelter cost") %>%
-      dplyr::mutate(value = round(.data$value, digits = 0)),
+      dplyr::mutate(value = round(value, digits = 0)),
     # Household tenure
     data_breakdown %>%
       filter_breakdown("household_tenure", "Tenure"),
@@ -224,18 +257,18 @@ prepare_data <- function(geography, regions) {
     # Ethnic or cultural origin
     data_breakdown %>%
       filter_breakdown("ethnic_cultural_origin") %>%
-      dplyr::filter(.data$value > 0) %>%
-      dplyr::arrange(-.data$value) %>%
+      dplyr::filter(value > 0) %>%
+      dplyr::arrange(-value) %>%
       utils::head(10) %>%
       censusaggregate::derive_census_vector_order(by_value = TRUE) %>%
-      dplyr::select(.data$label, .data$value, .data$value_proportion) %>%
+      dplyr::select(label, value, value_proportion) %>%
       dplyr::mutate(parent_label = "Top 10 ethnic or cultural origins")
   )
 
   data %>%
     dplyr::rename(breakdown = .data$label) %>%
     dplyr::rename(label = .data$parent_label) %>%
-    dplyr::select(.data$label, .data$breakdown, .data$value, .data$value_proportion)
+    dplyr::select(label, breakdown, value, value_proportion)
 }
 
 filter_breakdown <- function(data, label_short, parent_label = NA, exclude_parent = TRUE, proportion = TRUE) {

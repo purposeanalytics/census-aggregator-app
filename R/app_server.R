@@ -14,6 +14,7 @@ app_server <- function(input, output, session) {
     priority = 100,
     {
       map_rendered(TRUE)
+      rlog::log_info("Map Rendered(TRUE)")
     }
   )
 
@@ -33,6 +34,7 @@ app_server <- function(input, output, session) {
     ignoreNULL = FALSE,
     {
       if (input_aggregate_area() == "ct") {
+        rlog::log_info("ct polygon filter")
         if (all(input$ct_polygon_filter == "") | is.null(input$ct_polygon_filter)) {
           selected_geographies(
             tibble::tibble()
@@ -51,6 +53,7 @@ app_server <- function(input, output, session) {
     ignoreNULL = FALSE,
     {
       if (input_aggregate_area() == "csd") {
+        rlog::log_info("csd polygon filter")
         if (all(input$csd_polygon_filter == "" | is.null(input$csd_polygon_filter))) {
           selected_geographies(
             tibble::tibble()
@@ -63,6 +66,29 @@ app_server <- function(input, output, session) {
       }
     }
   )
+
+  shiny::observeEvent(
+    input$ridings_polygon_filter, # Set in JS
+    ignoreNULL = FALSE,
+    {
+      if (input_aggregate_area() == "ridings") {
+      rlog::log_info(paste("Ridings polygon filter",input$ridings_polygon_filter))
+        if (all(input$ridings_polygon_filter == "" | is.null(input$ridings_polygon_filter))) {
+          selected_geographies(
+            tibble::tibble()
+          )
+        } else {
+          selected_geographies(
+            tibble::tibble(geo_uid = unique(input$ridings_polygon_filter))
+          )
+        }
+      }
+    }
+  )
+
+
+
+
 
   mod_map_server(
     "map", input_aggregate_area, input_selection_tool, selected_geographies, map_rendered, bookmark_bounds

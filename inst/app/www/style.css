@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap');
+
 /* ------ CSS reset ------ */
 /* From from https://www.joshwcomeau.com/css/custom-css-reset/ */
 
@@ -56,16 +58,15 @@ p, h1, h2, h3, h4, h5, h6 {
 
 /* ------ App Styles ------ */
 
-@import url('https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap');
-
 :root {
-  --font: "Lato", Sans-Serif;
+  --font: "Lato", sans-serif;
   --base-size: 14px;
   --bigger-size: 16px;
   --smaller-size: 12px;
   --regular-weight: 400;
   --bold-weight: 700;
   --main-color: #5FD3BC;
+  --main-background-color: #5FD3BC;
   --secondary-color: #3D3D3D;
   --tertiary-color: #447E72;
   --breathing-room: 25px;
@@ -112,12 +113,14 @@ a:hover {
 }
 
 table {
+  font-family: var(--font) !important;
   color: var(--secondary-color);
   padding-left: 17px;
 }
 
 .censusagg-map {
   height: 100vh;
+  position: relative;
 }
 
 .censusagg-sidebar {
@@ -135,6 +138,161 @@ table {
   height: 50px;
 }
 
+bslib-tooltip {
+  cursor: pointer;
+}
+
+.tooltip {
+  background-color: #fff; /* White background like popovers */
+  border: 1px solid rgba(0, 0, 0, 0.2); /* Border similar to popovers */
+  border-radius: 0.5rem; /* Rounded corners */
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15); /* Box shadow for depth */
+  padding: 0.5rem; /* Padding inside the tooltip */
+  max-width: 400px; /* Max width similar to popovers */
+}
+
+.tooltip .tooltip-inner {
+  color: #212529; /* Text color */
+  padding: 0.5rem; /* Inner padding */
+}
+
+.tooltip .arrow::before {
+  border-width: 0.5rem; /* Arrow size */
+  border-color: rgba(0, 0, 0, 0.2); /* Arrow color */
+}
+
+.popover, .popover .form-control, .popover .btn-link, .popover .btn-link:hover, .popover .btn-link:focus{
+  font-size: 0.8rem;
+}
+
+.help-icon {
+  color: #aaaaaa;
+  margin-bottom: -2px;
+}
+
+.badge {
+  background-color: #5FD3BC;
+  display: inherit;
+  margin-left: 1px;
+}
+
+.modal {
+
+  .close-modal-button .btn {
+    border: 0px none;
+    float: right;
+    color: #cccccc;
+    padding: 10px 20px;
+    margin-right: -20px;
+  }
+
+  .close-modal-button .btn:hover {
+    background: none;
+    color: #000000;
+  }
+
+  --bs-modal-margin: 50px;
+
+  .title {
+    display: none;
+  }
+
+  .section-heading hr {
+    border-top: 2px solid var(--main-background-color);
+  }
+
+  .subsection-heading {
+    font-weight: var(--bold-weight);
+    background-color: white;
+    color: var(--main-background-color);
+    padding-top: 0.5rem;
+    padding-bottom: 0;
+  }
+
+  .box {
+    min-height: 106px;
+    height: 100%;
+    background-color: var(--main-background-color);
+    color: white;
+    padding: 0.5rem;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .card-value {
+    margin-top: auto;
+    font-size: 2rem;
+    font-weight: bold;
+  }
+
+  h1 {
+    font-size: 1.5rem;
+  }
+
+  .title-heading {
+    margin-top: 0.5em;
+  }
+
+  h2 {
+    font-size: 1.5rem;
+  }
+
+  h3 {
+    font-size: 1.25rem;
+  }
+
+  a {
+    color: var(--main-color);
+  }
+
+  .gt_table {
+    font-size: var(--base-size) !important;
+  }
+
+  /* Hide PDF definitions table in HTML */
+  .definitions-table-pdf {
+    display: none;
+  }
+
+  .print-header {
+    display: block;
+    width: 100%;
+    height: 75px;
+    margin: 1rem 0;
+  }
+
+  .print-header .left-logo {
+    float: left;
+    text-align: left;
+    max-width: 75%;
+    height: 100%;
+  }
+
+  .print-header .right-logo {
+    float: right;
+    text-align: right;
+    max-width: 25%;
+    height: 100%;
+  }
+
+  .print-header img {
+    height: 100%;
+  }
+
+  .censusagg-link {
+    margin-bottom: 0.5rem;
+  }
+
+  .censusagg-link a {
+    font-size: var(--bigger-size);
+  }
+
+  #modal-fig {
+    margin-bottom: 24px;
+  }
+
+}
+
 /* Inputs */
 
 /* Radio buttons */
@@ -150,9 +308,18 @@ table {
   font-weight: var(--bold-weight);
 }
 
+.pretty {
+  margin-right: 0;
+  margin-bottom: 0.6em;
+}
+
 /* Radio button choices */
 .shiny-input-radiogroup > .shiny-options-group {
   color: var(--secondary-color);
+}
+
+.input-field .form-group {
+  margin-bottom: 0.5em;
 }
 
 .pretty input:checked ~ .state.p-primary label:after, .pretty.p-toggle .state.p-primary label:after {
@@ -162,9 +329,19 @@ table {
 /* Position clear selection button */
 #sidebar-selection_tool {
   margin-bottom: 0;
-  margin-right: var(--little-breath);
+  margin-right: 1em;
   float: left;
 }
+
+#sidebar-reset {
+  margin-top: -9px;
+}
+
+#sidebar-share {
+  margin-left: 6px;
+  margin-top: 3px;
+}
+
 
 /* Spacing for share button */
 .fa, .fas {
@@ -206,9 +383,13 @@ table {
 }
 
 /* Cursor on disabled buttons */
-button:disabled, .btn.disabled {
+a[disabled], button:disabled, .btn.disabled {
   cursor: not-allowed;
-  pointer-events: all !important;
+  pointer-events: none;
+  color: var(--bs-btn-disabled-color);
+  background-color: var(--bs-btn-disabled-bg);
+  border-color: var(--bs-btn-disabled-border-color);
+  opacity: var(--bs-btn-disabled-opacity);
 }
 
 /* Style secondary buttons (link style) to have no background colour, no outline, no padding */
@@ -221,10 +402,14 @@ button:disabled, .btn.disabled {
   border-style: none !important;
   padding: 0;
   color: var(--main-color);
-  font-size: var(--bigger-size);
+  font-size: var(--base-size);
 }
 
 /* Tooltip positioning - top left instead of following mouse */
+
+.mapboxgl-symbol {
+  pointer-events: none
+}
 
 .mapboxgl-popup {
   transform: none !important;
@@ -256,24 +441,28 @@ button:disabled, .btn.disabled {
   display: none !important;
 }
 
+
 /* Legend */
 
-.map-overlay {
+.map-overlay-container {
   position: absolute;
   top: 10px;
   right: 30px;
-  background: #fff;
-  margin-right: 20px;
-  overflow: auto;
   border-radius: 3px;
+  font: 12px/20px Helvetica Neue,Arial,Helvetica,sans-serif;
+}
+
+.map-overlay {
+  margin-right: 20px;
+  border-radius: 3px;
+  min-width: 240px;
 }
 
 .legend {
-  font: 12px/20px Helvetica Neue,Arial,Helvetica,sans-serif;
   padding: 10px;
   line-height: 1.3rem;
-  min-width: 240px;
-  margin-bottom: 30px;
+  background: #fff;
+  margin-bottom: 20px;
   -moz-box-shadow: 0 0 2px rgba(0,0,0,.1);
   -webkit-box-shadow: 0 0 2px rgba(0,0,0,.1);
   box-shadow: 0 0 0 2px rgba(0,0,0,.1);
@@ -285,6 +474,28 @@ button:disabled, .btn.disabled {
   width: 10px;
   height: 10px;
   margin-right: 5px;
+}
+
+#select-municipality {
+  font-weight: bold;
+  width: 240px;
+}
+
+#select-municipality .btn {
+  font-size: 0.9em;
+  -moz-box-shadow: 0 0 2px rgba(0,0,0,.1);
+  -webkit-box-shadow: 0 0 2px rgba(0,0,0,.1);
+  box-shadow: 0 0 0 2px rgba(0,0,0,.1);
+  padding: 0.55em 9px;
+}
+
+#select-municipality #map-select_municipality-label {
+  margin-bottom: .25rem;
+  text-shadow: 0px 0px 3px white;
+}
+
+#select-municipality .dropdown-menu {
+  font-size: 0.95em;
 }
 
 /* Media queries - default is desktop */
@@ -328,4 +539,3 @@ button:disabled, .btn.disabled {
     left: unset !important;
   }
 }
-

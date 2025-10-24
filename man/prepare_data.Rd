@@ -7,7 +7,7 @@
 prepare_data(geography, regions)
 }
 \arguments{
-\item{geography}{CT or CSD}
+\item{geography}{CT or CSD or ridings}
 
 \item{regions}{Vector of geo_uids}
 }

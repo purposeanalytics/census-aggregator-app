@@ -9,7 +9,13 @@ app_ui <- function(request) {
     # shiny::div(
     # style = "display: flex;",
     bslib::page_fluid(
-      theme = bslib::bs_theme(version = 4),
+      theme = bslib::bs_theme(version = 5) |>
+        bslib::bs_add_variables("tooltip-max-width" = "360px",
+                                "tooltip-bg" = "white",
+                                "tooltip-color" = "#1D1F21",
+                                "tooltip-opacity" = 1
+                                ),
+      waiter::use_waiter(),
       shiny::fluidRow(
         shiny::div(
           class = "col-sm-8 censusagg-col",
@@ -43,8 +49,6 @@ golem_add_external_resources <- function() {
       app_title = "CensusAggregator"
     ),
     shinyjs::useShinyjs(),
-    bsplus::use_bs_popover(),
-    bsplus::use_bs_tooltip(),
     shiny::tags$head(shiny::HTML("
       <!-- Google tag (gtag.js) -->
       <script async src='https://www.googletagmanager.com/gtag/js?id=G-JFNPH9EW2R'></script>
@@ -56,6 +60,18 @@ golem_add_external_resources <- function() {
         gtag('config', 'G-JFNPH9EW2R');
       </script>
     ")),
+    shiny::tags$head(
+      shiny::tags$link(rel = 'stylesheet', type = 'text/css', href = 'www/layers-control-1.0.0/layers-control.css'),
+      shiny::tags$script(src='www/freehand-mode-1.0.0/freehand-mode.js'),
+      shiny::tags$script(src='www/mapbogl-binding-0.2.1/mapboxgl.js'),
+      shiny::tags$link(rel = 'stylesheet', type = 'text/css', href = 'www/mapbox-gl-draw-1.4.3/mapbox-gl-draw.css'),
+      shiny::tags$script(src='www/mapbox-gl-draw-1.4.3/mapbox-gl-draw.js'),
+      shiny::tags$link(rel = 'stylesheet', type = 'text/css', href = 'www/mapbox-gl-geocoder-5.0.0/mapbox-gl-geocoder.css'),
+      shiny::tags$script(src='www/mapbox-gl-geocoder-5.0.0/mapbox-gl-geocoder.min.js'),
+      shiny::tags$script(src='www/mapbox-gl-globe-minimap-1.2.1/bundle.js'),
+      shiny::tags$link(rel = 'stylesheet', type = 'text/css', href = 'www/mapbox-gl-1.11.0/mapbox-gl.css'),
+      shiny::tags$script(src='www/mapbox-gl-1.11.0/mapbox-gl.js')
+    ),
     shiny::tags$head(shiny::HTML("
     <meta name='description' content='CensusAggregator makes it easier to aggregate and retrieve common census variables for custom regions that span multiple census geographic areas.'>
 
@@ -73,6 +89,19 @@ golem_add_external_resources <- function() {
     <meta name='twitter:title' content='CensusAggregator'>
     <meta name='twitter:description' content='CensusAggregator makes it easier to aggregate and retrieve common census variables for custom regions that span multiple census geographic areas.'>
     <meta name='twitter:image' content='https://purposeanalytics.ca/blog/introducing-censusaggregator/censusaggregator.gif'>
+    ")),
+    tags$script("
+            Shiny.addCustomMessageHandler('texToClipboard', function (texToClipboard) {
+                navigator.clipboard.writeText(texToClipboard);
+            });
+        "),
+    # select entire link when clicking within textInput
+    tags$script(HTML("
+      $(document).ready(function() {
+        $('#sidebar-share_link').click(function() {
+          $(this).select();
+        });
+      });
     "))
     # Add here other external resources
     # for example, you can add shinyalert::useShinyalert()

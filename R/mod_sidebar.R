@@ -9,9 +9,12 @@
 #' @importFrom shiny NS tagList
 mod_sidebar_ui <- function(id) {
   ns <- NS(id)
+
   shiny::div(
     class = "censusagg-sidebar",
-    shinybusy::add_busy_spinner("circle", color = "#447E72", height = "40px", width = "40px", margins = c(60, 30)),
+
+    waiter::use_waiter(),
+
     shiny::div(
       class = "sidebar-header",
       shiny::fluidRow(
@@ -27,25 +30,35 @@ mod_sidebar_ui <- function(id) {
         )
       ),
       breathe(),
-      shiny::p("CensusAggregator makes it easier to aggregate and retrieve common census variables for custom regions that span multiple census geographic areas. Follow the steps below to create a custom area on the map and download a summary report, data file, and boundary file for that area. CensusAggregator uses data from the 2021 Canadian census."),
+      shiny::p("CensusAggregator makes it easy to create custom geographic regions and aggregate common census variables for those areas. Follow the steps below to build a custom area using the map and then explore the data as a report, in tabular format, or download the boundary file. CensusAggregator uses data from the 2021 Canadian census."),
       sidebar_header(
         "Step 1: Choose a geographic unit",
-        tooltip("Census tracts (CTs) are small, relatively stable geographic areas that usually have a population of fewer than 7,500 persons, based on data from the previous Census of Population Program. They are located in census metropolitan areas (CMAs) and in census agglomerations (CAs) that had a core population of 50,000 or more in the previous census.<br><br>Census subdivision (CSD) is the general term for municipalities (as determined by provincial/territorial legislation) or areas treated as municipal equivalents for statistical purposes (e.g., Indian reserves, Indian settlements and unorganized territories).")
+        bslib::tooltip(bsicons::bs_icon("info-circle", class = "help-icon"),
+        HTML("Census tracts (CTs) are small, relatively stable geographic areas that usually have a population of fewer than 7,500 persons, based on data from the previous Census of Population Program. They are located in census metropolitan areas (CMAs) and in census agglomerations (CAs) that had a core population of 50,000 or more in the previous census.
+                <br><br>Census subdivision (CSD) is the general term for municipalities (as determined by provincial/territorial legislation) or areas treated as municipal equivalents for statistical purposes (e.g., Indian reserves, Indian settlements and unorganized territories).
+                <br><br>Federal electoral districts (FED) portray the geographic areas represented by members of the House of Commons. The federal electoral district boundaries are redistributed every 10 years to reflect changes in Canada's population. The latest Representation Order was proclaimed in 2023 with 343 federal electoral districts."),
+        placement = "auto",
+        style = "display: inline-block;")
       ),
       shinyWidgets::prettyRadioButtons(
         ns("aggregate_area"),
         NULL,
-        choices = list(
-          "Census tract" = "ct",
-          "Census subdivision" = "csd"
+        choiceNames = list(
+          HTML("Census Tract"),
+          HTML("Census Subdivision"),
+          HTML("Federal Electoral District <span class='badge'>New!</span>")
         ),
+        choiceValues = c("ct", "csd", "ridings"),
+        selected = "csd",
         inline = TRUE
       ),
       shiny::div(
         sidebar_header(
           "Step 2: Choose an area selection method",
-          tooltip(shiny::HTML('Use the "Click to select/deselect" option to select one geographic area at a time. Each selected geographic area will be highlighted with a bold outline. This option also permits the selection of non-contiguous areas.<br><br>Use the "Draw a polygon" option to draw a continuous boundary. Each mouse click marks a new point in the boundary. To complete the polygon selection, use a double mouse click for the final point or click on the first point to close the loop. The census geographic areas that overlap with polygon will be selected and highlighted with a bold outline.')),
-          style = ""
+          bslib::tooltip(bsicons::bs_icon("info-circle", class = "help-icon"),
+                         HTML('Use the "Click to select/deselect" option to select one geographic area at a time. Each selected geographic area will be highlighted with a bold outline. This option also permits the selection of non-contiguous areas.<br><br>Use the "Draw a polygon" option to draw a continuous boundary. Each mouse click marks a new point in the boundary. To complete the polygon selection, use a double mouse click for the final point or click on the first point to close the loop. The census geographic areas that overlap with polygon will be selected and highlighted with a bold outline.'),
+                         placement = "auto",
+                         style = "display: inline-block;")
         ),
         shinyWidgets::prettyRadioButtons(
           ns("selection_tool"),
@@ -60,26 +73,65 @@ mod_sidebar_ui <- function(id) {
           shiny::actionButton(
             ns("reset"),
             "Clear selection",
-            class = "btn-link", style = "margin-bottom: var(--breathing-room); font-size: var(--base-size);"
+            class = "btn-link",
+            icon = shiny::icon("circle-xmark")
           )
         )
       ),
-      sidebar_header("Step 3: Download data"),
+      shiny::div(
+        shiny::fluidRow(
+          shiny::column(
+            width = 8,
+            shiny::div(style="display: inline-block;",
+              sidebar_header("Step 3: Explore data"),
+            ),
+            shiny::div(style="display: inline-block;",
+              shinyjs::disabled(
+                shiny::actionButton(
+                  ns("share"),
+                  "Share",
+                  class = "btn-link",
+                  icon = shiny::icon("share-alt")
+                ) |>
+                  bslib::popover(
+                    shiny::div(
+                      shiny::div(
+                        class = "input-field",
+                        textInput(ns("share_link"), "Share this link:", value = "https://example.com")
+                      ),
+                      shiny::actionButton(
+                        ns("copy_link"),
+                        "Copy to clipboard",
+                        class = "btn-link"
+                      )
+                    ),
+                  placement = "bottom"
+                )
+              )
+            ),
+          )
+        )
+      ),
       shiny::div(
         shinyjs::disabled(
-          shinyWidgets::dropdownButton(
-            inputId = ns("download_report"),
-            circle = FALSE,
-            inline = TRUE,
-            label = "Download report",
-            mod_download_report_ui(ns("pdf"), "(pdf)"),
-            mod_download_report_ui(ns("html"), "(html)")
+          shiny::actionButton(
+            ns("view_data"),
+            "View Data",
+            icon = NULL
+          )
+        ),
+        shinyjs::disabled(
+          shiny::downloadButton(
+            ns("download_report"),
+            "Download PDF",
+            width = "100%",
+            icon = NULL
           )
         ),
         shinyjs::disabled(
           shiny::downloadButton(
             ns("download_data"),
-            "Download data (csv)",
+            "Download CSV",
             width = "100%",
             icon = NULL
           )
@@ -87,7 +139,7 @@ mod_sidebar_ui <- function(id) {
         shinyjs::disabled(
           shiny::downloadButton(
             ns("download_boundary"),
-            "Download boundary (geojson)",
+            "Download GeoJSON boundary",
             width = "100%",
             icon = NULL
           )
@@ -99,20 +151,6 @@ mod_sidebar_ui <- function(id) {
           shiny::column(
             width = 8,
             sidebar_header("Summary of selected area")
-          ),
-          shiny::column(
-            width = 4,
-            shiny::div(
-              style = "text-align: right;",
-              shinyjs::disabled(
-                shiny::actionButton(
-                  ns("share"),
-                  "Share",
-                  class = "btn-link",
-                  icon = shiny::icon("share-alt")
-                )
-              )
-            )
           )
         ),
         gt::gt_output(ns("summary_statistics"))
@@ -135,6 +173,11 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
+    modal_close <- div(
+      class = "close-modal-button",
+      modalButton(icon = shiny::icon("x"), label = NULL)
+    )
+
     # About ----
 
     shiny::observeEvent(
@@ -145,18 +188,10 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
           easyClose = TRUE,
           footer = NULL,
           style = "padding: 2rem",
-          shiny::fluidRow(
-            shiny::column(
-              width = 12,
-              shiny::div(
-                style = "float: right;",
-                shiny::modalButton("Close")
-              ),
-              shiny::h3("About CensusAggregator"),
-              shiny::hr(),
-              shiny::includeHTML(app_sys("app/www/about.html"))
-            )
-          )
+          modal_close,
+          shiny::h2("About CensusAggregator"),
+          shiny::hr(),
+          shiny::includeHTML(app_sys("app/www/about.html"))
         )
       )
     )
@@ -170,11 +205,9 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
           size = "l",
           easyClose = TRUE,
           footer = NULL,
-          shiny::div(
-            style = "float: right;",
-            shiny::modalButton("Close")
-          ),
-          shiny::h3("Contact Us"),
+          style = "padding: 2rem",
+          modal_close,
+          shiny::h2("Contact Us"),
           shiny::hr(),
           shiny::includeHTML(app_sys("app/www/contact.html"))
         )
@@ -183,12 +216,29 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
 
     # Set up bookmarking ----
     bookmark_query <- shiny::reactive(
-      bookmark_query <- construct_bookmark(input, session, exclude = c("selection_tool", "export_data", "bookmark_selections", "export_geography", "export_boundary_bttn", "reset", "share", "download_report", "about", "contact", "download_report_state"), selected_geographies())
+      bookmark_query <- construct_bookmark(input, session, exclude = c("selection_tool", "export_data", "bookmark_selections", "export_geography", "export_boundary_bttn", "reset", "share", "download_report", "about", "contact", "download_report_state", "municipalities", "view_data", "share_link", "copy_link"), selected_geographies())
     )
 
     shiny::observeEvent(input$share, {
-      shiny::showModal(shiny::urlModal(bookmark_query(), "Share link"))
+      updateTextInput(session, "share_link", value = bookmark_query())
+
     })
+
+    shiny::observeEvent(input$copy_link, {
+      session$sendCustomMessage("texToClipboard", bookmark_query())
+      updateTextInput(session, "share_link", value = bookmark_query())
+      shinyjs::runjs("
+        var notification = document.getElementById('sidebar-copy_link');
+        notification.innerHTML = 'Copied!';
+        shinyjs.show('notification');
+        setTimeout(function() {
+          notification.innerHTML = 'Copy to clipboard';
+          shinyjs.hide('notification');
+        }, 3000);
+    ")
+
+    })
+
 
     # Observe any bookmarking to update inputs with ----
     bookmark_aggregate_area <- shiny::reactiveVal()
@@ -235,12 +285,15 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
 
               input_aggregate_area(bookmark_aggregate_area())
 
-              # Get bounds of selected area to fly map to
-              dataset <- arrow::open_dataset(app_sys(glue::glue("extdata/{bookmark_aggregate_area()}")))
 
-              query <- dplyr::filter(dataset, .data$geo_uid %in% selected_geographies()[["geo_uid"]])
+              # Get bounds of selected area to fly map to
+              dataset <- arrow::open_dataset(app_sys(glue::glue("extdata/{bookmark_aggregate_area()}"))) |>
+                dplyr::collect() |>
+                sf::st_as_sf()
+
+              query <<- dplyr::filter(dataset, geo_uid %in% selected_geographies()[["geo_uid"]])
               bookmark_bounds(
-                sfarrow::read_sf_dataset(query) %>%
+                query |>
                   sf::st_bbox()
               )
             }
@@ -292,6 +345,7 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
         # Disable buttons
         shinyjs::disable("reset")
         shinyjs::disable("share")
+        shinyjs::disable("view_data")
         shinyjs::disable("download_report")
         shinyjs::disable("download_data")
         shinyjs::disable("download_boundary")
@@ -308,19 +362,27 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
         # Enable buttons
         shinyjs::enable("reset")
         shinyjs::enable("share")
+        shinyjs::enable("share_link")
+        shinyjs::enable("copy_link")
+        shinyjs::enable(selector = "button")
+        shinyjs::enable("view_data")
         shinyjs::enable("download_report")
         shinyjs::enable("download_data")
         shinyjs::enable("download_boundary")
 
+        updateTextInput(session, "share_link", value = bookmark_query())
+
         summary_statistics_source <- switch(input_aggregate_area(),
           "csd" = censusaggregatorapp::csd,
-          "ct" = censusaggregatorapp::ct
+          "ct" = censusaggregatorapp::ct,
+          "ridings" = censusaggregatorapp::ridings
         )
 
         summary_statistics <- summary_statistics_source %>%
           dplyr::inner_join(selected_geographies(), by = "geo_uid") %>%
           dplyr::select(.data$population, .data$households, .data$area_sq_km, .data$population_density) %>%
           dplyr::mutate(n = dplyr::n())
+
 
         if (nrow(selected_geographies()) > 1) {
           summary_statistics <- summary_statistics %>%
@@ -341,7 +403,8 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
 
         n_units <- switch(input_aggregate_area(),
           csd = "Census Subdivision",
-          ct = "Census Tract"
+          ct = "Census Tract",
+          ridings = "Federal Electoral District"
         )
 
         n_units <- ifelse(nrow(selected_geographies()) > 1,
@@ -386,8 +449,25 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
     })
 
     # Export  ----
-    mod_download_report_server("pdf", input_aggregate_area, selected_geographies, bookmark_query)
-    mod_download_report_server("html", input_aggregate_area, selected_geographies, bookmark_query)
+
+    shiny::observeEvent(input$view_data, {
+
+        mod_display_stats_in_modal_server("display_stats_in_modal_1", input_aggregate_area, selected_geographies, bookmark_query)
+
+    })
+
+    output$download_report <- shiny::downloadHandler(
+
+      filename = function() {
+        "CensusAggregator Data.pdf"
+      },
+
+      content = function(file) {
+
+        generate_pdf_report(file, ns, selected_geographies, input_aggregate_area, bookmark_query)
+
+      }
+    )
 
     output$download_data <- shiny::downloadHandler(
       filename = function() {
@@ -408,9 +488,11 @@ mod_sidebar_server <- function(id, input_aggregate_area, input_selection_tool, s
       },
       content = function(file) {
         shiny::req(nrow(selected_geographies()) > 0)
-        dataset <- arrow::open_dataset(app_sys(glue::glue("extdata/{input$aggregate_area}")))
 
-        query <- dplyr::filter(dataset, .data$geo_uid %in% selected_geographies()[["geo_uid"]])
+        dataset_path <- app_sys(glue::glue("extdata/{input$aggregate_area}"))
+        dataset <- arrow::open_dataset(dataset_path)
+        sg <- selected_geographies()
+        query <- dplyr::filter(dataset, geo_uid %in% sg$geo_uid)
 
         sfarrow::read_sf_dataset(query) %>%
           sf::st_union() %>%
@@ -429,6 +511,6 @@ sidebar_header <- function(..., style = NULL) {
 }
 
 tooltip <- function(content) {
-  shiny::icon("question-circle", `data-html` = "true", style = "color: lightgrey;") %>%
-    bsplus::bs_embed_popover(title = NULL, content = content, placement = "right", container = "body", trigger = "hover")
+  bsicons::bs_icon("question-circle", `data-html` = "true", style = "color: lightgrey;") # %>%
 }
+

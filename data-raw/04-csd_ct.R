@@ -42,9 +42,12 @@ csd_remove <- readRDS(here::here("data-raw", "intermediary", "csd_remove.rds"))
 csd <- csd_raw %>%
   anti_join(csd_remove, by = "geo_uid")
 
+
+
+
 # Simplify features - based on number of points - required for uploading to mapbox
 # without it timing out, and also to make data storage easier for us
-
+saveRDS(csd,  here::here("data-raw", "intermediary", "csd_before_simplify.rds"))
 # Size before:
 csd_size <- object.size(csd)
 
@@ -131,7 +134,7 @@ upload_tiles(
 
 csd <- csd %>%
   st_set_geometry(NULL) %>%
-  select(-region_name, -tidyselect::ends_with("fmt"))
+  select(-tidyselect::ends_with("fmt"))
 
 usethis::use_data(csd, overwrite = TRUE)
 

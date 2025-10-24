@@ -6,8 +6,8 @@ output:
     theme:
       version: 4
 params:
-  geo_uid: !r c("5750001.00")
-  geography: "ct"
+  geo_uid: !r c("2023A000411002")
+  geography: "ridings"
   bookmark: "https://censusaggregator.ca/"
 ---
 
@@ -33,15 +33,27 @@ library(sf)
 library(forcats)
 library(htmltools)
 library(shiny)
+library(ggspatial)
 ```
 
-```{r html-utils}
+```{r functions}
+
+title_heading <- function(title) {
+  div(
+    div(
+      class = "title-heading",
+      h1(title),
+      hr()
+    )
+  )
+}
+
 section_heading <- function(title) {
   div(
     hr(),
     div(
       class = "section-heading",
-      h1(title),
+      h2(title),
       hr()
     )
   )
@@ -50,7 +62,7 @@ section_heading <- function(title) {
 subsection_heading <- function(title, class = NULL) {
   div(
     class = "subsection-heading",
-    h2(title)
+    h3(title)
   )
 }
 
@@ -85,10 +97,10 @@ pull_and_format_value <- function(data, format = "percent", column = "value") {
   }
 
   switch(format,
-    percent = scales::percent(value, 0.1),
-    comma = scales::comma(value, 1),
-    comma_decimal = scales::comma(value, 0.1),
-    dollar = scales::dollar(value)
+         percent = scales::percent(value, 0.1),
+         comma = scales::comma(value, 1),
+         comma_decimal = scales::comma(value, 0.1),
+         dollar = scales::dollar(value)
   )
 }
 
@@ -121,6 +133,8 @@ suppressed_note <- function(...) {
     )
   }
 }
+
+
 ```
 
 ```{r data}
@@ -138,6 +152,27 @@ data <- prepare_data(geography, regions) %>%
 logo(FALSE)
 ```
 
+```{r}
+
+title <- if (length(regions) == 1 & geography == "ridings") {
+  div(title_heading(paste("Federal Electoral District:", ridings |> dplyr::filter(geo_uid == regions) |> dplyr::pull(geo_name))))
+} else if (length(regions) > 1 & geography == "ridings") {
+  div(title_heading(paste0("Custom Area: ", scales::number_format(big.mark = ",")(length(regions)), " Federal Electoral Districts")))
+} else if (length(regions) == 1 & geography == "csd") {
+  div(title_heading(paste("Census Subdivision:", csd |> dplyr::filter(geo_uid == regions) |> dplyr::pull(region_name))))
+} else if (length(regions) > 1 & geography == "csd") {
+  div(title_heading(paste0("Custom Area: ", scales::number_format(big.mark = ",")(length(regions)), " Census Subdivisions")))
+} else if (length(regions) == 1 & geography == "ct") {
+  div(title_heading(paste("Census Tract ID:", ct |> dplyr::filter(geo_uid == regions) |> dplyr::pull(geo_uid))))
+} else if (length(regions) > 1 & geography == "ct") {
+  div(title_heading(paste0("Custom Area: ", scales::number_format(big.mark = ",")(length(regions)), " Census Tracts")))
+}
+
+h1(title)
+
+```
+
+
 ```{r map, fig.height = 3.25, dpi = 150, fig.alt = "Map showing the outline of the selected census geographic areas."}
 boundaries_dataset <- glue::glue("extdata/{geography}")
 
@@ -145,11 +180,15 @@ boundaries_data <- open_dataset(system.file(boundaries_dataset, package = "censu
 boundaries_data <- boundaries_data %>%
   read_sf_dataset()
 
+if(geography =='region'){
+ boundaries_data <- st_make_valid(boundaries_data) 
+}
+
 # Limit to regions, combine boundaries
 region_boundaries <- boundaries_data %>%
   filter(geo_uid %in% regions)
-region_boundaries <- region_boundaries %>%
-  st_union()
+# region_boundaries <- region_boundaries %>%
+#   st_union()
 
 # Get bounding box
 regions_bbox <- region_boundaries %>%
@@ -165,14 +204,31 @@ regions_bbox[["xmax"]] <- regions_bbox$xmax + bbox_buffer
 regions_bbox[["ymax"]] <- regions_bbox$ymax + bbox_buffer
 
 # Get all boundaries within bbox
+if(geography!='ridings'){
 all_boundaries_in_bbox <- boundaries_data %>%
   st_crop(regions_bbox)
+} else if(geography =='ridings'){
+  # ref: https://gis.stackexchange.com/a/413134
+all_boundaries_in_bbox <- boundaries_data %>%  
+  sf::st_transform(crs = 3857) |>    
+  st_crop(regions_bbox |> 
+            st_transform(crs = 3857))  |>
+st_transform(crs = 4326)
+}
+
 
 ggplot() +
   geom_sf(data = all_boundaries_in_bbox, colour = "grey", fill = NA, size = 0.4) +
   geom_sf(data = region_boundaries, colour = "black", fill = "#5FD3BC", alpha = 0.3, size = 0.7) +
   geom_rect(aes(xmin = regions_bbox$xmin, xmax = regions_bbox$xmax, ymin = regions_bbox$ymin, ymax = regions_bbox$ymax), fill = NA, colour = "black", size = 0.2) +
-  theme_void()
+  theme_void() +
+  annotation_scale(location = "br", line_width = 0.5, height = unit(0.15, "cm"),
+                   pad_x = unit(0.75, "cm"), pad_y = unit(0.75, "cm"), text_cex = 0.5)
+
+# if(nrow(region_boundaries) < 10) {
+#   
+#   p + geom_text(region_boundaries$geoname)
+# }
 
 # tmap::tm_shape(all_boundaries_in_bbox) + tmap::tm_polygons(alpha = 0, border.col = "grey") + tmap::tm_shape(region_boundaries) + tmap::tm_polygons(alpha = 0.75, border.col = "black", col = "white") + tmap::tm_layout(frame = FALSE)
 
@@ -197,11 +253,13 @@ population <- data[["Population, 2021"]] %>%
 households <- data[["Households"]] %>%
   pull_and_format_value("comma")
 
+if(geography!='ridings'){
 population_change <- data[["Population change, 2016 to 2021"]] %>%
   pull_and_format_value()
 
 if (!str_starts(population_change, "-")) {
   population_change <- paste0("+", population_change)
+}
 }
 
 population_density <- data[["Population density"]] %>%
@@ -223,10 +281,12 @@ column(
 ```
 
 ```{r population_change}
+if(geography!='ridings'){
 column(
   width = 3,
   snapshot_card("Population change<br>(2016 to 2021)", population_change)
 )
+}
 ```
 
 ```{r population_density}
@@ -238,7 +298,13 @@ column(
 :::
 
 ```{r}
+if(geography!='ridings'){
 suppressed_note(population, households, population_change, population_density)
+} else {
+suppressed_note(population, households,  population_density)
+}
+
+
 ```
 
 ```{r section-age-households-families}

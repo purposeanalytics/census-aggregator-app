@@ -40,6 +40,12 @@ vectors_many <- vectors_original %>%
   filter(n > 25) %>%
   select(-n)
 
+
+saveRDS(vectors_many, here::here("data-raw", "intermediary", "vectors_many.rds"))
+saveRDS(vectors_few, here::here("data-raw", "intermediary", "vectors_few.rds"))
+saveRDS(language_at_home_vectors, here::here("data-raw", "intermediary", "language_at_home_vectors.rds"))
+saveRDS(ethnic_cultural_origin_vectors, here::here("data-raw", "intermediary", "ethnic_cultural_origin_vectors.rds"))
+
 ## CSD ----
 
 csd_data_few <- get_census(
@@ -96,7 +102,7 @@ ct_data_many_2 <- get_census(
 pivot_census_data <- function(data) {
   data %>%
     dplyr::select(
-      geo_uid = .data$GeoUID,
+      all_of(c("geo_uid" = "GeoUID")),
       dplyr::starts_with("v_CA21_")
     ) %>%
     tidyr::pivot_longer(dplyr::starts_with("v_CA21_"), names_to = "vector") %>%
